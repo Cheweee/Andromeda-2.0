@@ -26,9 +26,11 @@ namespace Andromeda.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly ILogger _logger;
+        public Startup(ILoggerFactory loggerFactory, IConfiguration configuration)
         {
             Configuration = configuration;
+            _logger = loggerFactory.CreateLogger<Startup>();
         }
 
         public IConfiguration Configuration { get; }
@@ -50,8 +52,7 @@ namespace Andromeda.API
             services.AddMvc()
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            var appSettingsSection = Configuration.GetSection("ApplicationSettings");
-            var appsettings = appSettingsSection.Get<Appsettings>();
+            var appsettings = Configuration.Get<Appsettings>();
             var emailSettings = appsettings.EmailConnectionSettings;
             var databaseConnectionSettings = appsettings.DatabaseConnectionSettings;
 
@@ -74,6 +75,12 @@ namespace Andromeda.API
                     ValidateAudience = false
                 };
             });
+
+            if (databaseConnectionSettings == null)
+            {
+                _logger.LogWarning("Database doesn't initialized yet!");
+                return;              
+            }
 
             string connectionString = databaseConnectionSettings.SqlServerDatabaseConnectionString;
 
@@ -105,7 +112,8 @@ namespace Andromeda.API
                 return new RoleService(daoFactory.RoleDao, roleInDepartmentService, logger);
             });
 
-            services.AddScoped(provider => {
+            services.AddScoped(provider =>
+            {
                 var daoFactory = provider.GetService<IDaoFactory>();
                 return new UserRoleInDepartmentService(daoFactory.UserRoleInDepartment);
             });

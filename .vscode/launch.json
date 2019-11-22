@@ -27,7 +27,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceRoot}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
-            "args": [],
+            "args": ["api"],
             "cwd": "${workspaceRoot}/Andromeda.API",
             "stopAtEntry": false,
             "env": {
@@ -41,11 +41,11 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.Utility/bin/Debug/netcoreapp2.2/Andromeda.Utility.dll",
+            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
             "args": [
                 "create"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.Utility",
+            "cwd": "${workspaceFolder}/Andromeda.API",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -54,11 +54,11 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.Utility/bin/Debug/netcoreapp2.2/Andromeda.Utility.dll",
+            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
             "args": [
                 "drop"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.Utility",
+            "cwd": "${workspaceFolder}/Andromeda.API",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -67,11 +67,11 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.Utility/bin/Debug/netcoreapp2.2/Andromeda.Utility.dll",
+            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
             "args": [
                 "reset"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.Utility",
+            "cwd": "${workspaceFolder}/Andromeda.API",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -80,11 +80,11 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.Utility/bin/Debug/netcoreapp2.2/Andromeda.Utility.dll",
+            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
             "args": [
                 "migrate-up"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.Utility",
+            "cwd": "${workspaceFolder}/Andromeda.API",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -93,11 +93,11 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.Utility/bin/Debug/netcoreapp2.2/Andromeda.Utility.dll",
+            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
             "args": [
                 "migrate-down"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.Utility",
+            "cwd": "${workspaceFolder}/Andromeda.API",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -106,7 +106,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.Utility/bin/Debug/netcoreapp2.2/Andromeda.Utility.dll",
+            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
             "args": [
                 "app-settings",
                 "--database-host",
@@ -120,7 +120,7 @@
                 "--database-password",
                 "admin"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.Utility",
+            "cwd": "${workspaceFolder}/Andromeda.API",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -129,11 +129,11 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.Utility/bin/Debug/netcoreapp2.2/Andromeda.Utility.dll",
+            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
             "args": [
                 "--help"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.Utility",
+            "cwd": "${workspaceFolder}/Andromeda.API",
             "console": "internalConsole",
             "stopAtEntry": false
         }

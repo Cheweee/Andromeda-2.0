@@ -1,0 +1,141 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "compounds": [
+        {
+            "name": "Andromeda (chrome + api)",
+            "configurations": [
+                "Andromeda (chrome)",
+                "Andromeda (api)"
+            ]
+        },
+    ],
+    "configurations": [        
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Andromeda (chrome)",
+            "url": "http://localhost:8080",
+            "breakOnLoad": false,
+            "sourceMaps": true,
+        },
+        {
+            "name": "Andromeda (api)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
+            "args": [],
+            "cwd": "${workspaceRoot}/Andromeda.API",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+            },
+            "justMyCode": false,
+            "suppressJITOptimizations": true,
+        },
+        {
+            "name": "Andromeda (create database)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Andromeda.Utility/bin/Debug/netcoreapp2.2/Andromeda.Utility.dll",
+            "args": [
+                "create"
+            ],
+            "cwd": "${workspaceFolder}/Andromeda.Utility",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Andromeda (drop database)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Andromeda.Utility/bin/Debug/netcoreapp2.2/Andromeda.Utility.dll",
+            "args": [
+                "drop"
+            ],
+            "cwd": "${workspaceFolder}/Andromeda.Utility",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Andromeda (reset database)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Andromeda.Utility/bin/Debug/netcoreapp2.2/Andromeda.Utility.dll",
+            "args": [
+                "reset"
+            ],
+            "cwd": "${workspaceFolder}/Andromeda.Utility",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Andromeda (migrate up database)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Andromeda.Utility/bin/Debug/netcoreapp2.2/Andromeda.Utility.dll",
+            "args": [
+                "migrate-up"
+            ],
+            "cwd": "${workspaceFolder}/Andromeda.Utility",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Andromeda (migrate down database)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Andromeda.Utility/bin/Debug/netcoreapp2.2/Andromeda.Utility.dll",
+            "args": [
+                "migrate-down"
+            ],
+            "cwd": "${workspaceFolder}/Andromeda.Utility",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Andromeda (init app settings)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Andromeda.Utility/bin/Debug/netcoreapp2.2/Andromeda.Utility.dll",
+            "args": [
+                "app-settings",
+                "--database-host",
+                "localhost",
+                "--database-name",
+                "andromeda",
+                "--database-port",
+                "5432",
+                "--database-user-name",
+                "postgres",
+                "--database-password",
+                "admin"
+            ],
+            "cwd": "${workspaceFolder}/Andromeda.Utility",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Andromeda (utility help)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Andromeda.Utility/bin/Debug/netcoreapp2.2/Andromeda.Utility.dll",
+            "args": [
+                "--help"
+            ],
+            "cwd": "${workspaceFolder}/Andromeda.Utility",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}

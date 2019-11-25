@@ -72,7 +72,7 @@ namespace Andromeda.Data.DataAccessObjects.MSSql
                         d.Type as DepartmentType,
                         r.Name as RoleName,
                         d.FullName as DepartmentName,
-                        (u.Firstname + coalesce(u.Secondname + ' ', ' ') + u.Lastname) as UserFullName
+                        (u.Firstname + ' ' + coalesce(u.Secondname + ' ', ' ') + u.Lastname) as UserFullName
                     from [UserRoleInDepartment] urid
                     left join [RoleInDepartment] rid on urid.RoleInDepartmentId = rid.Id
                     left join [User] u on urid.UserId = u.Id
@@ -115,8 +115,7 @@ namespace Andromeda.Data.DataAccessObjects.MSSql
                 await ExecuteAsync(@"
                         update [UserRoleInDepartment] set
                             [UserId] = @UserId,
-                            [RoleId] = @RoleId,
-                            [DepartmentId] = @DepartmentId
+                            [RoleInDepartmentId] = @RoleInDepartmentId
                         where [Id] = @Id
                 ", models);
                 _logger.LogInformation("Sql update user role in department query successfully executed");

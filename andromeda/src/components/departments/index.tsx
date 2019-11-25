@@ -1,2 +1,4 @@
-export * from './SelectDepartmentDialog';
-export * from './SelectUserRoleInDepartment';
+export * from './Faculties';
+export * from './Faculty';
+export * from './TrainingDepartments';
+export * from './TrainingDepartment';

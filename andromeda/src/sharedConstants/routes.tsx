@@ -9,8 +9,8 @@ import {
 import { Route } from "../models";
 import { Dashboard } from "../components";
 import { Users, UserComponent } from "../components/users";
-import { Faculties, FacultyComponent } from "../components/faculties";
-import { TrainingDepartments, TrainingDepartmentComponent } from "../components/trainingdepartments";
+import { Faculties, FacultyComponent } from "../components/departments";
+import { TrainingDepartments, TrainingDepartmentComponent } from "../components/departments";
 import { Roles, RoleComponent } from "../components/roles";
 
 const idParameterName = 'id';

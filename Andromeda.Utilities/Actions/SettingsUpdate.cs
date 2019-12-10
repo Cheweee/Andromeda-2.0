@@ -54,6 +54,7 @@ namespace Andromeda.Utilities.Actions
     {
         public static int Run(
             ILogger logger,
+            Appsettings appsettings,
             SolutionSettingsOptions options
         )
         {
@@ -68,7 +69,6 @@ namespace Andromeda.Utilities.Actions
                 }
                 logger.LogInformation("Try to update solution settings");
 
-                Appsettings appsettings = JsonConvert.DeserializeObject<Appsettings>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json")));
                 appsettings.DatabaseConnectionSettings = DatabaseConnectionSettings.InitializeSolutionSettings(
                     options.DatabaseHost,
                     options.DatabaseName,

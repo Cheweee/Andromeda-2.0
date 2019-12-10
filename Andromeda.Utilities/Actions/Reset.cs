@@ -12,11 +12,10 @@ namespace Andromeda.Utilities.Actions
     
     public class Reset
     {
-        public static int Run(ILogger logger, ResetOptions options)
+        public static int Run(ILogger logger, Appsettings appsettings, ResetOptions options)
         {
             try
             {
-                Appsettings appsettings = JsonConvert.DeserializeObject<Appsettings>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json")));
                 bool databaseInitialized = appsettings.DatabaseConnectionSettings != null;
                 if (databaseInitialized)
                 {
@@ -27,7 +26,7 @@ namespace Andromeda.Utilities.Actions
                     logger.LogInformation($"Try to initialize project database");
                 }
 
-                SettingsUpdate.Run(logger, options);
+                SettingsUpdate.Run(logger, appsettings, options);
 
                 appsettings = JsonConvert.DeserializeObject<Appsettings>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json")));
 

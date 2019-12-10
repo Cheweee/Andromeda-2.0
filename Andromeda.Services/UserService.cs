@@ -18,18 +18,21 @@ namespace Andromeda.Services
     public class UserService
     {
         private readonly IUserDao _dao;
+        private readonly PinnedDisciplineService _pinnedDisciplineService;
         private readonly Appsettings _settings;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger _logger;
 
         public UserService(
             IUserDao dao,
+            PinnedDisciplineService pinnedDisciplineService,
             Appsettings settings,
             IHttpContextAccessor httpContextAccessor,
             ILogger logger
         )
         {
             _dao = dao ?? throw new ArgumentNullException(nameof(dao));
+            _pinnedDisciplineService = pinnedDisciplineService ?? throw new ArgumentException(nameof(pinnedDisciplineService));
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -40,12 +43,27 @@ namespace Andromeda.Services
             await _dao.Create(model);
             model.Password = null;
 
+            if (model.PinnedDisciplines != null)
+            {
+                model.PinnedDisciplines.ForEach(o => o.UserId = model.Id);
+                await _pinnedDisciplineService.Create(model.PinnedDisciplines);
+            }
+
             return model;
         }
 
         public async Task<IEnumerable<User>> Get(UserGetOptions options)
         {
-            return await _dao.Get(options);
+            var users = await _dao.Get(options);
+            var usersIds = users.Select(o => o.Id).ToList();
+            var usersPinnedDisciplines = await _pinnedDisciplineService.Get(new PinnedDisciplineGetOptions { UsersIds = usersIds });
+
+            foreach (var user in users)
+            {
+                user.PinnedDisciplines = usersPinnedDisciplines.Where(o => o.UserId == user.Id).ToList();
+            }
+
+            return users;
         }
 
         public async Task<AuthenticatedUser> SignIn(UserAuthorizeOptions options)
@@ -90,6 +108,9 @@ namespace Andromeda.Services
         {
             await _dao.Update(model);
 
+            if (model.PinnedDisciplines != null)
+                await UpdateUserPinnedDisciplines(model.Id, model.PinnedDisciplines);
+
             return model;
         }
 
@@ -113,7 +134,7 @@ namespace Andromeda.Services
                     return result;
 
                 var users = await _dao.Get(options);
-                if (users.Count() > 0)
+                if (users.Where(o => o.Username != options.Username).Count() > 0)
                 {
                     string message = "User with same user name or email have been already created. Please try another or try to sign in.";
                     _logger.LogInformation(message);
@@ -128,6 +149,23 @@ namespace Andromeda.Services
                 _logger.LogError(exception.Message);
                 throw exception;
             }
+        }
+
+        private async Task UpdateUserPinnedDisciplines(int userId, List<PinnedDiscipline> models)
+        {
+            var old = await _pinnedDisciplineService.Get(new PinnedDisciplineGetOptions
+            {
+                UserId = userId
+            });
+            var toDelete = old.Select(o => o.Id).Where(o => !models.Select(du => du.Id).Contains(o)).ToList();
+            var toUpdate = old.Where(o => models.Select(du => du.Id).Contains(o.Id)).ToList();
+            var toCreate = models.Where(o => !old.Select(du => du.Id).Contains(o.Id)).ToList();
+
+            toCreate.ForEach(o => o.UserId = userId);
+
+            await _pinnedDisciplineService.Delete(toDelete);
+            await _pinnedDisciplineService.Update(toUpdate);
+            await _pinnedDisciplineService.Create(toCreate);
         }
     }
 }

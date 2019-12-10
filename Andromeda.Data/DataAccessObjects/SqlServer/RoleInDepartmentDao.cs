@@ -6,7 +6,7 @@ using Andromeda.Data.Interfaces;
 using Andromeda.Data.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Andromeda.Data.DataAccessObjects.MSSql
+namespace Andromeda.Data.DataAccessObjects.SqlServer
 {
     public class RoleInDepartmentDao : BaseDao, IRoleInDepartmentDao
     {

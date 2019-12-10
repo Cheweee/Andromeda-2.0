@@ -7,7 +7,7 @@ using Andromeda.Data.Interfaces;
 using Andromeda.Data.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Andromeda.Data.DataAccessObjects.MSSql
+namespace Andromeda.Data.DataAccessObjects.SqlServer
 {
     public class DepartmentDao : BaseDao, IDepartmentDao
     {
@@ -90,6 +90,8 @@ namespace Andromeda.Data.DataAccessObjects.MSSql
                 from Department d
                 left join RoleInDepartment rind on rind.DepartmentId = d.Id
                 left join (select * from parentDepartment) pd on pd.Id = d.ParentId
+                left join RoleInDepartment rid on pd.Id = rid.DepartmentId
+                left join UserRoleInDepartment urid on rid.Id = urid.RoleInDepartmentId
                 ");
 
                 int conditionIndex = 0;

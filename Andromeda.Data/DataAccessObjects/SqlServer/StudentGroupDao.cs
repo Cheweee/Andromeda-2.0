@@ -6,36 +6,33 @@ using Andromeda.Data.Interfaces;
 using Andromeda.Data.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Andromeda.Data.DataAccessObjects.MSSql
+namespace Andromeda.Data.DataAccessObjects.SqlServer
 {
     public class StudentGroupDao : BaseDao, IStudentGroupDao
     {
         public StudentGroupDao(string connectionString, ILogger logger) : base(connectionString, logger) { }
 
-        public async Task Create(StudentGroup model)
+        public async Task Create(List<StudentGroup> model)
         {
             try
             {
                 _logger.LogInformation("Trying to execute sql create student group query");
-                model.Id = await QuerySingleOrDefaultAsync<int>(@"
-                        insert into User (
-                            StudyDirection,
+                await ExecuteAsync(@"
+                        insert into StudentGroup (
+                            StudyDirectionId,
                             Name,
                             StudentsCount,
                             StartYear,
                             CurrentCourse,
-                            DepartmentId,
-                            StudyLoadId
+                            DepartmentId
                         ) values (
-                            @StudyDirection,
+                            @StudyDirectionId,
                             @Name,
                             @StudentsCount,
                             @StartYear,
                             @CurrentCourse,
-                            @DepartmentId,
-                            @StudyLoadId
+                            @DepartmentId
                         );
-                        select SCOPE_IDENTITY();
                 ", model);
                 _logger.LogInformation("Sql create student group query successfully executed");
             }
@@ -53,7 +50,7 @@ namespace Andromeda.Data.DataAccessObjects.MSSql
                 _logger.LogInformation("Trying to execute sql delete student groups query");
                 await ExecuteAsync(@"
                     delete from StudentGroup
-                    where Id = any(@ids)
+                    where Id in @Ids
                 ", new { ids });
                 _logger.LogInformation("Sql delete student groups query successfully executed");
             }
@@ -75,13 +72,12 @@ namespace Andromeda.Data.DataAccessObjects.MSSql
                 sql.AppendLine(@"
                     select 
                         Id,
-                        StudyDirection,
+                        StudyDirectionId,
                         Name,
                         StudentsCount,
                         StartYear,
                         CurrentCourse,
-                        DepartmentId,
-                        StudyLoadId
+                        DepartmentId
                     from StudentGroup");
 
                 int conditionIndex = 0;
@@ -91,7 +87,7 @@ namespace Andromeda.Data.DataAccessObjects.MSSql
                 }
                 if (options.Ids != null)
                 {
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} id = any(@ids)");
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} id in @Ids");
                 }
                 if (options.Search != null)
                 {
@@ -114,20 +110,19 @@ namespace Andromeda.Data.DataAccessObjects.MSSql
             }
         }
 
-        public async Task Update(StudentGroup model)
+        public async Task Update(List<StudentGroup> model)
         {
             try
             {
                 _logger.LogInformation("Trying to execute sql update student group query");
-                model.Id = await QuerySingleOrDefaultAsync<int>(@"
-                    update set
-                        StudyDirection = @StudyDirection, 
+                await ExecuteAsync(@"
+                    update StudentGroup set
+                        StudyDirectionId = @StudyDirectionId, 
                         Name = @Name,
                         StudentsCount = @StudentsCount, 
                         StartYear = @StartYear, 
                         CurrentCourse = @CurrentCourse, 
-                        DepartmentId = @DepartmentId,
-                        StudyLoadId = @StudyLoadId
+                        DepartmentId = @DepartmentId
                     from StudentGroup
                     where Id = @Id
                 ", model);

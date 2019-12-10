@@ -170,7 +170,7 @@ namespace Andromeda.Data.DataAccessObjects
             try
             {
                 _logger.LogInformation("Trying to execute sql update user query");
-                model.Id = await QuerySingleOrDefaultAsync<int>(@"
+                await ExecuteAsync(@"
                     update [User] set
                         [Username] = @Username, 
                         [Secondname] = @Secondname,

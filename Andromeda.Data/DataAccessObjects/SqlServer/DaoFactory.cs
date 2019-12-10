@@ -1,7 +1,7 @@
 using Andromeda.Data.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Andromeda.Data.DataAccessObjects.MSSql
+namespace Andromeda.Data.DataAccessObjects.SqlServer
 {
     public class DaoFactory : IDaoFactory
     {
@@ -27,5 +27,11 @@ namespace Andromeda.Data.DataAccessObjects.MSSql
         public IRoleInDepartmentDao RoleInDepartmentDao => new RoleInDepartmentDao(_connectionString, _logger);
 
         public IUserRoleInDepartmentDao UserRoleInDepartment => new UserRoleInDepartmentDao(_connectionString, _logger);
+
+        public IStudyDirectionDao StudyDirectionDao => new StudyDirectionDao(_connectionString, _logger);
+
+        public IDisciplineTitleDao DisciplineTitleDao => new DisciplineTitleDao(_connectionString, _logger);
+
+        public IPinnedDisciplineDao PinnedDisciplineDao => new PinnedDisciplineDao(_connectionString, _logger);
     }
 }

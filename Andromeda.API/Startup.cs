@@ -79,7 +79,7 @@ namespace Andromeda.API
             if (databaseConnectionSettings == null)
             {
                 _logger.LogWarning("Database doesn't initialized yet!");
-                return;              
+                return;
             }
 
             string connectionString = databaseConnectionSettings.SqlServerDatabaseConnectionString;
@@ -87,15 +87,21 @@ namespace Andromeda.API
             services.AddScoped(provider =>
             {
                 var logger = provider.GetService<ILogger<IDaoFactory>>();
-                return DaoFactories.GetFactory(DataProvider.MSSql, connectionString, logger);
+                return DaoFactories.GetFactory(DataProvider.SqlServer, connectionString, logger);
+            });
+
+            services.AddScoped(provider => {
+                var daoFactory = provider.GetService<IDaoFactory>();
+                return new PinnedDisciplineService(daoFactory.PinnedDisciplineDao);
             });
 
             services.AddScoped(provider =>
             {
                 var logger = provider.GetService<ILogger<UserService>>();
                 var daoFactory = provider.GetService<IDaoFactory>();
+                var pinnedDisciplineService = provider.GetService<PinnedDisciplineService>();
                 var httpAccessor = provider.GetService<IHttpContextAccessor>();
-                return new UserService(daoFactory.UserDao, appsettings, httpAccessor, logger);
+                return new UserService(daoFactory.UserDao, pinnedDisciplineService, appsettings, httpAccessor, logger);
             });
 
             services.AddScoped(provider =>
@@ -121,16 +127,39 @@ namespace Andromeda.API
             services.AddScoped(provider =>
             {
                 var daoFactory = provider.GetService<IDaoFactory>();
-                var roleInDepartmentService = provider.GetService<RoleInDepartmentService>();
-                var userRoleInDepartmentService = provider.GetService<UserRoleInDepartmentService>();
-                var logger = provider.GetService<ILogger<DepartmentService>>();
-                return new DepartmentService(daoFactory.DepartmentDao, roleInDepartmentService, userRoleInDepartmentService, logger);
+                return new StudentGroupService(daoFactory.StudentGroupDao);
+            });
+
+            services.AddScoped(provider => 
+            {
+                var daoFactory = provider.GetService<IDaoFactory>();
+                return new StudyDirectionService(daoFactory.StudyDirectionDao);
+            });
+
+            services.AddScoped(provider => 
+            {
+                var daoFactory = provider.GetService<IDaoFactory>();
+                return new DisciplineTitleService(daoFactory.DisciplineTitleDao);
             });
 
             services.AddScoped(provider =>
             {
                 var daoFactory = provider.GetService<IDaoFactory>();
-                return new StudentGroupService(daoFactory.StudentGroupDao);
+                var disciplineTitleService = provider.GetService<DisciplineTitleService>();
+                var roleInDepartmentService = provider.GetService<RoleInDepartmentService>();
+                var userRoleInDepartmentService = provider.GetService<UserRoleInDepartmentService>();
+                var studyDirectionService = provider.GetService<StudyDirectionService>();
+                var studentGroupService = provider.GetService<StudentGroupService>();
+                var logger = provider.GetService<ILogger<DepartmentService>>();
+                return new DepartmentService(
+                    daoFactory.DepartmentDao,
+                    roleInDepartmentService, 
+                    userRoleInDepartmentService, 
+                    disciplineTitleService,
+                    studyDirectionService, 
+                    studentGroupService, 
+                    logger
+                );
             });
 
             services.AddScoped(provider =>

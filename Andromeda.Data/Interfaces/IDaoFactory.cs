@@ -9,5 +9,8 @@ namespace Andromeda.Data.Interfaces
         IRoleDao RoleDao { get; }
         IRoleInDepartmentDao RoleInDepartmentDao { get; }
         IUserRoleInDepartmentDao UserRoleInDepartment { get; }
+        IStudyDirectionDao StudyDirectionDao { get; }
+        IDisciplineTitleDao DisciplineTitleDao { get; }
+        IPinnedDisciplineDao PinnedDisciplineDao { get; }
     }
 }

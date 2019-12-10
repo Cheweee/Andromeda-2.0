@@ -10,10 +10,10 @@ namespace Andromeda.Data
         {
             switch (provider)
             {
-                case DataProvider.MSSql:
-                    return new DataAccessObjects.MSSql.DaoFactory(connectionString, logger);
+                case DataProvider.SqlServer:
+                    return new DataAccessObjects.SqlServer.DaoFactory(connectionString, logger);
                 default:
-                    return new DataAccessObjects.MSSql.DaoFactory(connectionString, logger);
+                    return new DataAccessObjects.SqlServer.DaoFactory(connectionString, logger);
             }
         }
     }

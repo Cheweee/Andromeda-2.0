@@ -7,8 +7,8 @@ namespace Andromeda.Data.Interfaces
     public interface IStudentGroupDao
     {
         Task<IEnumerable<StudentGroup>> Get(StudentGroupGetOptions options);
-        Task Create(StudentGroup model);
-        Task Update(StudentGroup model);
+        Task Create(List<StudentGroup> model);
+        Task Update(List<StudentGroup> model);
         Task Delete(IReadOnlyList<int> ids);
     }
 }

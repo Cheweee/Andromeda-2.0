@@ -19,18 +19,18 @@ namespace Andromeda.Services
             return await _dao.Get(options);
         }
 
-        public async Task<StudentGroup> Create(StudentGroup model)
+        public async Task<List<StudentGroup>> Create(List<StudentGroup> models)
         {
-            await _dao.Create(model);
+            await _dao.Create(models);
 
-            return model;
+            return models;
         }
 
-        public async Task<StudentGroup> Update(StudentGroup model)
+        public async Task<List<StudentGroup>> Update(List<StudentGroup> models)
         {
-            await _dao.Update(model);
+            await _dao.Update(models);
 
-            return model;
+            return models;
         }
 
         public async Task Delete(IReadOnlyList<int> ids)

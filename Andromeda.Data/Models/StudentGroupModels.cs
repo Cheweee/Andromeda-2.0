@@ -1,10 +1,12 @@
+using System.Collections.Generic;
+
 namespace Andromeda.Data.Models
 {
     public class StudentGroup
     {
         public int Id { get; set; }
 
-        public string StudyDirection { get; set; }
+        public int StudyDirectionId { get; set; }
 
         public string Name { get; set; }
 
@@ -16,11 +18,14 @@ namespace Andromeda.Data.Models
 
         public int DepartmentId { get; set; }
 
-        public int StudyLoadId { get; set; }
+        public StudyDirection StudyDirection { get; set; }
     }
 
     public class StudentGroupGetOptions : BaseGetOptions
     {
+        public int? DepartmentId { get; set; }
+        public IReadOnlyList<int> DepartmentIds { get; set; }
+        public int? StudyLoadId { get; set; }
         public string Search { get; set; }
     }
 }

@@ -14,6 +14,9 @@ namespace Andromeda.Data.Models
         public string Email { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime DateUpdated { get; set; }
+
+        public List<PinnedDiscipline> PinnedDisciplines { get; set; }
+        public List<Department> Departments { get; set; }
     }
 
     public class AuthenticatedUser : User

@@ -2,7 +2,7 @@ using FluentMigrator;
 
 namespace Andromeda.Utilities.Migrations
 {
-    [Migration(201910260003)]
+    [Migration(201910260004)]
     public class CreateStudyLoad : Migration
     {
         public override void Down()
@@ -15,6 +15,7 @@ namespace Andromeda.Utilities.Migrations
             Create.Table("StudyLoad")
                 .WithColumn("Id").AsInt32().PrimaryKey().Identity()
                 .WithColumn("FacultyId").AsInt32().NotNullable().ForeignKey("Department", "Id")
+                .WithColumn("StudentGroupId").AsInt32().NotNullable().ForeignKey("StudentGroup", "Id")
                 .WithColumn("SubjectName").AsString().NotNullable()
                 .WithColumn("SemesterNumber").AsInt32().NotNullable()
                 .WithColumn("StudyWeeksCount").AsInt32().NotNullable()

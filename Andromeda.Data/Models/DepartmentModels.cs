@@ -12,8 +12,11 @@ namespace Andromeda.Data.Models
         public Department Parent { get; set; }
         public DepartmentType Type { get; set; }
 
-        public List<RoleInDepartment> DepartmentRoles { get; set; }
-        public List<UserRoleInDepartment> DepartmentUsers { get; set; }
+        public List<DisciplineTitle> Titles { get; set; }
+        public List<RoleInDepartment> Roles { get; set; }
+        public List<UserRoleInDepartment> Users { get; set; }
+        public List<StudyDirection> StudyDirections { get; set; }
+        public List<StudentGroup> Groups { get; set; }
     }
 
     public class DepartmentGetOptions : BaseGetOptions

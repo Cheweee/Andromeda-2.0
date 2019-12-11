@@ -14,7 +14,7 @@ export const Dashboard = withStyles(styles)(function (props: Props) {
     // private handleDistributeStudyLoad = () => {
     //     const {
     //         data
-    //     } = this.state;
+    //     } = state;
     //     const id = Math.max(...(data.map(o => o.id)), 0) + 1;
 
     //     const newDistributionData: DistributionBarChartData = {
@@ -25,58 +25,58 @@ export const Dashboard = withStyles(styles)(function (props: Props) {
     //     data.push(newDistributionData);
     //     const newData = data.slice();
 
-    //     this.setState({ data: newData });
+    //     setState({ data: newData });
     // }
 
     // private handleSaveStudyLoad = () => {
     //     const timer = setTimeout(() => {
-    //         this.setState({
+    //         setState({
     //             saving: false
     //         });
     //         clearTimeout(timer);
     //     }, 2500);
-    //     this.setState({
+    //     setState({
     //         saving: true
     //     });
     // }
 
     // private handleGenerateStudyLoad = () => {
     //     const timer = setTimeout(() => {
-    //         this.setState({
+    //         setState({
     //             generating: false,
     //             data: initialData.slice()
     //         })
     //         clearTimeout(timer);
     //     }, 2500);
 
-    //     this.setState({ generating: true });
+    //     setState({ generating: true });
     // }
 
     // private handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     //     const search = event.target.value;
-    //     this.setState({ search });
+    //     setState({ search });
     // }
 
     // private handleDelete = (id: number) => {
     //     const {
     //         data: data
-    //     } = this.state;
+    //     } = state;
 
     //     const newData = data.filter(o => o.id !== id);
 
-    //     this.setState({ data: newData });
+    //     setState({ data: newData });
     // }
 
     const {
         classes
-    } = this.props;
+    } = props;
     // const {
     //     studyLoad,
     //     data,
     //     search,
     //     saving,
     //     generating
-    // } = this.state;
+    // } = state;
     // const allocatedStudyLoad = (data.reduce((sum, current) => sum +
     //     (current.lections ? current.lections : 0) +
     //     (current.laboratories ? current.laboratories : 0) +
@@ -123,7 +123,7 @@ export const Dashboard = withStyles(styles)(function (props: Props) {
         //                     id="search-field"
         //                     className={classes.notUnderlined}
         //                     value={search}
-        //                     onChange={this.handleSearch}
+        //                     onChange={handleSearch}
         //                     placeholder="Поиск"
         //                     margin="none"
         //                 />
@@ -131,7 +131,7 @@ export const Dashboard = withStyles(styles)(function (props: Props) {
         //             {chartData && chartData.map(o =>
         //                 <Grid item xs={4}>
         //                     <LecturerStudyLoad
-        //                         onDelete={this.handleDelete}
+        //                         onDelete={handleDelete}
         //                         lecturer={o}
         //                     />
         //                 </Grid>
@@ -147,7 +147,7 @@ export const Dashboard = withStyles(styles)(function (props: Props) {
         //                 <div className={classes.wrapper}>
         //                     <Fab
         //                         color="primary"
-        //                         onClick={this.handleGenerateStudyLoad}
+        //                         onClick={handleGenerateStudyLoad}
         //                     >
         //                         {generating ? <PieChartRounded /> : <PieChartSharp />}
         //                     </Fab>
@@ -159,7 +159,7 @@ export const Dashboard = withStyles(styles)(function (props: Props) {
         //                     <div className={classes.wrapper}>
         //                         <Fab
         //                             color="primary"
-        //                             onClick={this.handleDistributeStudyLoad}
+        //                             onClick={handleDistributeStudyLoad}
         //                         >
         //                             <Add />
         //                         </Fab>
@@ -171,7 +171,7 @@ export const Dashboard = withStyles(styles)(function (props: Props) {
         //                         <Fab
         //                             color="primary"
         //                             className={buttonClassname}
-        //                             onClick={this.handleSaveStudyLoad}
+        //                             onClick={handleSaveStudyLoad}
         //                         >
         //                             {saving ? <Save /> : <Check />}
         //                         </Fab>

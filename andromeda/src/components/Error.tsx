@@ -11,7 +11,7 @@ const styles = mergeStyles();
 interface Props extends RouteComponentProps {
 }
 
-export const Error = function (props: Props) {
+export const ErrorPage = function (props: Props) {
     const [message, setMessage] = useState<string>('');
     useEffect(() => {
         const { location: { state: locationState } } = props;

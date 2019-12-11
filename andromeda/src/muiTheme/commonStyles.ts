@@ -39,6 +39,9 @@ export const commonStyles = (theme: Theme) => ({
   margin0: {
     margin: 0
   },
+  padding0: {
+    padding: 0
+  },
   padding1: {
     padding: "1em"
   },
@@ -50,6 +53,12 @@ export const commonStyles = (theme: Theme) => ({
   },
   margin1X: {
     marginLeft: "0.5em",
+    marginRight: "0.5em"
+  },
+  margin1Left: {
+    marginLeft: "0.5em"
+  },
+  margin1Right: {
     marginRight: "0.5em"
   },
   margin1Y: {

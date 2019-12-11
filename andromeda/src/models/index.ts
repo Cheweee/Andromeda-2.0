@@ -4,3 +4,7 @@ export * from './sessionModels';
 export * from './userModels';
 export * from './departmentModels';
 export * from './roleModels';
+export * from './studentGroupModels';
+export * from './studyDirectionModels';
+export * from './disciplineTitleModels';
+export * from './pinnedDisciplinesModels';

@@ -1,4 +1,5 @@
 import { Validation, GetOptions } from "./commonModels";
+import { PinnedDiscipline } from ".";
 
 export interface User {
     id?: number;
@@ -8,6 +9,8 @@ export interface User {
     lastname: string;
     password?: string;
     email: string;
+
+    pinnedDisciplines: PinnedDiscipline[];
 }
 
 export interface AuthenticatedUser extends User {

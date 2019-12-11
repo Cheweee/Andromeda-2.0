@@ -1,28 +1,28 @@
 import * as React from "react";
-import { mergeStyles } from "../../utilities";
+
 import { WithStyles, withStyles } from "@material-ui/styles";
 import { LinearProgress } from "@material-ui/core";
 
-const tdStyles = {
-    padding0: {
-        padding: 0
-    }
-}
+import { mergeStyles } from "../../utilities";
+import { commonStyles } from "../../muiTheme";
 
-const styles = mergeStyles(tdStyles);
+const styles = mergeStyles(commonStyles);
 
 interface Props extends WithStyles<typeof styles> {
     colSpan: number;
 }
 
-function TableLoaderBase(props: Props) {
+export const TableLoader = withStyles(styles)(function (props: Props) {
+    const {
+        classes,
+        colSpan
+    } = props;
+
     return (
         <tr>
-            <td className={props.classes.padding0} colSpan={props.colSpan}>
+            <td className={classes.padding0} colSpan={colSpan}>
                 <LinearProgress variant="query" />
             </td>
         </tr>
     );
-}
-
-export const TableLoader = withStyles(styles)(TableLoaderBase);
+});

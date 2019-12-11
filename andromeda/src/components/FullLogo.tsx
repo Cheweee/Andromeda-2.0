@@ -7,7 +7,7 @@ const styles = mergeStyles(fullLogoStyles, commonStyles);
 
 interface Props extends WithStyles<typeof styles> { }
 
-const FullLogoBase = function(props: Props) {
+export const FullLogo = withStyles(styles)(function(props: Props) {
     return (
         <svg 
             xmlns="http://www.w3.org/2000/svg"
@@ -101,6 +101,4 @@ const FullLogoBase = function(props: Props) {
         </defs >
         </svg >
     )
-}
-
-export const FullLogo = withStyles(styles)(FullLogoBase);
+});

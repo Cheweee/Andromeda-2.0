@@ -1,40 +1,28 @@
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
 
-import { withStyles, WithStyles, Grid, Typography } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 
 import { mergeStyles } from "../utilities";
+import { useState, useEffect } from "react";
 
 const styles = mergeStyles();
 
-interface Props extends WithStyles<typeof styles>, RouteComponentProps {
+interface Props extends RouteComponentProps {
 }
 
-interface State {
-    message?: string;
-}
+export const Error = function (props: Props) {
+    const [message, setMessage] = useState<string>('');
+    useEffect(() => {
+        const { location: { state: locationState } } = props;
 
-class ErrorBase extends React.Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
+        setMessage(locationState && locationState.message);
+    }, [props.location]);
 
-        const { location: { state: locationState } } = this.props;
-
-        this.state = {
-            message: locationState && locationState.message
-        }
-    }
-
-    render() {
-        const { message } = this.state;
-
-        return (
-            <Grid container direction="column" component="main" alignItems="center" justify="center">
-                <Typography variant="h1" component="h1">Oh no... Something went wrong...</Typography>
-                <Typography variant="h3" component="h3">{message}</Typography>
-            </Grid>
-        );
-    }
-}
-
-export const ErrorPage = withStyles(styles)(ErrorBase);
+    return (
+        <Grid container direction="column" component="main" alignItems="center" justify="center">
+            <Typography variant="h1" component="h1">Oh no... Something went wrong...</Typography>
+            <Typography variant="h3" component="h3">{message}</Typography>
+        </Grid>
+    );
+};

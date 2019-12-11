@@ -8,11 +8,10 @@ interface Props {
 }
 
 export const ConfirmationDialog = function (props: Props) {
-    const message = props.message;
-    const open = props.open;
+    const { message, open, onClose } = props;
 
-    const handleCancel = () => props.onClose(false);
-    const handleOk = () => props.onClose(true);
+    function handleCancel() { onClose(false); }
+    function handleOk() { onClose(true); }
 
     return (
         <Dialog onClose={handleCancel} open={open}>

@@ -38,6 +38,8 @@ import { MessageSnackbar } from "../common";
 import { DepartmentDetails } from "./DepartmentDetails";
 import { UsersRolesInDepartment, UserRolesInDepartmentDetails } from "./UsersRolesInDepartments";
 import { ChildDepartments } from "./ChildDepartments";
+import { useSnackbarState } from "../../hooks";
+import { SnackbarVariant } from "../../models/commonModels";
 
 const styles = mergeStyles(commonStyles);
 
@@ -60,13 +62,11 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
     const [facultyDepartments, setFacultyDepartments] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
     const [formErrors, setFormErrors] = useState(initialFormErrors);
-    const [loading, setLoading] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [selectedRoles, setSelectedRoles] = useState([]);
     const [selectUserRolesDialogOpen, setSelectUserRolesDialogOpen] = useState(false);
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarVariant, setSnackbarVariant] = useState(undefined);
-    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [snackbar, setSnackbar] = useSnackbarState();
 
     useEffect(() => { loadDepartment(); }, [props.match.params]);
 
@@ -114,9 +114,7 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
         catch (error) {
             if (error instanceof ApplicationError) {
                 setLoading(false);
-                setSnackbarMessage(error.message);
-                setSnackbarOpen(true);
-                setSnackbarVariant("error");
+                setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
     }
@@ -132,12 +130,6 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
         setLoading(false);
     }
 
-    const handleSnackbarClose = () => {
-        setSnackbarMessage('');
-        setSnackbarOpen(false);
-        setSnackbarVariant(undefined);
-    }
-
     const handleBackClick = (event: React.MouseEvent<Element, MouseEvent>) => {
         const { history } = props;
         history.push(paths.facultiesPath);
@@ -151,16 +143,12 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
             else
                 await departmentService.create(department);
             setLoading(false);
-            setSnackbarMessage('Факультет успешно сохранен');
-            setSnackbarOpen(true);
-            setSnackbarVariant("success");
+            setSnackbar('Факультет успешно сохранен', true, SnackbarVariant.success);
         }
         catch (error) {
             if (error instanceof ApplicationError) {
                 setLoading(false);
-                setSnackbarMessage(error.message);
-                setSnackbarOpen(true);
-                setSnackbarVariant("error");
+                setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
     }
@@ -320,10 +308,10 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
                 </Grid>
                 <Grid item xs={2} />
                 <MessageSnackbar
-                    variant={snackbarVariant}
-                    message={snackbarMessage}
-                    open={snackbarOpen}
-                    onClose={handleSnackbarClose}
+                    variant={snackbar.variant}
+                    message={snackbar.message}
+                    open={snackbar.open}
+                    onClose={() => setSnackbar('', false, undefined)}
                 />
                 <UserRolesInDepartmentDetails
                     open={selectUserRolesDialogOpen}

@@ -43,6 +43,8 @@ import { UsersRolesInDepartment, UserRolesInDepartmentDetails } from "./UsersRol
 import { StudentGroups, StudentGroupDetails } from "./StudentGroups";
 import { StudyDirections, StudyDirectionDetails } from "./StudyDirections";
 import { DisciplineTitleDetails, DisciplinesTitles } from "./DisciplinesTitles";
+import { useSnackbarState } from "../../hooks";
+import { SnackbarVariant } from "../../models/commonModels";
 
 const styles = mergeStyles(commonStyles);
 
@@ -91,11 +93,7 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
     const [selectUserRolesDialogOpen, setSelectUserRolesDialogOpen] = useState(false);
     //#endregion
 
-    //#region Snackbar state
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarVariant, setSnackbarVariant] = useState(undefined);
-    const [snackbarMessage, setSnackbarMessage] = useState('');
-    //#endregion
+    const [snackbarState, setSnackbarState] = useSnackbarState();
 
     useEffect(() => { loadDepartment(); }, [props.match.params]);
 
@@ -128,9 +126,7 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
         catch (error) {
             if (error instanceof ApplicationError) {
                 setLoading(false);
-                setSnackbarMessage(error.message);
-                setSnackbarOpen(true);
-                setSnackbarVariant("error");
+                setSnackbarState(error.message, true, SnackbarVariant.error);
             }
         }
     }
@@ -147,9 +143,7 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
     }
 
     const handleSnackbarClose = () => {
-        setSnackbarMessage('');
-        setSnackbarOpen(false);
-        setSnackbarVariant(undefined);
+        setSnackbarState('', false, undefined);
     }
 
     const handleBackClick = () => {
@@ -165,16 +159,12 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
             else
                 await departmentService.create(department);
             setLoading(false);
-            setSnackbarMessage('Кафедра успешно сохранена');
-            setSnackbarOpen(true);
-            setSnackbarVariant("success");
+            setSnackbarState('Кафедра успешно сохранена', true, SnackbarVariant.success);
         }
         catch (error) {
             if (error instanceof ApplicationError) {
                 setLoading(false);
-                setSnackbarMessage(error.message);
-                setSnackbarOpen(true);
-                setSnackbarVariant("error");
+                setSnackbarState(error.message, true, SnackbarVariant.error);
             }
         }
     }
@@ -530,9 +520,9 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                 </Grid>
                 <Grid item xs={2} />
                 <MessageSnackbar
-                    variant={snackbarVariant}
-                    message={snackbarMessage}
-                    open={snackbarOpen}
+                    variant={snackbarState.variant}
+                    message={snackbarState.message}
+                    open={snackbarState.open}
                     onClose={handleSnackbarClose}
                 />
                 <UserRolesInDepartmentDetails

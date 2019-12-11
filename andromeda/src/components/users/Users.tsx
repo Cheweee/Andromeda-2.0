@@ -13,11 +13,12 @@ import {
     IconButton,
 } from '@material-ui/core';
 import { Search, Edit, Delete, Add, SupervisorAccount } from '@material-ui/icons';
-import { Filter, Column, initialFilter } from '../../models/commonModels';
-import { TableComponent, ConfirmationDialog, SearchInput } from '../common';
+import { Filter, Column, initialFilter, SnackbarVariant } from '../../models/commonModels';
+import { TableComponent, ConfirmationDialog, SearchInput, MessageSnackbar } from '../common';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { paths } from '../../sharedConstants';
 import { useEffect, useState } from 'react';
+import { useSnackbarState } from '../../hooks';
 
 const styles = mergeStyles(commonStyles);
 
@@ -28,6 +29,7 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
     const [filter, setFilter] = useState<Filter>(initialFilter);
     const [id, setId] = useState<number>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const [snackbar, setSnackbar] = useSnackbarState();
     const [open, setOpen] = useState<boolean>(false);
 
     useEffect(() => { getUsers(); }, [props])
@@ -40,6 +42,7 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
         }
         catch (error) {
             if (error instanceof ApplicationError) {
+                setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
         finally {
@@ -63,15 +66,23 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
     }
 
     async function handleConfirmationClose(result: boolean) {
-        setOpen(false);
-
-        if (result) {
-            const ids = [id];
-            await userService.delete(ids);
-            await getUsers();
+        try {
+            setOpen(false);
+            if (result) {
+                const ids = [id];
+                await userService.delete(ids);
+                setSnackbar('Пользователь успешно удален.', true, SnackbarVariant.success);
+                await getUsers();
+            }
         }
-
-        setId(null);
+        catch (error) {
+            if (error instanceof ApplicationError) {
+                setSnackbar(error.message, true, SnackbarVariant.error);
+            }
+        }
+        finally {
+            setId(null);
+        }
     }
 
     async function handleSearchChange(value: string) {
@@ -126,6 +137,12 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
                 open={open}
                 message={'Вы уверены, что хотите удалить пользователя?'}
                 onClose={handleConfirmationClose}
+            />
+            <MessageSnackbar
+                variant={snackbar.variant}
+                open={snackbar.open}
+                message={snackbar.message}
+                onClose={() => setSnackbar('', false, undefined)}
             />
         </Grid >
     );

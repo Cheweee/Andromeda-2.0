@@ -3,13 +3,14 @@ import { WithStyles, withStyles, IconButton, Grid, Typography, Paper } from "@ma
 import { RouteComponentProps, withRouter } from "react-router";
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
-import { Filter, Column, initialFilter } from "../../models/commonModels";
+import { Filter, Column, initialFilter, SnackbarVariant } from "../../models/commonModels";
 import { ApplicationError, Role, DepartmentType } from "../../models";
 import { paths } from "../../sharedConstants";
 import { Edit, Delete, Search, Add, Apartment, AssignmentInd } from "@material-ui/icons";
-import { SearchInput, TableComponent, ConfirmationDialog } from "../common";
+import { SearchInput, TableComponent, ConfirmationDialog, MessageSnackbar } from "../common";
 import { roleService } from "../../services";
 import { useState, useEffect } from "react";
+import { useSnackbarState } from "../../hooks";
 
 const styles = mergeStyles(commonStyles);
 
@@ -20,6 +21,7 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
     const [filter, setFilter] = useState<Filter>(initialFilter);
     const [id, setId] = useState<number>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const [snackbar, setSnackbar] = useSnackbarState();
     const [open, setOpen] = useState<boolean>(false);
 
     useEffect(() => {
@@ -35,6 +37,7 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
         }
         catch (error) {
             if (error instanceof ApplicationError) {
+                setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
         finally { setLoading(false); }
@@ -56,15 +59,23 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
     }
 
     async function handleConfirmationClose(result: boolean) {
-        setOpen(false);
-
-        if (result) {
-            const ids = [id];
-            await roleService.delete(ids);
-            await getFaculties();
+        try {
+            setOpen(false);
+            if (result) {
+                const ids = [id];
+                await roleService.delete(ids);
+                setSnackbar('Роль успешно удалена', false, undefined);
+                await getFaculties();
+            }
         }
-
-        setId(null);
+        catch (error) {
+            if (error instanceof ApplicationError) {
+                setSnackbar(error.message, true, SnackbarVariant.error);
+            }
+        }
+        finally {
+            setId(null);
+        }
     }
 
     async function handleSearchChange(value: string) {
@@ -114,6 +125,12 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
                 open={open}
                 message={'Вы уверены, что хотите удалить роль?'}
                 onClose={handleConfirmationClose}
+            />
+            <MessageSnackbar
+                variant={snackbar.variant}
+                open={snackbar.open}
+                message={snackbar.message}
+                onClose={() => setSnackbar('', false, undefined)}
             />
         </Grid >
     );

@@ -31,6 +31,7 @@ import { useState, useEffect } from "react";
 import { SnackbarVariant } from "../../models/commonModels";
 import { RoleDetails } from "./RoleDetails";
 import { RoleDepartments, RoleDepartmentsDetails } from "./RoleDepartments";
+import { useSnackbarState } from "../../hooks";
 
 const styles = mergeStyles(commonStyles);
 
@@ -69,24 +70,7 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
     //#endregion
     const [formErrors, setFormErrors] = useState<RoleValidation>(initialFormErrors);
     const [loading, setLoading] = useState<boolean>(false);
-    //#region Snackbar state
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarVariant, setSnackbarVariant] = useState(SnackbarVariant.info);
-    const [snackbarMessage, setSnackbarMessage] = useState('');
-
-
-    const showSnackbar = function (message: string, variant: SnackbarVariant = undefined) {
-        setSnackbarMessage(message);
-        setSnackbarOpen(true)
-        setSnackbarVariant(variant);
-    }
-
-    const hideSnackbar = () => {
-        setSnackbarMessage('');
-        setSnackbarOpen(false);
-        setSnackbarVariant(undefined);
-    }
-    //#endregion
+    const [snackbar, setSnackbar] = useSnackbarState();
 
     useEffect(() => { initialize(); }, [props.match.params]);
 
@@ -111,7 +95,7 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
         catch (error) {
             if (error instanceof ApplicationError) {
                 setLoading(false);
-                showSnackbar(error.message, SnackbarVariant.error);
+                setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
         finally {
@@ -144,12 +128,12 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
             else
                 await roleService.create(role);
             setLoading(false);
-            showSnackbar('Роль успешно сохранена', SnackbarVariant.success);
+            setSnackbar('Роль успешно сохранена', true, SnackbarVariant.success);
         }
         catch (error) {
             if (error instanceof ApplicationError) {
                 setLoading(false);
-                showSnackbar(error.message, SnackbarVariant.error);
+                setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
     }
@@ -219,10 +203,10 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
                     </Grid>
                     <Grid item xs={2} />
                     <MessageSnackbar
-                        variant={snackbarVariant}
-                        message={snackbarMessage}
-                        open={snackbarOpen}
-                        onClose={hideSnackbar}
+                        variant={snackbar.variant}
+                        message={snackbar.message}
+                        open={snackbar.open}
+                        onClose={() => setSnackbar('', false, undefined)}
                     />
                 </Grid>
             </form>

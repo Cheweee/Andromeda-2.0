@@ -18,6 +18,7 @@ import { SnackbarVariant, ProjectType } from "../../models/commonModels";
 import { UserDetails } from "./UserDetails";
 import { PinnedDisciplineDetails, PinnedDisciplines } from "./PinnedDisciplines";
 import { disciplinetitleService } from "../../services/disciplineTitleService";
+import { useSnackbarState } from "../../hooks";
 
 const styles = mergeStyles(commonStyles);
 
@@ -121,24 +122,7 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
 
     const [formErrors, setFormErrors] = useState<UserValidation>(initialFormErrors);
     const [loading, setLoading] = useState<boolean>(false);
-
-    //#region Snackbar state
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarVariant, setSnackbarVariant] = useState(SnackbarVariant.info);
-    const [snackbarMessage, setSnackbarMessage] = useState('');
-
-
-    const showSnackbar = (message: string, variant: SnackbarVariant = undefined) => {
-        setSnackbarMessage(message);
-        setSnackbarOpen(true)
-        setSnackbarVariant(variant);
-    }
-    const hideSnackbar = () => {
-        setSnackbarMessage('');
-        setSnackbarOpen(false);
-        setSnackbarVariant(undefined);
-    }
-    //#endregion
+    const [snackbar, setSnackbar] = useSnackbarState();
 
     useEffect(() => { initialize(); }, [props.match.params]);
 
@@ -163,7 +147,7 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
         catch (error) {
             if (error instanceof ApplicationError) {
                 setLoading(false);
-                showSnackbar(error.message, SnackbarVariant.error);
+                setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
         finally {
@@ -181,7 +165,7 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
         catch (error) {
             if (error instanceof ApplicationError) {
                 setLoading(false);
-                showSnackbar(error.message, SnackbarVariant.error);
+                setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
         finally {
@@ -207,12 +191,12 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
             else
                 await userService.create(user);
             setLoading(false);
-            showSnackbar('Пользователь успешно сохранен', SnackbarVariant.success);
+            setSnackbar('Пользователь успешно сохранен', true, SnackbarVariant.success);
         }
         catch (error) {
             if (error instanceof ApplicationError) {
                 setLoading(false)
-                showSnackbar(error.message, SnackbarVariant.error);
+                setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
     }
@@ -301,10 +285,10 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
                 </Grid>
                 <Grid item xs={2} />
                 <MessageSnackbar
-                    variant={snackbarVariant}
-                    message={snackbarMessage}
-                    open={snackbarOpen}
-                    onClose={hideSnackbar}
+                    variant={snackbar.variant}
+                    message={snackbar.message}
+                    open={snackbar.open}
+                    onClose={() => setSnackbar('', false, undefined)}
                 />
                 <PinnedDisciplineDetails
                     open={pinnedDisciplineDetailsOpen}

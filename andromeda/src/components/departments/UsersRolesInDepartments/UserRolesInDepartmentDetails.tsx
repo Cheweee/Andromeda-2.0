@@ -1,7 +1,7 @@
 import * as React from "react";
-import { mergeStyles } from "../../utilities";
-import { commonStyles } from "../../muiTheme";
-import { Department, RoleInDepartment, UserRoleInDepartment, User, Role } from "../../models";
+import { mergeStyles } from "../../../utilities";
+import { commonStyles } from "../../../muiTheme";
+import { Department, RoleInDepartment, UserRoleInDepartment, User, Role } from "../../../models";
 import { Dialog, DialogTitle, DialogContent, Grid, InputBase, List, ListSubheader, ListItem, ListItemIcon, Checkbox, ListItemText, DialogActions, Button, TextField, CircularProgress } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { WithStyles, withStyles } from "@material-ui/styles";
@@ -20,7 +20,7 @@ interface Props extends WithStyles<typeof styles> {
     onCancel: () => void;
 }
 
-export const SelectUserRoleInDepartment = withStyles(styles)(function (props: Props) {
+export const UserRolesInDepartmentDetails = withStyles(styles)(function (props: Props) {
     const [selectedUser, setSelectedUser] = useState(null);
     const [selectedRoles, setSelectedRoles] = useState([]);
 

@@ -1,11 +1,11 @@
 import * as React from "react";
 
-import { commonStyles } from "../../muiTheme";
-import { mergeStyles } from "../../utilities";
+import { commonStyles } from "../../../muiTheme";
+import { mergeStyles } from "../../../utilities";
 import { WithStyles, withStyles } from "@material-ui/styles";
 import { Grid, List, Typography, ListItem, ListItemText, ListItemSecondaryAction, IconButton } from "@material-ui/core";
 import { Edit, Delete } from "@material-ui/icons";
-import { DepartmentType, UserRoleInDepartment, RoleInDepartment } from "../../models";
+import { DepartmentType, UserRoleInDepartment, RoleInDepartment } from "../../../models";
 
 const styles = mergeStyles(commonStyles);
 

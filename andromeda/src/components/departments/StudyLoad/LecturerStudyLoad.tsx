@@ -1,8 +1,8 @@
 import * as React from "react";
-import { DistributionBarChartData } from "../models/Dash";
+import { DistributionBarChartData } from "../../../models/Dash";
 import { withStyles, WithStyles } from "@material-ui/styles";
-import { mergeStyles } from "../utilities";
-import { commonStyles } from "../muiTheme";
+import { mergeStyles } from "../../../utilities";
+import { commonStyles } from "../../../muiTheme";
 import { Grid, Card, CardHeader, Tooltip, IconButton, CardContent } from "@material-ui/core";
 import { Edit, Delete } from "@material-ui/icons";
 

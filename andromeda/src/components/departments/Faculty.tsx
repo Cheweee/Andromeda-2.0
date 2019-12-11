@@ -1,34 +1,56 @@
 import * as React from "react";
-import { RouteComponentProps, withRouter } from "react-router";
-import { commonStyles } from "../../muiTheme";
-import { mergeStyles } from "../../utilities";
-import { Faculty, DepartmentValidation, ApplicationError, DepartmentType, TrainingDepartment, User, RoleInDepartment } from "../../models";
-import { paths } from "../../sharedConstants";
-import { departmentService, userService } from "../../services";
-import clsx from "clsx";
-import { MessageSnackbar } from "../common";
-import { WithStyles, withStyles } from "@material-ui/styles";
-import {
-    ArrowBack, Close, Check, ExpandMore, Edit, Add
-} from "@material-ui/icons";
-import { Grid, Tooltip, IconButton, Card, CardHeader, LinearProgress, CardContent, TextField, ExpansionPanel, ExpansionPanelSummary, Typography, ExpansionPanelDetails, List, ListItem, ListItemText } from "@material-ui/core";
-import { UsersRolesInDepartment } from "./UsersRolesInDepartment";
-import { ChildDepartments } from "./ChildDepartments";
 import { useState, useEffect } from "react";
+import { RouteComponentProps, withRouter } from "react-router";
+
+import clsx from "clsx";
+import { WithStyles, withStyles } from "@material-ui/styles";
+import { ArrowBack, Close, Check, ExpandMore, Add } from "@material-ui/icons";
+import {
+    Grid,
+    Tooltip,
+    IconButton,
+    Card,
+    CardHeader,
+    LinearProgress,
+    CardContent,
+    ExpansionPanel,
+    ExpansionPanelSummary,
+    ExpansionPanelDetails,
+    Typography
+} from "@material-ui/core";
+
+import { commonStyles } from "../../muiTheme";
+import { mergeStyles, getShortening } from "../../utilities";
+import { paths } from "../../sharedConstants";
+import {
+    Faculty,
+    DepartmentValidation,
+    ApplicationError,
+    DepartmentType,
+    TrainingDepartment,
+    User,
+    RoleInDepartment
+} from "../../models";
+
+import { departmentService, userService } from "../../services";
+
+import { MessageSnackbar } from "../common";
 import { DepartmentDetails } from "./DepartmentDetails";
-import { SelectUserRoleInDepartment } from "./SelectUserRoleInDepartment";
+import { UsersRolesInDepartment, UserRolesInDepartmentDetails } from "./UsersRolesInDepartments";
+import { ChildDepartments } from "./ChildDepartments";
 
 const styles = mergeStyles(commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
-const initialDepartment: Faculty= {
+const initialDepartment: Faculty = {
     id: null,
     type: DepartmentType.Faculty,
     fullName: '',
     name: '',
-    departmentUsers: [],
-    departmentRoles: [],
+
+    users: [],
+    roles: [],
 };
 
 const initialFormErrors: DepartmentValidation = { isValid: false };
@@ -36,7 +58,7 @@ const initialFormErrors: DepartmentValidation = { isValid: false };
 export const FacultyComponent = withStyles(styles)(withRouter(function (props: Props) {
     const [department, setDepartment] = useState(initialDepartment);
     const [facultyDepartments, setFacultyDepartments] = useState([]);
-    const [users, setUsers] = useState([]);
+    const [allUsers, setAllUsers] = useState([]);
     const [formErrors, setFormErrors] = useState(initialFormErrors);
     const [loading, setLoading] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
@@ -81,8 +103,8 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
                     fullName: '',
                     type: DepartmentType.Faculty,
 
-                    departmentUsers: [],
-                    departmentRoles: []
+                    users: [],
+                    roles: []
                 };
             }
             setDepartment(department);
@@ -102,10 +124,10 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
     const loadFacultyUsersAndDepartments = async () => {
         setLoading(true);
 
-        const users = await userService.get({});
+        const allUsers = await userService.get({});
 
         const facultyDepartments = await departmentService.getTrainingDepartments({ type: DepartmentType.TrainingDepartment, parentId: department.id });
-        setUsers(users);
+        setAllUsers(allUsers);
         setFacultyDepartments(facultyDepartments);
         setLoading(false);
     }
@@ -154,7 +176,7 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
 
     const handleFullNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const fullName = event.target && event.target.value;
-        const name = departmentService.getNameFromFullName(fullName);
+        const name = getShortening(fullName);
 
         setDepartment({ ...department, fullName, name });
     }
@@ -166,8 +188,8 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
 
     const handleUserRolesEdit = (userId: number) => {
         const selectedUser = users.find(o => o.id === userId);
-        const selectedRolesInDepartmentIds = department.departmentUsers.filter(o => o.userId === userId).map(o => o.roleInDepartmentId);
-        const selectedRolesInDepartment = department.departmentRoles.filter(o => selectedRolesInDepartmentIds.includes(o.id));
+        const selectedRolesInDepartmentIds = department.users.filter(o => o.userId === userId).map(o => o.roleInDepartmentId);
+        const selectedRolesInDepartment = department.roles.filter(o => selectedRolesInDepartmentIds.includes(o.id));
 
         setSelectUserRolesDialogOpen(true);
         setSelectedUser(selectedUser);
@@ -176,16 +198,16 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
 
     const handleUserRolesDelete = (userId: number) => {
         const selectedUser = users.find(o => o.id === userId);
-        const departmentUsersRoles = department.departmentUsers.filter(o => o.userId !== selectedUser.id);
+        const usersRoles = department.users.filter(o => o.userId !== selectedUser.id);
 
-        setDepartment({ ...department, departmentUsers: departmentUsersRoles });
+        setDepartment({ ...department, users: usersRoles });
     }
 
     const handleUserRolesInDepartmentClosed = (user: User, rolesInDepartment: RoleInDepartment[]) => {
-        const departmentUsersRoles = department.departmentUsers.filter(o => o.userId !== user.id);
+        const usersRoles = department.users.filter(o => o.userId !== user.id);
 
         for (const role of rolesInDepartment) {
-            departmentUsersRoles.push({
+            usersRoles.push({
                 roleId: role.roleId,
                 roleInDepartmentId: role.id,
                 departmentName: department.fullName,
@@ -198,7 +220,7 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
         setSelectUserRolesDialogOpen(false);
         setSelectedUser(null);
         setSelectedRoles([]);
-        setDepartment({ ...department, departmentUsers: departmentUsersRoles });
+        setDepartment({ ...department, users: usersRoles });
     }
 
     const handleUserRolesInDepartmentCanceled = () => {
@@ -207,15 +229,15 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
 
     const { classes } = props;
 
-    const departmentRoles = department.departmentRoles || [];
-    const departmentUsers = department.departmentUsers || [];
+    const roles = department.roles || [];
+    const users = department.users || [];
 
     let usersForDialog = [];
     if (!selectedUser) {
-        usersForDialog = users.filter(o => !departmentUsers.map(u => u.userId).includes(o.id));
+        usersForDialog = allUsers.filter(o => !users.map(u => u.userId).includes(o.id));
     } else {
-        const departmentUsersWithoutSelectedUser = departmentUsers.filter(o => o.userId !== selectedUser.id).map(o => o.userId);
-        usersForDialog = users.filter(o => !departmentUsersWithoutSelectedUser.includes(o.id));
+        const usersWithoutSelectedUser = allUsers.filter(o => o.userId !== selectedUser.id).map(o => o.userId);
+        usersForDialog = allUsers.filter(o => !usersWithoutSelectedUser.includes(o.id));
     }
 
     return (
@@ -286,8 +308,8 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails>
                                 <UsersRolesInDepartment
-                                    departmentRoles={departmentRoles}
-                                    departmentUsers={departmentUsers}
+                                    departmentRoles={roles}
+                                    departmentUsers={users}
                                     departmentType={department.type}
                                     handleUserRolesDelete={handleUserRolesDelete}
                                     handleUserRolesEdit={handleUserRolesEdit}
@@ -303,11 +325,11 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
                     open={snackbarOpen}
                     onClose={handleSnackbarClose}
                 />
-                <SelectUserRoleInDepartment
+                <UserRolesInDepartmentDetails
                     open={selectUserRolesDialogOpen}
                     selectedUser={selectedUser}
                     selectedRoles={selectedRoles}
-                    rolesInDepartment={department.departmentRoles}
+                    rolesInDepartment={department.roles}
                     users={usersForDialog}
                     onClose={handleUserRolesInDepartmentClosed}
                     onCancel={handleUserRolesInDepartmentCanceled}

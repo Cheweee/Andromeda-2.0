@@ -19,332 +19,219 @@ import {
     List,
     ListItem,
     ListItemText,
-    ListItemSecondaryAction,
     ExpansionPanel,
     ExpansionPanelSummary,
     ExpansionPanelDetails,
-    ListSubheader,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    InputBase
+    ListSubheader
 } from "@material-ui/core";
-import { ArrowBack, Close, Check, Add, Delete, ExpandMore, Search, Edit } from "@material-ui/icons";
+import { ArrowBack, Close, Check, ExpandMore, Edit } from "@material-ui/icons";
 import clsx from "clsx";
 import { MessageSnackbar } from "../common";
-import { SelectDepartmentDialog } from "../departments";
+import { useState, useEffect } from "react";
+import { SnackbarVariant } from "../../models/commonModels";
+import { RoleDetails } from "./RoleDetails";
+import { RoleDepartments, RoleDepartmentsDetails } from "./RoleDepartments";
 
 const styles = mergeStyles(commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
-interface State {
-    role: Role;
-    allDepartments: Department[];
-    formErrors: RoleValidation;
-    selectDepartmentsDialogOpen: boolean;
-    loading: boolean;
-    snackbarOpen: boolean;
-    snackbarVariant: "success" | "error";
-    snackbarMessage: string;
-}
+const initialRole: Role = {
+    name: '',
+    roleDepartments: []
+};
 
-class RoleBase extends React.Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
+const initialFormErrors: RoleValidation = { isValid: false };
 
-        this.state = {
-            role: {
-                name: '',
-                roleDepartments: []
-            },
-            allDepartments: [],
-            formErrors: { isValid: false },
-            loading: false,
-            selectDepartmentsDialogOpen: false,
-            snackbarOpen: false,
-            snackbarVariant: undefined,
-            snackbarMessage: ''
-        }
+export const RoleComponent = withStyles(styles)(withRouter(function (props: Props) {
+    //#region Role state
+    const [role, setRole] = useState<Role>(initialRole);
+
+    function handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const name = event.target && event.target.value;
+
+        setRole({ ...role, name });
+    }
+    //#endregion
+    //#region Departments state
+    const [allDepartments, setAllDepartments] = useState<Department[]>([]);
+    const [roleDepartmentsDetailsOpen, setRoleDepartmentsDetailsOpen] = useState<boolean>(false);
+
+    function handleAddDepartment(event: React.MouseEvent<Element, MouseEvent>) {
+        event.stopPropagation();
+        setRoleDepartmentsDetailsOpen(true);
     }
 
-    async componentDidMount() {
-        this.setState({
-            loading: true
-        });
-        const allDepartments = await departmentService.getDepartments({});
-        this.setState({
-            allDepartments
-        });
-        await this.loadRole();
+    function handleDepartmentsSelected(selected: RoleInDepartment[]) {
+        setRoleDepartmentsDetailsOpen(false);
+        setRole({ ...role, roleDepartments: selected });
+    }
+    //#endregion
+    const [formErrors, setFormErrors] = useState<RoleValidation>(initialFormErrors);
+    const [loading, setLoading] = useState<boolean>(false);
+    //#region Snackbar state
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarVariant, setSnackbarVariant] = useState(SnackbarVariant.info);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+
+
+    const showSnackbar = function (message: string, variant: SnackbarVariant = undefined) {
+        setSnackbarMessage(message);
+        setSnackbarOpen(true)
+        setSnackbarVariant(variant);
     }
 
-    private loadRole = async () => {
-        const {
-            match
-        } = this.props;
+    const hideSnackbar = () => {
+        setSnackbarMessage('');
+        setSnackbarOpen(false);
+        setSnackbarVariant(undefined);
+    }
+    //#endregion
+
+    useEffect(() => { initialize(); }, [props.match.params]);
+
+    useEffect(() => {
+        const formErrors = roleService.validateRole(role);
+        setFormErrors(formErrors);
+    }, [role]);
+
+    async function loadRole() {
+        const { match } = props;
 
         const tempId = match.params && match.params[paths.idParameterName];
+        let role: Role = initialRole;
         try {
-            this.setState({
-                loading: true
-            });
-            let role: Role;
+            setLoading(true);
             const id = parseInt(tempId, 0);
             if (id) {
-                const models = await roleService.getFaculties({
-                    id,
-                });
-                const model = models[0];
-                role = {
-                    id: model.id,
-                    name: model.name,
-                    roleDepartments: model.roleDepartments || []
-                };
+                const models = await roleService.getRoles({ id });
+                role = models[0];
             }
-            else {
-                role = {
-                    name: '',
-                    roleDepartments: []
-                };
-            }
-            this.setState({
-                role,
-                loading: false
-            }, this.validateRole);
         }
         catch (error) {
             if (error instanceof ApplicationError) {
-                this.setState({
-                    loading: false,
-                    snackbarMessage: error.message,
-                    snackbarOpen: true,
-                    snackbarVariant: "error"
-                })
+                setLoading(false);
+                showSnackbar(error.message, SnackbarVariant.error);
             }
+        }
+        finally {
+            setLoading(false);
+            setRole(role);
         }
     }
 
-    private validateRole = () => {
-        const {
-            role
-        } = this.state;
-        const formErrors = roleService.validateRole(role);
-        this.setState({
-            formErrors
-        })
+    async function loadAllDepartments() {
+        setLoading(true);
+        const allDepartments = await departmentService.getDepartments({});
+        setAllDepartments(allDepartments);
     }
 
-    private handleSnackbarClose = () => {
-        this.setState({
-            snackbarMessage: '',
-            snackbarOpen: false,
-            snackbarVariant: undefined
-        })
+    async function initialize() {
+        await loadRole();
+        await loadAllDepartments();
     }
 
-    private handleBackClick = (event: React.MouseEvent<Element, MouseEvent>) => {
-        const {
-            history
-        } = this.props;
+    function handleBackClick() {
+        const { history } = props;
         history.push(paths.rolesPath);
     }
 
-    private handleSaveClick = async (event: React.MouseEvent<Element, MouseEvent>) => {
-        const {
-            role
-        } = this.state;
-
+    async function handleSaveClick() {
         try {
-            this.setState({
-                loading: true
-            });
+            setLoading(true);
             if (role.id)
                 await roleService.update(role);
             else
                 await roleService.create(role);
-            this.setState({
-                loading: false,
-                snackbarMessage: 'Роль успешно сохранена',
-                snackbarOpen: true,
-                snackbarVariant: "success"
-            });
+            setLoading(false);
+            showSnackbar('Роль успешно сохранена', SnackbarVariant.success);
         }
         catch (error) {
             if (error instanceof ApplicationError) {
-                this.setState({
-                    loading: false,
-                    snackbarMessage: error.message,
-                    snackbarOpen: true,
-                    snackbarVariant: "error"
-                })
+                setLoading(false);
+                showSnackbar(error.message, SnackbarVariant.error);
             }
         }
     }
 
-    private handleCancelClick = async (event: React.MouseEvent<Element, MouseEvent>) => {
-        await this.loadRole();
+    async function handleCancelClick() {
+        await loadRole();
     }
 
-    private handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { role } = this.state;
-        const name = event.target && event.target.value;
+    const { classes } = props;
 
-        this.setState({
-            role: { ...role, name },
-        }, this.validateRole);
-    }
-
-    private handleAddDepartment = (event: React.MouseEvent<Element, MouseEvent>) => {
-        event.stopPropagation();
-        this.setState({ selectDepartmentsDialogOpen: true });
-    }
-
-    private handleDepartmentsSelected = (selected: RoleInDepartment[]) => {
-        const { role } = this.state;
-
-        this.setState({
-            selectDepartmentsDialogOpen: false,
-            role: { ...role, roleDepartments: selected }
-        });
-    }
-
-    render() {
-        const { classes } = this.props;
-        const {
-            role,
-            allDepartments,
-            loading,
-            formErrors,
-            snackbarOpen,
-            snackbarVariant,
-            snackbarMessage,
-            selectDepartmentsDialogOpen
-        } = this.state;
-
-        const faculties = role.roleDepartments.filter(o => o.departmentType === DepartmentType.Faculty);
-        const trainingDepartments = role.roleDepartments.filter(o => o.departmentType === DepartmentType.TrainingDepartment);
-
-        return (
-            <div>
-                <form autoComplete="off" noValidate>
-                    <Grid container direction="row">
-                        <Grid item xs={2} />
-                        <Grid item xs container direction="column">
-                            <Grid container direction="row">
-                                <Tooltip title="Вернуться назад">
-                                    <IconButton disabled={loading} onClick={this.handleBackClick}>
-                                        <ArrowBack />
-                                    </IconButton>
-                                </Tooltip>
-                                <Grid item xs />
-                                <Tooltip title="Отменить">
-                                    <IconButton disabled={loading} onClick={this.handleCancelClick}>
-                                        <Close />
-                                    </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Сохранить">
-                                    <IconButton color="primary" disabled={loading || !formErrors.isValid} onClick={this.handleSaveClick}>
-                                        <Check />
-                                    </IconButton>
-                                </Tooltip>
-                            </Grid>
-                            <Card className={clsx(classes.margin1Y, classes.w100)}>
-                                <CardHeader
-                                    title="Роль"
-                                />
-                                {loading && <LinearProgress variant="query" />}
-                                <CardContent>
-                                    <Grid container direction="column">
-                                        <Grid container direction="row">
-                                            <Grid item xs className={classes.margin1X}>
-                                                <TextField
-                                                    id="name"
-                                                    name="name"
-                                                    label="Наименование"
-                                                    placeholder="Введите наименование роли"
-                                                    margin="normal"
-                                                    variant="outlined"
-                                                    fullWidth
-                                                    required
-                                                    autoComplete="firstname"
-                                                    disabled={loading}
-                                                    value={role.name}
-                                                    onChange={this.handleNameChange}
-                                                    error={Boolean(formErrors.nameError)}
-                                                    helperText={formErrors.nameError}
-                                                />
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                </CardContent>
-                            </Card>
-                            <Card className={clsx(classes.margin1Y, classes.w100)}>
-                                <ExpansionPanel>
-                                    <ExpansionPanelSummary expandIcon={<ExpandMore />}>
-                                        <Grid container direction="row" alignItems="center">
-                                            <Typography className={classes.heading}>Подразделения и департаменты</Typography>
-                                            <Grid item xs />
-                                            <Tooltip title="Редактировать подразделения роли">
-                                                <IconButton onClick={this.handleAddDepartment}>
-                                                    <Edit />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </Grid>
-                                    </ExpansionPanelSummary>
-                                    <ExpansionPanelDetails>
-                                        {role.roleDepartments.length ? (
-                                            <List subheader={<li />}>
-                                                {faculties.length ?
-                                                    <div>
-                                                        <ListSubheader>{"Факультеты и институты"}</ListSubheader>
-                                                        {faculties.map(department =>
-                                                            <ListItem>
-                                                                <ListItemText key={department.id} primary={department.departmentName} />
-                                                            </ListItem>
-                                                        )}
-                                                    </div>
-                                                    : null
-                                                }
-                                                {trainingDepartments.length ?
-                                                    <div>
-                                                        <ListSubheader>{"Кафедры"}</ListSubheader>
-                                                        {trainingDepartments.map(department =>
-                                                            <ListItem>
-                                                                <ListItemText key={department.id} primary={department.departmentName} />
-                                                            </ListItem>
-                                                        )}
-                                                    </div>
-                                                    : null
-                                                }
-                                            </List>
-                                        ) : (
-                                                <Grid container direction="row" justify="center">
-                                                    <Typography color="textSecondary">Данная роль еще не используется подразделениями</Typography>
-                                                </Grid>
-                                            )}
-                                    </ExpansionPanelDetails>
-                                </ExpansionPanel>
-                            </Card>
+    return (
+        <div>
+            <form autoComplete="off" noValidate>
+                <Grid container direction="row">
+                    <Grid item xs={2} />
+                    <Grid item xs container direction="column">
+                        <Grid container direction="row">
+                            <Tooltip title="Вернуться назад">
+                                <IconButton disabled={loading} onClick={handleBackClick}>
+                                    <ArrowBack />
+                                </IconButton>
+                            </Tooltip>
+                            <Grid item xs />
+                            <Tooltip title="Отменить">
+                                <IconButton disabled={loading} onClick={handleCancelClick}>
+                                    <Close />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Сохранить">
+                                <IconButton color="primary" disabled={loading || !formErrors.isValid} onClick={handleSaveClick}>
+                                    <Check />
+                                </IconButton>
+                            </Tooltip>
                         </Grid>
-                        <Grid item xs={2} />
-                        <MessageSnackbar
-                            variant={snackbarVariant}
-                            message={snackbarMessage}
-                            open={snackbarOpen}
-                            onClose={this.handleSnackbarClose}
-                        />
+                        <Card className={clsx(classes.margin1Y, classes.w100)}>
+                            <CardHeader
+                                title="Роль"
+                            />
+                            {loading && <LinearProgress variant="query" />}
+                            <CardContent>
+                                <RoleDetails
+                                    disabled={loading}
+                                    formErrors={formErrors}
+                                    role={role}
+                                    handleNameChange={handleNameChange}
+                                />
+                            </CardContent>
+                        </Card>
+                        <Card className={clsx(classes.margin1Y, classes.w100)}>
+                            <ExpansionPanel>
+                                <ExpansionPanelSummary expandIcon={<ExpandMore />}>
+                                    <Grid container direction="row" alignItems="center">
+                                        <Typography className={classes.heading}>Подразделения и департаменты</Typography>
+                                        <Grid item xs />
+                                        <Tooltip title="Редактировать подразделения роли">
+                                            <IconButton onClick={handleAddDepartment}>
+                                                <Edit />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Grid>
+                                </ExpansionPanelSummary>
+                                <ExpansionPanelDetails>
+                                    <RoleDepartments departments={role.roleDepartments}/>
+                                </ExpansionPanelDetails>
+                            </ExpansionPanel>
+                        </Card>
                     </Grid>
-                </form>
-                <SelectDepartmentDialog
-                    departments={allDepartments}
-                    previousSelected={role.roleDepartments}
-                    open={selectDepartmentsDialogOpen}
-                    onClose={this.handleDepartmentsSelected}
-                />
-            </div>
-        );
-    }
-}
-
-export const RoleComponent = withStyles(styles)(withRouter(RoleBase));
+                    <Grid item xs={2} />
+                    <MessageSnackbar
+                        variant={snackbarVariant}
+                        message={snackbarMessage}
+                        open={snackbarOpen}
+                        onClose={hideSnackbar}
+                    />
+                </Grid>
+            </form>
+            <RoleDepartmentsDetails
+                departments={allDepartments}
+                previousSelected={role.roleDepartments}
+                open={roleDepartmentsDetailsOpen}
+                onClose={handleDepartmentsSelected}
+            />
+        </div >
+    );
+}));

@@ -19,6 +19,7 @@ const getUserPath = (idParameter: string) => `/users/${idParameter}`;
 const getFacultyPath = (idParameter: string) => `/faculties/${idParameter}`;
 const getTrainingDepartmentPath = (idParameter: string) => `/trainingdepartments/${idParameter}`;
 const getRolePath = (idParameter: string) => `/roles/${idParameter}`;
+const getStudyloadPath = (idParameter: string) => `/trainingdepartments/${idParameter}/studyload`;
 
 export const paths = {
     dashboardPath: '/',
@@ -31,11 +32,13 @@ export const paths = {
     facultyPath: getFacultyPath(':' + idParameterName),
     trainingDepartmentPath: getTrainingDepartmentPath(':' + idParameterName),
     rolePath: getRolePath(':' + idParameterName),
+    studyloadPath: getStudyloadPath(':' + idParameterName),
 
     getUserPath,
     getFacultyPath,
     getTrainingDepartmentPath,
     getRolePath,
+    getStudyloadPath,
 
     idParameterName
 };

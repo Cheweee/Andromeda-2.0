@@ -1,9 +1,9 @@
 import * as React from "react";
 import { BarChart, XAxis, Bar, ResponsiveContainer, Tooltip as ChartTooltip, TooltipProps } from "recharts";
-import { DistributionExtendedTooltipPayload, DistributionBarChartData } from "../models/Dash";
+import { DistributionExtendedTooltipPayload, DistributionBarChartData } from "../../../models/Dash";
 import { Card, CardContent, Typography, Grid, WithStyles, withStyles } from "@material-ui/core";
-import { mergeStyles } from "../utilities";
-import { chartStyles, commonStyles } from "../muiTheme";
+import { mergeStyles } from "../../../utilities";
+import { chartStyles, commonStyles } from "../../../muiTheme";
 
 const styles = mergeStyles(chartStyles, commonStyles);
 

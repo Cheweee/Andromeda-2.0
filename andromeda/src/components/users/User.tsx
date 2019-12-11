@@ -2,378 +2,319 @@ import * as React from "react";
 import { RouteComponentProps } from "react-router";
 
 import { WithStyles, withStyles } from "@material-ui/styles";
-import { Grid, Card, CardContent, CardHeader, Tooltip, IconButton, TextField, LinearProgress } from "@material-ui/core";
+import { Grid, Card, CardContent, CardHeader, Tooltip, IconButton, TextField, LinearProgress, ExpansionPanel, ExpansionPanelSummary, Typography, ExpansionPanelDetails } from "@material-ui/core";
 
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
-import { Check, Close, ArrowBack } from "@material-ui/icons";
+import { Check, Close, ArrowBack, ExpandMore, Add } from "@material-ui/icons";
 import { paths } from "../../sharedConstants";
 
 import clsx from "clsx";
-import { User, UserValidation, ApplicationError } from '../../models';
-import { userService } from "../../services";
+import { User, UserValidation, ApplicationError, PinnedDiscipline, DisciplineTitle } from '../../models';
+import { userService, departmentService } from "../../services";
 import { MessageSnackbar } from "../common";
+import { useState, useEffect } from "react";
+import { SnackbarVariant, ProjectType } from "../../models/commonModels";
+import { UserDetails } from "./UserDetails";
+import { PinnedDisciplineDetails, PinnedDisciplines } from "./PinnedDisciplines";
+import { disciplinetitleService } from "../../services/disciplineTitleService";
 
 const styles = mergeStyles(commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
-interface State {
-    user: User;
-    formErrors: UserValidation;
-    loading: boolean;
-    snackbarOpen: boolean;
-    snackbarVariant: "success" | "error";
-    snackbarMessage: string;
-}
+const initialUser: User = {
+    email: '',
+    firstname: '',
+    lastname: '',
+    username: '',
 
-class UserBase extends React.Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
+    pinnedDisciplines: []
+};
 
-        this.state = {
-            user: {
-                email: '',
-                firstname: '',
-                lastname: '',
-                username: ''
-            },
-            formErrors: { isValid: false },
-            loading: false,
-            snackbarOpen: false,
-            snackbarVariant: undefined,
-            snackbarMessage: ''
+const initialFormErrors: UserValidation = { isValid: false }
+
+export const UserComponent = withStyles(styles)(function (props: Props) {
+    //#region User state
+    const [user, setUser] = useState(initialUser);
+
+    function handleFirstnameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setUser({ ...user, firstname: event.target && event.target.value });
+    }
+
+    function handleSecondnameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setUser({ ...user, secondname: event.target && event.target.value });
+    }
+
+    function handleLastnameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setUser({ ...user, lastname: event.target && event.target.value });
+    }
+
+    function handleEmailChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setUser({ ...user, email: event.target && event.target.value });
+    }
+
+    function handleUsernameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setUser({ ...user, username: event.target && event.target.value });
+    }
+
+    function handlePasswordChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setUser({ ...user, password: event.target && event.target.value });
+    }
+    //#endregion
+
+    //#region Pinned disciplines state
+    const [selectedTitle, setSelectedTitle] = useState<DisciplineTitle>(null);
+    const [selectedProjectTypes, setSelectedProjectTypes] = useState<ProjectType[]>([]);
+    const [pinnedDisciplineDetailsOpen, setPinnedDisciplineDetailsOpen] = useState<boolean>(false);
+    const [disciplinesTitles, setDisciplinesTitles] = useState<DisciplineTitle[]>([]);
+
+    function handlePinnedDisciplineAdd(event: React.MouseEvent<Element, MouseEvent>) {
+        event.stopPropagation();
+        setPinnedDisciplineDetailsOpen(true);
+        setSelectedTitle(null);
+        setSelectedProjectTypes([]);
+    }
+
+    function handlePinnedDisciplineDelete(id: number) {
+        const pinnedDisciplines = user.pinnedDisciplines.filter(o => o.id !== id);
+        setUser({ ...user, pinnedDisciplines });
+    }
+
+    function handlePinnedDisciplineEdit(id: number) {
+        const discipline: DisciplineTitle = {
+            name: user.pinnedDisciplines.find(o => o.id === id).disciplineTitle,
+            id: user.pinnedDisciplines.find(o => o.id === id).disciplineTitleId
+        };
+        const projectTypes = user.pinnedDisciplines.filter(o => o.id === id).map(o => o.projectType);
+
+        setPinnedDisciplineDetailsOpen(true);
+        setSelectedTitle(discipline);
+        setSelectedProjectTypes(projectTypes);
+    }
+
+    function handlePinnedDisciplineDetailsAccept(title: DisciplineTitle, projectTypes: ProjectType[]) {
+        const pinnedDisciplines = user.pinnedDisciplines.filter(o => o.disciplineTitleId !== title.id);
+
+        for (const projectType of projectTypes) {
+            pinnedDisciplines.push({
+                disciplineTitleId: title.id,
+                userId: user.id,
+                projectType: projectType,
+                disciplineTitle: title.name,
+                title: title
+            });
         }
+
+        setUser({ ...user, pinnedDisciplines });
+        setPinnedDisciplineDetailsOpen(false);
+        setSelectedTitle(null);
+        setSelectedProjectTypes([]);
     }
 
-    async componentDidMount() {
-        await this.loadUser();
+    function handlePinnedDisciplineDetailsCancel() {
+        setPinnedDisciplineDetailsOpen(false);
+        setSelectedTitle(null);
+        setSelectedProjectTypes([]);
     }
+    //#endregion
 
-    private loadUser = async () => {
-        const {
-            match
-        } = this.props;
+    const [formErrors, setFormErrors] = useState<UserValidation>(initialFormErrors);
+    const [loading, setLoading] = useState<boolean>(false);
+
+    //#region Snackbar state
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarVariant, setSnackbarVariant] = useState(SnackbarVariant.info);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+
+
+    const showSnackbar = (message: string, variant: SnackbarVariant = undefined) => {
+        setSnackbarMessage(message);
+        setSnackbarOpen(true)
+        setSnackbarVariant(variant);
+    }
+    const hideSnackbar = () => {
+        setSnackbarMessage('');
+        setSnackbarOpen(false);
+        setSnackbarVariant(undefined);
+    }
+    //#endregion
+
+    useEffect(() => { initialize(); }, [props.match.params]);
+
+    useEffect(() => {
+        const formErrors = userService.validateUser(user);
+        setFormErrors(formErrors);
+    }, [user]);
+
+    async function loadUser() {
+        const { match } = props;
 
         const tempId = match.params && match.params[paths.idParameterName];
-        const id = parseInt(tempId, 0);
-        if (id) {
-            try {
-                this.setState({
-                    loading: true
-                })
-                const users = await userService.get({ id });
-                const user = users[0];
-                this.setState({
-                    user: {
-                        email: user.email,
-                        firstname: user.firstname,
-                        id: user.id,
-                        lastname: user.lastname,
-                        password: user.password,
-                        secondname: user.secondname || '',
-                        username: user.username
-
-                    },
-                    loading: false
-                }, this.validateUser);
-            }
-            catch (error) {
-                if (error instanceof ApplicationError) {
-                    this.setState({
-                        loading: false,
-                        snackbarMessage: error.message,
-                        snackbarOpen: true,
-                        snackbarVariant: "error"
-                    })
-                }
+        let user: User = initialUser;
+        try {
+            setLoading(true);
+            const id = parseInt(tempId, 0);
+            if (id) {
+                const models = await userService.get({ id });
+                user = models[0];
             }
         }
-        else {
-            this.setState({
-                user: {
-                    email: '',
-                    firstname: '',
-                    lastname: '',
-                    username: ''
-                }
-            }, this.validateUser)
+        catch (error) {
+            if (error instanceof ApplicationError) {
+                setLoading(false);
+                showSnackbar(error.message, SnackbarVariant.error);
+            }
+        }
+        finally {
+            setLoading(false);
+            setUser(user);
         }
     }
 
-    private validateUser = () => {
-        const {
-            user
-        } = this.state;
-        const formErrors = userService.validateUser(user);
-        this.setState({
-            formErrors
-        })
+    async function loadNotPinnedDiscilines() {
+        try {
+            setLoading(true);
+            const titles = await disciplinetitleService.getTitles({});
+            setDisciplinesTitles(titles);
+        }
+        catch (error) {
+            if (error instanceof ApplicationError) {
+                setLoading(false);
+                showSnackbar(error.message, SnackbarVariant.error);
+            }
+        }
+        finally {
+            setLoading(false);
+        }
     }
 
-    private handleSnackbarClose = () => {
-        this.setState({
-            snackbarMessage: '',
-            snackbarOpen: false,
-            snackbarVariant: undefined
-        })
+    async function initialize() {
+        await loadUser();
+        await loadNotPinnedDiscilines();
     }
 
-    private handleBackClick = (event: React.MouseEvent<Element, MouseEvent>) => {
-        const {
-            history
-        } = this.props;
+    function handleBackClick(event: React.MouseEvent<Element, MouseEvent>) {
+        const { history } = props;
         history.push(paths.usersPath);
     }
 
-    private handleSaveClick = async (event: React.MouseEvent<Element, MouseEvent>) => {
-        const {
-            user
-        } = this.state;
-
+    async function handleSaveClick(event: React.MouseEvent<Element, MouseEvent>) {
         try {
-            this.setState({
-                loading: true
-            });
+            setLoading(true);
             if (user.id)
                 await userService.update(user);
             else
                 await userService.create(user);
-            this.setState({
-                loading: false,
-                snackbarMessage: 'Пользователь успешно сохранен',
-                snackbarOpen: true,
-                snackbarVariant: "success"
-            });
+            setLoading(false);
+            showSnackbar('Пользователь успешно сохранен', SnackbarVariant.success);
         }
         catch (error) {
             if (error instanceof ApplicationError) {
-                this.setState({
-                    loading: false,
-                    snackbarMessage: error.message,
-                    snackbarOpen: true,
-                    snackbarVariant: "error"
-                })
+                setLoading(false)
+                showSnackbar(error.message, SnackbarVariant.error);
             }
         }
     }
 
-    private handleCancelClick = async (event: React.MouseEvent<Element, MouseEvent>) => {
-        await this.loadUser();
+    function handleCancelClick(event: React.MouseEvent<Element, MouseEvent>) {
+        loadUser();
     }
 
-    private handleFirstnameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { user } = this.state;
-        this.setState({
-            user: { ...user, firstname: event.target && event.target.value },
-        }, this.validateUser);
+    const { classes } = props;
+
+    const userDisciplines = user.pinnedDisciplines || [];
+
+    let disciplinesForDialog: DisciplineTitle[] = [];
+
+    if (!selectedTitle) {
+        disciplinesForDialog = disciplinesTitles.filter(o => !userDisciplines.map(o => o.disciplineTitleId).includes(o.id));
+    } else {
+        const userDisciplinesWithoutSelectedDiscipline = userDisciplines.filter(o => o.disciplineTitleId !== selectedTitle.id).map(o => o.disciplineTitleId);
+        disciplinesForDialog = disciplinesTitles.filter(o => !userDisciplinesWithoutSelectedDiscipline.includes(o.id));
     }
 
-    private handleSecondnameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { user } = this.state;
-        this.setState({
-            user: { ...user, secondname: event.target && event.target.value },
-        });
-    }
-
-    private handleLastnameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { user } = this.state;
-        this.setState({
-            user: { ...user, lastname: event.target && event.target.value },
-        }, this.validateUser);
-    }
-
-    private handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { user } = this.state;
-        this.setState({
-            user: { ...user, email: event.target && event.target.value },
-        }, this.validateUser);
-    }
-
-    private handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { user } = this.state;
-        this.setState({
-            user: { ...user, username: event.target && event.target.value },
-        }, this.validateUser);
-    }
-
-    private handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { user } = this.state;
-        this.setState({
-            user: { ...user, password: event.target && event.target.value }
-        }, this.validateUser);
-    }
-
-    render() {
-        const { classes } = this.props;
-        const {
-            user,
-            loading,
-            formErrors,
-            snackbarOpen,
-            snackbarVariant,
-            snackbarMessage
-        } = this.state;
-
-        return (
-            <form autoComplete="off" noValidate>
-                <Grid container direction="row">
-                    <Grid item xs={2} />
-                    <Grid item xs container direction="column">
-                        <Grid container direction="row">
-                            <Tooltip title="Вернуться назад">
-                                <IconButton disabled={loading} onClick={this.handleBackClick}>
-                                    <ArrowBack />
-                                </IconButton>
-                            </Tooltip>
-                            <Grid item xs />
-                            <Tooltip title="Отменить">
-                                <IconButton disabled={loading} onClick={this.handleCancelClick}>
-                                    <Close />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Сохранить">
-                                <IconButton color="primary" disabled={loading || !formErrors.isValid} onClick={this.handleSaveClick}>
-                                    <Check />
-                                </IconButton>
-                            </Tooltip>
-                        </Grid>
-                        <Card className={clsx(classes.margin1Y, classes.w100)}>
-                            <CardHeader
-                                title="Пользователь"
-                            />
-                            {loading && <LinearProgress variant="query" />}
-                            <CardContent>
-                                <Grid container direction="column">
-                                    <Grid container direction="row">
-                                        <Grid item xs className={classes.margin1X}>
-                                            <TextField
-                                                id="firstname"
-                                                name="firstname"
-                                                label="Имя"
-                                                placeholder="Введите имя пользователя"
-                                                margin="normal"
-                                                variant="outlined"
-                                                fullWidth
-                                                required
-                                                autoComplete="firstname"
-                                                disabled={loading}
-                                                error={Boolean(formErrors.firstnameError)}
-                                                helperText={formErrors.firstnameError}
-                                                value={user.firstname}
-                                                onChange={this.handleFirstnameChange}
-                                            />
-                                        </Grid>
-                                        <Grid item xs className={classes.margin1X}>
-                                            <TextField
-                                                id="secondname"
-                                                name="secondname"
-                                                label="Отчество"
-                                                placeholder="Введите отчество пользователя"
-                                                margin="normal"
-                                                variant="outlined"
-                                                autoComplete="secondname"
-                                                fullWidth
-                                                disabled={loading}
-                                                value={user.secondname || ''}
-                                                onChange={this.handleSecondnameChange}
-                                            />
-                                        </Grid>
-                                        <Grid item xs className={classes.margin1X}>
-                                            <TextField
-                                                id="lastname"
-                                                name="lastname"
-                                                label="Фамилия"
-                                                placeholder="Введите фамилию пользователя"
-                                                margin="normal"
-                                                variant="outlined"
-                                                fullWidth
-                                                required
-                                                autoComplete="familyname"
-                                                disabled={loading}
-                                                value={user.lastname}
-                                                onChange={this.handleLastnameChange}
-                                                error={Boolean(formErrors.lastnameError)}
-                                                helperText={formErrors.lastnameError}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid container direction="row">
-                                        <Grid item xs className={classes.margin1X}>
-                                            <TextField
-                                                id="email"
-                                                name="email"
-                                                label="Email"
-                                                placeholder="Введите email пользователя"
-                                                margin="normal"
-                                                variant="outlined"
-                                                autoComplete="email"
-                                                required
-                                                fullWidth
-                                                disabled={loading}
-                                                error={Boolean(formErrors.emailError)}
-                                                helperText={formErrors.emailError}
-                                                value={user.email}
-                                                onChange={this.handleEmailChange}
-                                            />
-                                        </Grid>
-                                        <Grid item xs className={classes.margin1X}>
-                                            <TextField
-                                                id="username"
-                                                name="username"
-                                                label="Логин"
-                                                placeholder="Введите логин пользователя"
-                                                margin="normal"
-                                                variant="outlined"
-                                                autoComplete="username"
-                                                required
-                                                fullWidth
-                                                disabled={loading}
-                                                InputProps={{
-                                                    readOnly: Boolean(user.id),
-                                                }}
-                                                error={Boolean(formErrors.usernameError)}
-                                                helperText={formErrors.usernameError}
-                                                value={user.username}
-                                                onChange={this.handleUsernameChange}
-                                            />
-                                        </Grid>
-                                        {!user.id &&
-                                            <Grid item xs className={classes.margin1X}>
-                                                <TextField
-                                                    id="password"
-                                                    name="password"
-                                                    label="Пароль"
-                                                    placeholder="Введите пароль"
-                                                    margin="normal"
-                                                    variant="outlined"
-                                                    autoComplete="password"
-                                                    required
-                                                    fullWidth
-                                                    disabled={loading}
-                                                    error={Boolean(formErrors.passwordError)}
-                                                    helperText={formErrors.passwordError}
-                                                    value={user.password}
-                                                    onChange={this.handlePasswordChange}
-                                                />
-                                            </Grid>
-                                        }
-                                    </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
+    return (
+        <form autoComplete="off" noValidate>
+            <Grid container direction="row">
+                <Grid item xs={2} />
+                <Grid item xs container direction="column">
+                    <Grid container direction="row">
+                        <Tooltip title="Вернуться назад">
+                            <IconButton disabled={loading} onClick={handleBackClick}>
+                                <ArrowBack />
+                            </IconButton>
+                        </Tooltip>
+                        <Grid item xs />
+                        <Tooltip title="Отменить">
+                            <IconButton disabled={loading} onClick={handleCancelClick}>
+                                <Close />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Сохранить">
+                            <IconButton color="primary" disabled={loading || !formErrors.isValid} onClick={handleSaveClick}>
+                                <Check />
+                            </IconButton>
+                        </Tooltip>
                     </Grid>
-                    <Grid item xs={2} />
-                    <MessageSnackbar
-                        variant={snackbarVariant}
-                        message={snackbarMessage}
-                        open={snackbarOpen}
-                        onClose={this.handleSnackbarClose}
-                    />
+                    <Card className={clsx(classes.margin1Y, classes.w100)}>
+                        <CardHeader
+                            title="Пользователь"
+                        />
+                        {loading && <LinearProgress variant="query" />}
+                        <CardContent>
+                            <UserDetails
+                                user={user}
+                                disabled={loading}
+                                formErrors={formErrors}
+                                handleEmailChange={handleEmailChange}
+                                handleFirstnameChange={handleFirstnameChange}
+                                handleLastnameChange={handleLastnameChange}
+                                handlePasswordChange={handlePasswordChange}
+                                handleSecondnameChange={handleSecondnameChange}
+                                handleUsernameChange={handleUsernameChange}
+                            />
+                        </CardContent>
+                    </Card>
+                    <Card className={clsx(classes.margin1Y, classes.w100)}>
+                        <ExpansionPanel>
+                            <ExpansionPanelSummary expandIcon={<ExpandMore />}>
+                                <Grid container direction="row" alignItems="center">
+                                    <Typography className={classes.heading}>Прикрепленные дисциплины</Typography>
+                                    <Grid item xs />
+                                    <Tooltip title="Прикрепить дисциплину">
+                                        <IconButton onClick={handlePinnedDisciplineAdd}>
+                                            <Add />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Grid>
+                            </ExpansionPanelSummary>
+                            <ExpansionPanelDetails>
+                                <PinnedDisciplines
+                                    pinnedDisciplines={user.pinnedDisciplines}
+                                    handleDelete={handlePinnedDisciplineDelete}
+                                    handleEdit={handlePinnedDisciplineEdit}
+                                />
+                            </ExpansionPanelDetails>
+                        </ExpansionPanel>
+                    </Card>
                 </Grid>
-            </form>
-        );
-    }
-}
-
-export const UserComponent = withStyles(styles)(UserBase);
+                <Grid item xs={2} />
+                <MessageSnackbar
+                    variant={snackbarVariant}
+                    message={snackbarMessage}
+                    open={snackbarOpen}
+                    onClose={hideSnackbar}
+                />
+                <PinnedDisciplineDetails
+                    open={pinnedDisciplineDetailsOpen}
+                    disciplineTitle={selectedTitle}
+                    projectTypes={selectedProjectTypes}
+                    disciplinesTitles={disciplinesForDialog}
+                    onAccept={handlePinnedDisciplineDetailsAccept}
+                    onCancel={handlePinnedDisciplineDetailsCancel}
+                />
+            </Grid>
+        </form >
+    );
+});

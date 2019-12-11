@@ -23,7 +23,7 @@ class RoleService {
             .then(handleJsonResponse as ResponseHandler<Role>);
     }
 
-    public async getFaculties(options?: RoleGetOptions): Promise<Role[]> {
+    public async getRoles(options?: RoleGetOptions): Promise<Role[]> {
         let url = 'api/role';
         let conditionIndex: number = 0;
         if (options.id)

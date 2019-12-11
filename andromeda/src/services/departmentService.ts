@@ -95,19 +95,6 @@ class DepartmentService {
             .then(handleResponse);
     }
 
-    public getNameFromFullName(fullName: string): string {
-        let name = '';
-        const words = fullName.split(' ');
-        for (const word of words) {
-            if (word.length === 1)
-                name += word.charAt(0);
-            else
-                name += word.toUpperCase().charAt(0);
-        }
-
-        return name;
-    }
-
     private validateName(name: string): string {
         const nameValid = Boolean(name);
         return nameValid ? '' : 'Сокращение обязательно';

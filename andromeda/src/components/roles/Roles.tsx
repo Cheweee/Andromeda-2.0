@@ -24,11 +24,9 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
     const [snackbar, setSnackbar] = useSnackbarState();
     const [open, setOpen] = useState<boolean>(false);
 
-    useEffect(() => {
-        getFaculties();
-    });
+    useEffect(() => { getRoles(); }, [props]);
 
-    async function getFaculties() {
+    async function getRoles() {
         try {
             setLoading(true);
             const roles = await roleService.getRoles({ search: filter.search });
@@ -65,7 +63,7 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
                 const ids = [id];
                 await roleService.delete(ids);
                 setSnackbar('Роль успешно удалена', false, undefined);
-                await getFaculties();
+                await getRoles();
             }
         }
         catch (error) {
@@ -112,7 +110,7 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
                     debounce={filter.debounce}
                     search={filter.search}
                     onSearchChange={handleSearchChange}
-                    onSearch={getFaculties}
+                    onSearch={getRoles}
                 />
                 <IconButton onClick={handleAdd}>
                     <Add />

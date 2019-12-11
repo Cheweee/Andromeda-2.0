@@ -108,6 +108,7 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
         setLoading(true);
         const allDepartments = await departmentService.getDepartments({});
         setAllDepartments(allDepartments);
+        setLoading(false);
     }
 
     async function initialize() {

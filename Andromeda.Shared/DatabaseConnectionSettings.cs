@@ -1,3 +1,5 @@
+using Andromeda.Shared.Enumerations;
+
 namespace Andromeda.Shared
 {
     public class DatabaseConnectionSettings
@@ -8,6 +10,7 @@ namespace Andromeda.Shared
         private string databasePort;
         private string databaseUserName;
         private string databasePassword;
+        private DatabaseProvider? provider;
         #endregion
 
         #region Environment variables names
@@ -20,6 +23,8 @@ namespace Andromeda.Shared
         public const string DatabaseUserNameVariableName = "database-user-name";
 
         public const string DatabasePasswordVariableName = "database-password";
+
+        public const string DatabaseProviderVariableName = "database-provider";
         #endregion
 
         public string PostgresConnectionString { get => $"host={databaseHost};port={databasePort};username={databaseUserName};password={databasePassword}"; }
@@ -35,8 +40,16 @@ namespace Andromeda.Shared
         public string DatabasePort { get => databasePort; set => databasePort = value; }
         public string DatabaseUserName { get => databaseUserName; set => databaseUserName = value; }
         public string DatabasePassword { get => databasePassword; set => databasePassword = value; }
+        public DatabaseProvider? Provider { get => provider; set => provider = value; }
 
-        public static DatabaseConnectionSettings InitializeSolutionSettings(string databaseHost, string databaseName, string databasePort, string databaseUserName, string databasePassword)
+        public static DatabaseConnectionSettings InitializeSolutionSettings(
+            string databaseHost,
+            string databaseName,
+            string databasePort,
+            string databaseUserName,
+            string databasePassword,
+            DatabaseProvider provider
+        )
         {
             return new DatabaseConnectionSettings
             {
@@ -44,7 +57,8 @@ namespace Andromeda.Shared
                 databaseName = databaseName,
                 databasePassword = databasePassword,
                 databasePort = databasePort,
-                databaseUserName = databaseUserName
+                databaseUserName = databaseUserName,
+                provider = provider
             };
         }
     }

@@ -17,9 +17,9 @@ namespace Andromeda.Utilities.Actions
             {
                 logger.LogInformation($"Try to drop \"{settings.DatabaseName}\" database");
 
-                using (var connection = new SqlConnection(settings.SqlServerConnectionString))
+                using (var connection = MigrateUtilities.CreateServerConnection(settings))
                 {
-                    var comma = new SqlCommand($"drop database if exists {settings.DatabaseName}", connection);
+                    var comma = MigrateUtilities.CreateCommand(settings, $"drop database if exists {settings.DatabaseName}", connection);
 
                     connection.Open();
                     comma.ExecuteNonQuery();

@@ -17,9 +17,9 @@ namespace Andromeda.Utilities.Actions
             {
                 logger.LogInformation($"Try to create \"{settings.DatabaseName}\" database");
 
-                using (var connection = MigrateUtilities.CreateServerConnection(settings))
+                using (var connection = DatabaseConnectionSettings.CreateServerConnection(settings))
                 {
-                    var comma = MigrateUtilities.CreateCommand(settings, $@"create database {settings.DatabaseName}", connection);
+                    var comma = DatabaseConnectionSettings.CreateCommand(settings, $@"create database {settings.DatabaseName}", connection);
 
                     connection.Open();
                     comma.ExecuteNonQuery();

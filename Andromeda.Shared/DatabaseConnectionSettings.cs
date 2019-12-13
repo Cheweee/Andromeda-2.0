@@ -1,4 +1,7 @@
+using System.Data;
+using System.Data.SqlClient;
 using Andromeda.Shared.Enumerations;
+using Npgsql;
 
 namespace Andromeda.Shared
 {
@@ -60,6 +63,36 @@ namespace Andromeda.Shared
                 databaseUserName = databaseUserName,
                 provider = provider
             };
+        }
+
+        public static IDbCommand CreateCommand(DatabaseConnectionSettings settings, string command, IDbConnection connection)
+        {
+            switch (settings.Provider)
+            {
+                case DatabaseProvider.Postgres: return new NpgsqlCommand(command, connection as NpgsqlConnection);
+                case DatabaseProvider.SqlServer: return new SqlCommand(command, connection as SqlConnection);
+                default: return new SqlCommand(command, connection as SqlConnection);
+            }
+        }
+
+        public static IDbConnection CreateServerConnection(DatabaseConnectionSettings settings)
+        {
+            switch (settings.Provider)
+            {
+                default:
+                case DatabaseProvider.SqlServer: return new SqlConnection(settings.SqlServerConnectionString);
+                case DatabaseProvider.Postgres: return new NpgsqlConnection(settings.PostgresConnectionString);
+            }
+        }
+
+        public static IDbConnection CreateDatabaseConnection(DatabaseConnectionSettings settings)
+        {
+            switch (settings.Provider)
+            {
+                default:
+                case DatabaseProvider.SqlServer: return new SqlConnection(settings.SqlServerDatabaseConnectionString);
+                case DatabaseProvider.Postgres: return new NpgsqlConnection(settings.PostgresDatabaseConnectionString);
+            }
         }
     }
 }

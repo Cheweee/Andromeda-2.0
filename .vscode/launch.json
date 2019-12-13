@@ -69,7 +69,7 @@
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
             "args": [
-                "reset"
+                "reset --database-host localhost\\sqlserver --database-name andromeda --database-user-name sa --database-password qwerty_123 --database-provider 0"
             ],
             "cwd": "${workspaceFolder}/Andromeda.API",
             "console": "internalConsole",

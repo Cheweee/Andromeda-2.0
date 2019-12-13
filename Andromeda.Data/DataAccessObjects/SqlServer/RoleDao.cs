@@ -4,13 +4,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Andromeda.Data.Interfaces;
 using Andromeda.Data.Models;
+using Andromeda.Shared;
 using Microsoft.Extensions.Logging;
 
 namespace Andromeda.Data.DataAccessObjects.SqlServer
 {
     public class RoleDao : BaseDao, IRoleDao
     {
-        public RoleDao(string connectionString, ILogger logger) : base(connectionString, logger) { }
+        public RoleDao(DatabaseConnectionSettings settings, ILogger logger) : base(settings, logger) { }
 
         public async Task Create(Role model)
         {

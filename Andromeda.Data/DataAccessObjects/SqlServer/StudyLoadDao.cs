@@ -4,13 +4,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Andromeda.Data.Interfaces;
 using Andromeda.Data.Models;
+using Andromeda.Shared;
 using Microsoft.Extensions.Logging;
 
 namespace Andromeda.Data.DataAccessObjects.SqlServer
 {
     public class StudyLoadDao : BaseDao, IStudyLoadDao
     {
-        public StudyLoadDao(string connectionString, ILogger logger) : base(connectionString, logger)
+        public StudyLoadDao(DatabaseConnectionSettings settings, ILogger logger) : base(settings, logger)
         {
         }
 

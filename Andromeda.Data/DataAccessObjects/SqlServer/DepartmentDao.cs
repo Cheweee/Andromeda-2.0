@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using Andromeda.Data.Interfaces;
 using Andromeda.Data.Models;
 using Microsoft.Extensions.Logging;
+using Andromeda.Shared;
 
 namespace Andromeda.Data.DataAccessObjects.SqlServer
 {
     public class DepartmentDao : BaseDao, IDepartmentDao
     {
-        public DepartmentDao(string connectionString, ILogger logger) : base(connectionString, logger)
+        public DepartmentDao(DatabaseConnectionSettings settings, ILogger logger) : base(settings, logger)
         {
         }
 

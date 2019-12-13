@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
+using Andromeda.Shared;
 using Dapper;
 using Dapper.Mapper;
 using Microsoft.Extensions.Logging;
@@ -11,17 +12,17 @@ namespace Andromeda.Data.DataAccessObjects
 {
     public abstract class BaseDao
     {
-        protected readonly string _connectionString;
+        protected readonly DatabaseConnectionSettings _settings;
         protected readonly ILogger _logger;
-        protected BaseDao(string connectionString, ILogger logger)
+        protected BaseDao(DatabaseConnectionSettings settings, ILogger logger)
         {
-            _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         protected IEnumerable<T> Query<T>(string sql, object parameters = null)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = DatabaseConnectionSettings.CreateDatabaseConnection(_settings))
             {
                 try
                 {
@@ -37,7 +38,7 @@ namespace Andromeda.Data.DataAccessObjects
         }
         protected T QueryFirst<T>(string sql, object parameters = null)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = DatabaseConnectionSettings.CreateDatabaseConnection(_settings))
             {
                 try
                 {
@@ -53,7 +54,7 @@ namespace Andromeda.Data.DataAccessObjects
         }
         protected T QueryFirstOrDefault<T>(string sql, object parameters = null)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = DatabaseConnectionSettings.CreateDatabaseConnection(_settings))
             {
                 try
                 {
@@ -69,7 +70,7 @@ namespace Andromeda.Data.DataAccessObjects
         }
         protected async Task<IEnumerable<T>> QueryAsync<T>(string sql, object parameters = null)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = DatabaseConnectionSettings.CreateDatabaseConnection(_settings))
             {
                 try
                 {
@@ -86,7 +87,7 @@ namespace Andromeda.Data.DataAccessObjects
 
         protected async Task<IEnumerable<T>> QueryMapAsync<T, T1>(string sql, object parameters = null, Func<T, T1, T> map = null, string splitOn = null)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = DatabaseConnectionSettings.CreateDatabaseConnection(_settings))
             {
                 try
                 {
@@ -103,7 +104,7 @@ namespace Andromeda.Data.DataAccessObjects
 
         protected async Task<IEnumerable<T2>> QueryMapAsync<T, T1, T2>(string sql, object parameters = null, Func<T, T1, T2> map = null, string splitOn = null)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = DatabaseConnectionSettings.CreateDatabaseConnection(_settings))
             {
                 try
                 {
@@ -120,7 +121,7 @@ namespace Andromeda.Data.DataAccessObjects
 
         protected async Task<T> QueryFirstAsync<T>(string sql, object parameters = null)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = DatabaseConnectionSettings.CreateDatabaseConnection(_settings))
             {
                 try
                 {
@@ -136,7 +137,7 @@ namespace Andromeda.Data.DataAccessObjects
         }
         protected async Task<T> QueryFirstOrDefaultAsync<T>(string sql, object parameters = null)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = DatabaseConnectionSettings.CreateDatabaseConnection(_settings))
             {
                 try
                 {
@@ -152,7 +153,7 @@ namespace Andromeda.Data.DataAccessObjects
         }
         protected T QuerySingle<T>(string sql, object parameters = null)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = DatabaseConnectionSettings.CreateDatabaseConnection(_settings))
             {
                 try
                 {
@@ -168,7 +169,7 @@ namespace Andromeda.Data.DataAccessObjects
         }
         protected T QuerySingleOrDefault<T>(string sql, object parameters = null)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = DatabaseConnectionSettings.CreateDatabaseConnection(_settings))
             {
                 try
                 {
@@ -184,7 +185,7 @@ namespace Andromeda.Data.DataAccessObjects
         }
         protected async Task<T> QuerySingleAsync<T>(string sql, object parameters = null)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = DatabaseConnectionSettings.CreateDatabaseConnection(_settings))
             {
                 try
                 {
@@ -200,7 +201,7 @@ namespace Andromeda.Data.DataAccessObjects
         }
         protected async Task<T> QuerySingleOrDefaultAsync<T>(string sql, object parameters = null)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = DatabaseConnectionSettings.CreateDatabaseConnection(_settings))
             {
                 try
                 {
@@ -217,7 +218,7 @@ namespace Andromeda.Data.DataAccessObjects
 
         protected void Execute(string sql, object parameters = null)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = DatabaseConnectionSettings.CreateDatabaseConnection(_settings))
             {
                 try
                 {
@@ -233,7 +234,7 @@ namespace Andromeda.Data.DataAccessObjects
         }
         protected async Task ExecuteAsync(string sql, object parameters = null)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = DatabaseConnectionSettings.CreateDatabaseConnection(_settings))
             {
                 try
                 {

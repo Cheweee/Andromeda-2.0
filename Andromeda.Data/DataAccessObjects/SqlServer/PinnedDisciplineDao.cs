@@ -4,13 +4,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Andromeda.Data.Interfaces;
 using Andromeda.Data.Models;
+using Andromeda.Shared;
 using Microsoft.Extensions.Logging;
 
 namespace Andromeda.Data.DataAccessObjects.SqlServer
 {
     public class PinnedDisciplineDao : BaseDao, IPinnedDisciplineDao
     {
-        public PinnedDisciplineDao(string connectionString, ILogger logger) : base(connectionString, logger) { }
+        public PinnedDisciplineDao(DatabaseConnectionSettings settings, ILogger logger) : base(settings, logger) { }
 
         public async Task Create(List<PinnedDiscipline> model)
         {

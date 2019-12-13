@@ -4,13 +4,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Andromeda.Data.Interfaces;
 using Andromeda.Data.Models;
+using Andromeda.Shared;
 using Microsoft.Extensions.Logging;
 
 namespace Andromeda.Data.DataAccessObjects.SqlServer
 {
     public class UserRoleInDepartmentDao : BaseDao, IUserRoleInDepartmentDao
     {
-        public UserRoleInDepartmentDao(string connectionString, ILogger logger) : base(connectionString, logger) { }
+        public UserRoleInDepartmentDao(DatabaseConnectionSettings settings, ILogger logger) : base(settings, logger) { }
 
         public async Task Create(List<UserRoleInDepartment> models)
         {

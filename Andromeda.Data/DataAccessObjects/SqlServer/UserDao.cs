@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Andromeda.Data.Interfaces;
 using Andromeda.Data.Models;
+using Andromeda.Shared;
 
 namespace Andromeda.Data.DataAccessObjects
 {
     public class UserDao : BaseDao, IUserDao
     {
-        public UserDao(string connectionString, ILogger _logger) : base(connectionString, _logger) { }
+        public UserDao(DatabaseConnectionSettings settings, ILogger logger) : base(settings, logger) { }
 
         public async Task Create(User model)
         {

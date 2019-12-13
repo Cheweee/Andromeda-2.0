@@ -1,19 +1,21 @@
 using Andromeda.Data.Interfaces;
 using Microsoft.Extensions.Logging;
 using Andromeda.Data.Enumerations;
+using Andromeda.Shared;
+using Andromeda.Shared.Enumerations;
 
 namespace Andromeda.Data
 {
     public class DaoFactories
     {
-        public static IDaoFactory GetFactory(DataProvider provider, string connectionString, ILogger logger)
+        public static IDaoFactory GetFactory(DatabaseConnectionSettings settings, ILogger logger)
         {
-            switch (provider)
+            switch (settings.Provider)
             {
-                case DataProvider.SqlServer:
-                    return new DataAccessObjects.SqlServer.DaoFactory(connectionString, logger);
+                case DatabaseProvider.SqlServer:
+                    return new DataAccessObjects.SqlServer.DaoFactory(settings, logger);
                 default:
-                    return new DataAccessObjects.SqlServer.DaoFactory(connectionString, logger);
+                    return new DataAccessObjects.SqlServer.DaoFactory(settings, logger);
             }
         }
     }

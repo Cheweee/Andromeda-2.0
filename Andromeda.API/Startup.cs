@@ -82,12 +82,10 @@ namespace Andromeda.API
                 return;
             }
 
-            string connectionString = databaseConnectionSettings.SqlServerDatabaseConnectionString;
-
             services.AddScoped(provider =>
             {
                 var logger = provider.GetService<ILogger<IDaoFactory>>();
-                return DaoFactories.GetFactory(DataProvider.SqlServer, connectionString, logger);
+                return DaoFactories.GetFactory(databaseConnectionSettings, logger);
             });
 
             services.AddScoped(provider => {

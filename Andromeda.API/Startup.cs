@@ -7,6 +7,7 @@ using Andromeda.Data;
 using Andromeda.Data.Enumerations;
 using Andromeda.Data.Interfaces;
 using Andromeda.Services;
+using Andromeda.Services.GenerateLoadStrategies;
 using Andromeda.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -21,6 +22,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Andromeda.API.Utility;
 
 namespace Andromeda.API
 {
@@ -88,7 +90,8 @@ namespace Andromeda.API
                 return DaoFactories.GetFactory(databaseConnectionSettings, logger);
             });
 
-            services.AddScoped(provider => {
+            services.AddScoped(provider =>
+            {
                 var daoFactory = provider.GetService<IDaoFactory>();
                 return new PinnedDisciplineService(daoFactory.PinnedDisciplineDao);
             });
@@ -128,16 +131,43 @@ namespace Andromeda.API
                 return new StudentGroupService(daoFactory.StudentGroupDao);
             });
 
-            services.AddScoped(provider => 
+            services.AddScoped(provider =>
             {
                 var daoFactory = provider.GetService<IDaoFactory>();
                 return new StudyDirectionService(daoFactory.StudyDirectionDao);
             });
 
-            services.AddScoped(provider => 
+            services.AddScoped(provider =>
             {
                 var daoFactory = provider.GetService<IDaoFactory>();
                 return new DisciplineTitleService(daoFactory.DisciplineTitleDao);
+            });
+
+            services.AddScoped(provider =>
+            {
+                var userService = provider.GetService<UserService>();
+                var pinnedDisciplineService = provider.GetService<PinnedDisciplineService>();
+
+                return new ByPinnedDisciplinesStrategy(userService, pinnedDisciplineService);
+            });
+            services.AddScoped<IGenerateStrategy>(provider => provider.GetService<ByPinnedDisciplinesStrategy>());
+
+            services.AddScoped(provider =>
+            {
+                var daoFactory = provider.GetService<IDaoFactory>();
+                var studentGroupService = provider.GetService<StudentGroupService>();
+                return new StudyLoadService(daoFactory.StudyLoadDao, studentGroupService);
+            });
+
+            services.AddScoped(provider =>
+            {
+                var daoFactory = provider.GetService<IDaoFactory>();
+                var studyLoadService = provider.GetService<StudyLoadService>();
+                return new DepartmentLoadService(
+                    daoFactory.DepartmentLoadDao,
+                    studyLoadService,
+                    provider.ComposeGenerateStrategies() 
+                );
             });
 
             services.AddScoped(provider =>
@@ -151,20 +181,13 @@ namespace Andromeda.API
                 var logger = provider.GetService<ILogger<DepartmentService>>();
                 return new DepartmentService(
                     daoFactory.DepartmentDao,
-                    roleInDepartmentService, 
-                    userRoleInDepartmentService, 
+                    roleInDepartmentService,
+                    userRoleInDepartmentService,
                     disciplineTitleService,
-                    studyDirectionService, 
-                    studentGroupService, 
+                    studyDirectionService,
+                    studentGroupService,
                     logger
                 );
-            });
-
-            services.AddScoped(provider =>
-            {
-                var daoFactory = provider.GetService<IDaoFactory>();
-                var studentGroupService = provider.GetService<StudentGroupService>();
-                return new StudyLoadService(daoFactory.StudyLoadDao, studentGroupService);
             });
         }
 

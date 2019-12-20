@@ -3,14 +3,14 @@ import { WithStyles, withStyles, IconButton, Grid, Typography, Paper } from "@ma
 import { RouteComponentProps, withRouter } from "react-router";
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
-import { Filter, Column, initialFilter, SnackbarVariant } from "../../models/commonModels";
+import { IFilter, Column, SnackbarVariant, Filter } from "../../models/commonModels";
 import { ApplicationError, TrainingDepartment, DepartmentType } from "../../models";
 import { paths } from "../../sharedConstants";
 import { Edit, Delete, AccountBalance, Search, Add, BarChart } from "@material-ui/icons";
 import { SearchInput, TableComponent, ConfirmationDialog, MessageSnackbar } from "../common";
 import { departmentService } from "../../services";
 import { useState, useEffect } from "react";
-import { useSnackbarState } from "../../hooks";
+import { useSnackbarState, useFilterState } from "../../hooks";
 
 const styles = mergeStyles(commonStyles);
 
@@ -18,7 +18,7 @@ interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const TrainingDepartments = withStyles(styles)(withRouter(function (props: Props) {
     const [departments, setDepartments] = useState<TrainingDepartment[]>([]);
-    const [filter, setFilter] = useState<Filter>(initialFilter);
+    const [filter, setFilter] = useFilterState(Filter.initialFilter);
     const [loading, setLoading] = useState<boolean>(false);
     const [open, setOpen] = useState<boolean>(false);
     const [id, setId] = useState<number>(null);
@@ -56,9 +56,9 @@ export const TrainingDepartments = withStyles(styles)(withRouter(function (props
         history.push(paths.getTrainingDepartmentPath(`${model.id}`));
     }
 
-    function handleStudyload(model: TrainingDepartment) {
+    function handleDepartmentLoad(model: TrainingDepartment) {
         const { history } = props;
-        history.push(paths.getStudyloadPath(`${model.id}`));
+        history.push(paths.getDepartmentloadsPath(`${model.id}`));
     }
 
     function handleDelete(id: number) {
@@ -87,7 +87,7 @@ export const TrainingDepartments = withStyles(styles)(withRouter(function (props
     }
 
     async function handleSearchChange(value: string) {
-        setFilter({ ...filter, search: value });
+        setFilter(value);
     }
 
     const { classes } = props;
@@ -103,7 +103,7 @@ export const TrainingDepartments = withStyles(styles)(withRouter(function (props
         },
         {
             name: 'studyload', padding: "checkbox", displayName: '', render: (data: TrainingDepartment) => (
-                <IconButton onClick={() => handleStudyload(data)}>
+                <IconButton onClick={() => handleDepartmentLoad(data)}>
                     <BarChart />
                 </IconButton>
             )

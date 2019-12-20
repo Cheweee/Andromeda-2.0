@@ -12,5 +12,6 @@ namespace Andromeda.Data.Interfaces
         IStudyDirectionDao StudyDirectionDao { get; }
         IDisciplineTitleDao DisciplineTitleDao { get; }
         IPinnedDisciplineDao PinnedDisciplineDao { get; }
+        IDepartmentLoadDao DepartmentLoadDao { get; }
     }
 }

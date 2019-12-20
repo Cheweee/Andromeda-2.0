@@ -1,11 +1,13 @@
 import { Padding } from "@material-ui/core/TableCell";
 
-export interface Filter {
+export interface IFilter {
     debounce?: number;
     search?: string;
 }
 
-export const initialFilter: Filter = { debounce: 500, search: '' };
+export namespace Filter {
+    export const initialFilter: IFilter = { debounce: 500, search: '' };
+}
 
 export interface Column {
     name: string;

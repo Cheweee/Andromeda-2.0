@@ -6,11 +6,11 @@ import { WithStyles, withStyles } from "@material-ui/styles";
 
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
-import { Filter } from "../../models/commonModels";
+import { IFilter } from "../../models/commonModels";
 
 const styles = mergeStyles(commonStyles);
 
-interface Props extends Filter, WithStyles<typeof styles> {
+interface Props extends IFilter, WithStyles<typeof styles> {
     onSearchChange: (newValue: string) => void;
     onSearch: () => void;
 }

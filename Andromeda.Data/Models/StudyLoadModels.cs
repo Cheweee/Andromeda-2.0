@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Andromeda.Data.Enumerations;
 
 namespace Andromeda.Data.Models
 {
@@ -6,36 +7,26 @@ namespace Andromeda.Data.Models
     {
         public int Id { get; set; }
         public int FacultyId { get; set; }
-        public string FacultyName { get; set; }
-        public string SubjectName { get; set; }
+        public int DepartmentLoadId { get; set; }
+        public int DisciplineTitleId { get; set; }
         public int SemesterNumber { get; set; }
         public int StudyWeeksCount { get; set; }
         public int GroupsInTheStream { get; set; }
-        public int? Lections { get; set; }
-        public int? PracticalWorks { get; set; }
-        public int? LaboratoryWorks { get; set; }
-        public int? ThematicalDiscussions { get; set; }
-        public int? Consultations { get; set; }
-        public int? Exams { get; set; }
-        public int? Offsets { get; set; }
-        public int? ControlWorks { get; set; }
-        public int? Abstracts { get; set; }
-        public int? ESControlWorks { get; set; }
-        public int? StateExams { get; set; }
-        public int? PSEntryExams { get; set; }
-        public int? Practices { get; set; }
-        public int? DepartmentManagement { get; set; }
-        public int? ResearchWorks { get; set; }
-        public int? CourseWorks { get; set; }
-        public int? GraduationWorkManagement { get; set; }
-        public int? MasterProgramManagement { get; set; }
-        public int? UndergraduateProgramManagement { get; set; }
+        public int Value { get; set; }
+        public int? UserId { get; set; }
+        public ProjectType ProjectType { get; set; }
 
+        public User User { get; set; }
+        public Department Faculty { get; set; }
+        public Department Department { get; set; }
+        public DisciplineTitle DisciplineTitle { get; set; }
         public IEnumerable<StudentGroup> Groups { get; set; }
     }
 
-    public class StudyLoadGetOptions : BaseGetOptions
+    public class StudyLoadGetOptions
     {
-        public string Search { get; set; }
+        public int? DepartmentLoadId { get; set; }
+        public bool? OnlyNotDistibuted { get; set; }
+        public bool? OnlyDistributed { get; set; }
     }
 }

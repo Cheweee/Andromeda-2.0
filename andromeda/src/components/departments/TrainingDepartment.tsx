@@ -4,7 +4,7 @@ import { RouteComponentProps, withRouter } from "react-router";
 
 import clsx from "clsx";
 import { WithStyles, withStyles } from "@material-ui/styles";
-import { ArrowBack, Close, Check, ExpandMore, Add } from "@material-ui/icons";
+import { ArrowBack, Close, Check, ExpandMore, Add, BarChart } from "@material-ui/icons";
 import {
     Grid,
     Tooltip,
@@ -171,6 +171,11 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
 
     const handleCancelClick = async () => {
         await loadDepartment();
+    }
+
+    function handleStudyload() {
+        const { history } = props;
+        history.push(paths.getDepartmentloadsPath(`${department.id}`));
     }
 
     const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -413,7 +418,18 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                         </Tooltip>
                     </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        <CardHeader title="Кафедра" />
+                        <CardHeader title={
+                            <Grid container direction="row" alignItems="center" justify="space-between">
+                                <Typography>Кафедра</Typography>
+                                {department.id && (
+                                    <Tooltip title="Нагрузка кафедры">
+                                        <IconButton disabled={loading} onClick={handleStudyload}>
+                                            <BarChart />
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
+                            </Grid>
+                        } />
                         {loading && <LinearProgress variant="query" />}
                         <CardContent>
                             <DepartmentDetails

@@ -86,16 +86,21 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} Id = @id");
                 }
+                if(options.DepartmentId.HasValue)
+                {
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} DepartmentId = @DepartmentId");
+                }
                 if (options.Ids != null)
                 {
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} id in @Ids");
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} Id in @Ids");
+                }
+                if(options.DepartmentIds != null)
+                {
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} DepartmentId in @DepartmentIds");
                 }
                 if (options.Search != null)
                 {
-                    sql.AppendLine($@"
-                        {(conditionIndex++ == 0 ? "where" : "and")} lower(StudyDirection) like '%lower(@search)%'
-                        or lower(Name) like '%lower(@search)%'
-                    ");
+                    sql.AppendLine($@"{(conditionIndex++ == 0 ? "where" : "and")} lower(StudyDirection) like '%lower(@search)%' or lower(Name) like '%lower(@search)%'");
                 }
                 _logger.LogInformation($"Sql query successfully created:\n{sql.ToString()}");
 

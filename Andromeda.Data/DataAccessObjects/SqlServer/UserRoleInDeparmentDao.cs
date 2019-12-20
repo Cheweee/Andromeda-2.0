@@ -86,6 +86,10 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (rid.RoleId in @RoleIds)");
                 }
+                if(options.DepartmentId.HasValue)
+                {
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (rid.DepartmentId = @DepartmentId)");
+                }
                 if (options.DepartmentIds != null)
                 {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (rid.DepartmentId in @DepartmentIds)");

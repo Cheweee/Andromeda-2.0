@@ -17,6 +17,7 @@ namespace Andromeda.Data.Models
         public List<UserRoleInDepartment> Users { get; set; }
         public List<StudyDirection> StudyDirections { get; set; }
         public List<StudentGroup> Groups { get; set; }
+        public List<DepartmentLoad> DepartmentLoads { get; set; }
     }
 
     public class DepartmentGetOptions : BaseGetOptions

@@ -51,7 +51,7 @@ namespace Andromeda.Data.Models
 
     public class UserRoleInDepartmentGetOptions
     {
-        public int DepartmentId { get; set; }
+        public int? DepartmentId { get; set; }
 
         public IReadOnlyList<int> RoleIds { get; set; }
         public IReadOnlyList<int> UserIds { get; set; }

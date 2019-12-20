@@ -5,13 +5,13 @@ import { WithStyles, withStyles, IconButton, Grid, Typography, Paper } from "@ma
 import { RouteComponentProps, withRouter } from "react-router";
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
-import { Filter, Column, initialFilter, SnackbarVariant } from "../../models/commonModels";
+import { IFilter, Column, SnackbarVariant, Filter } from "../../models/commonModels";
 import { ApplicationError, Faculty, DepartmentType } from "../../models";
 import { paths } from "../../sharedConstants";
 import { Edit, Delete, AccountBalance, Search, Add, Apartment } from "@material-ui/icons";
 import { SearchInput, TableComponent, ConfirmationDialog, MessageSnackbar } from "../common";
 import { departmentService } from "../../services";
-import { useSnackbarState } from "../../hooks";
+import { useSnackbarState, useFilterState } from "../../hooks";
 
 const styles = mergeStyles(commonStyles);
 
@@ -19,7 +19,7 @@ interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const Faculties = withStyles(styles)(withRouter(function (props: Props) {
     const [faculties, setFaculties] = useState<Faculty[]>([]);
-    const [filter, setFilter] = useState<Filter>(initialFilter);
+    const [filter, setFilter] = useFilterState(Filter.initialFilter);
     const [loading, setLoading] = useState<boolean>(false);
     const [open, setOpen] = useState<boolean>(false)
     const [id, setId] = useState<number>(null);
@@ -83,7 +83,7 @@ export const Faculties = withStyles(styles)(withRouter(function (props: Props) {
     }
 
     async function handleSearchChange(value: string) {
-        setFilter({ ...filter, search: value });
+        setFilter(value);
     }
 
     const { classes } = props;

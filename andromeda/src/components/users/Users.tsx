@@ -13,12 +13,12 @@ import {
     IconButton,
 } from '@material-ui/core';
 import { Search, Edit, Delete, Add, SupervisorAccount } from '@material-ui/icons';
-import { Filter, Column, initialFilter, SnackbarVariant } from '../../models/commonModels';
+import { IFilter, Column, SnackbarVariant, Filter } from '../../models/commonModels';
 import { TableComponent, ConfirmationDialog, SearchInput, MessageSnackbar } from '../common';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { paths } from '../../sharedConstants';
 import { useEffect, useState } from 'react';
-import { useSnackbarState } from '../../hooks';
+import { useSnackbarState, useFilterState } from '../../hooks';
 
 const styles = mergeStyles(commonStyles);
 
@@ -26,7 +26,7 @@ interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const Users = withStyles(styles)(withRouter(function (props: Props) {
     const [users, setUsers] = useState<User[]>([]);
-    const [filter, setFilter] = useState<Filter>(initialFilter);
+    const [filter, setFilter] = useFilterState(Filter.initialFilter);
     const [id, setId] = useState<number>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [snackbar, setSnackbar] = useSnackbarState();
@@ -86,7 +86,7 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
     }
 
     async function handleSearchChange(value: string) {
-        setFilter({ ...filter, search: value });
+        setFilter(value);
     }
 
     const { classes } = props;

@@ -3,14 +3,14 @@ import { WithStyles, withStyles, IconButton, Grid, Typography, Paper } from "@ma
 import { RouteComponentProps, withRouter } from "react-router";
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
-import { Filter, Column, initialFilter, SnackbarVariant } from "../../models/commonModels";
+import { IFilter, Column, SnackbarVariant, Filter } from "../../models/commonModels";
 import { ApplicationError, Role, DepartmentType } from "../../models";
 import { paths } from "../../sharedConstants";
 import { Edit, Delete, Search, Add, Apartment, AssignmentInd } from "@material-ui/icons";
 import { SearchInput, TableComponent, ConfirmationDialog, MessageSnackbar } from "../common";
 import { roleService } from "../../services";
 import { useState, useEffect } from "react";
-import { useSnackbarState } from "../../hooks";
+import { useSnackbarState, useFilterState } from "../../hooks";
 
 const styles = mergeStyles(commonStyles);
 
@@ -18,7 +18,7 @@ interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const Roles = withStyles(styles)(withRouter(function (props: Props) {
     const [roles, setRoles] = useState<Role[]>([]);
-    const [filter, setFilter] = useState<Filter>(initialFilter);
+    const [filter, setFilter] = useFilterState(Filter.initialFilter);
     const [id, setId] = useState<number>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [snackbar, setSnackbar] = useSnackbarState();
@@ -77,7 +77,7 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
     }
 
     async function handleSearchChange(value: string) {
-        setFilter({ ...filter, search: value });
+        setFilter(value);
     }
 
     const { classes } = props;

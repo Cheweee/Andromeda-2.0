@@ -24,22 +24,22 @@ namespace Andromeda.Services
 
             var studyLoadIds = studyLoad.Select(o => o.Id).ToList();
             var studentGroups = await _studentGroupService.Get(new StudentGroupGetOptions { Ids = studyLoadIds });
-            studyLoad = studyLoad.GroupJoin(studentGroups, sl => sl.Id, sg => sg.StudyLoadId, (sl, sg) => {
-                sl.Groups = sg;
-                return sl;
-            });
+            // studyLoad = studyLoad.GroupJoin(studentGroups, sl => sl.Id, sg => sg.StudyLoadId, (sl, sg) => {
+            //     sl.Groups = sg;
+            //     return sl;
+            // });
 
             return studyLoad;
         }
 
-        public async Task<StudyLoad> Create(StudyLoad model)
+        public async Task<List<StudyLoad>> Create(List<StudyLoad> model)
         {
             await _dao.Create(model);
 
             return model;
         }
 
-        public async Task<StudyLoad> Update(StudyLoad model)
+        public async Task<List<StudyLoad>> Update(List<StudyLoad> model)
         {
             await _dao.Update(model);
 

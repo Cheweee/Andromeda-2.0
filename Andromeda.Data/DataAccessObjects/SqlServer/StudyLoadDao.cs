@@ -15,60 +15,34 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
         {
         }
 
-        public async Task Create(StudyLoad model)
+        public async Task Create(List<StudyLoad> model)
         {
             try
             {
                 _logger.LogInformation("Trying to execute sql create study load query");
-                model.Id = await QuerySingleOrDefaultAsync<int>(@"
+                await ExecuteAsync(@"
                         insert into StudyLoad (
+                            Id,
                             FacultyId,
-                            SubjectName,
+                            DepartmentId,
+                            DisciplineTitleId,
                             SemesterNumber,
                             StudyWeeksCount,
-                            Lections,
-                            PracticalWorks,
-                            LaboratoryWorks,
-                            TemathicalDiscussions,
-                            Consultations,
-                            Exams,
-                            Offests,
-                            ControlWorks,
-                            Abstrats,
-                            ESControlWorks,
-                            StateExams,
-                            PSEntryExams,
-                            Practices,
-                            DepartmentManagement,
-                            ResearchWorks,
-                            CourseWorks,
-                            GraduationWorkManagement,
-                            MasterProgramManagement,
-                            UndergraduateProgramManagement
+                            GroupsInTheStream,
+                            Value,
+                            UserId,
+                            ProjectType
                         ) values (
+                            @Id,
                             @FacultyId,
-                            @SubjectName,
+                            @DepartmentId,
+                            @DisciplineTitleId,
                             @SemesterNumber,
                             @StudyWeeksCount,
-                            @Lections,
-                            @PracticalWorks,
-                            @LaboratoryWorks,
-                            @TemathicalDiscussions,
-                            @Consultations,
-                            @Exams,
-                            @Offests,
-                            @ControlWorks,
-                            @Abstrats,
-                            @ESControlWorks,
-                            @StateExams,
-                            @PSEntryExams,
-                            @Practices,
-                            @DepartmentManagement,
-                            @ResearchWorks,
-                            @CourseWorks,
-                            @GraduationWorkManagement,
-                            @MasterProgramManagement,
-                            @UndergraduateProgramManagement                            
+                            @GroupsInTheStream,
+                            @Value,
+                            @UserId,
+                            @ProjectType                           
                         );
                         select SCOPE_IDENTITY();
                 ", model);
@@ -109,49 +83,34 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
 
                 sql.AppendLine(@"
                     select
-                        Id,
-                        FacultyId,
-                        d.Name as FacultyName,
-                        SubjectName,
-                        SemesterNumber,
-                        StudyWeeksCount,
-                        Lections,
-                        PracticalWorks,
-                        LaboratoryWorks,
-                        TemathicalDiscussions,
-                        Consultations,
-                        Exams,
-                        Offests,
-                        ControlWorks,
-                        Abstrats,
-                        ESControlWorks,
-                        StateExams,
-                        PSEntryExams,
-                        Practices,
-                        DepartmentManagement,
-                        ResearchWorks,
-                        CourseWorks,
-                        GraduationWorkManagement,
-                        MasterProgramManagement,
-                        UndergraduateProgramManagement
-                    from StudyLoad
-                    join Department d on d.Id = FacultyId
-                    where d.Type = 1");
+                        sl.Id,
+                        sl.FacultyId,
+                        sl.DepartmentId,
+                        sl.DisciplineTitleId,
+                        sl.SemesterNumber,
+                        sl.StudyWeeksCount,
+                        sl.GroupsInTheStream,
+                        sl.Value,
+                        sl.UserId,
+                        sl.ProjectType
+                    from StudyLoad sl
+                    left join User u on u.Id = sl.UserId
+                    left join Department d on d.Id = sl.FacultyId
+                    left join DisciplineTitle dt on dt.Id = sl.DisciplineTitleId
+                ");
 
                 int conditionIndex = 0;
-                if (options.Id.HasValue)
+                if (options.DepartmentLoadId.HasValue)
                 {
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} Id = @id");
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (sl.DepartmentLoadId = @DepartmentLoadId)");
                 }
-                if (options.Ids != null)
+                if (options.OnlyDistributed.HasValue)
                 {
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} id = any(@ids)");
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (sl.UserId is not null)");
                 }
-                if (options.Search != null)
+                if (options.OnlyNotDistibuted.HasValue)
                 {
-                    sql.AppendLine($@"
-                        {(conditionIndex++ == 0 ? "where" : "and")} lower(SubjectName) like '%lower(@search)%'
-                    ");
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (sl.UserId is null)");
                 }
                 _logger.LogInformation($"Sql query successfully created:\n{sql.ToString()}");
 
@@ -167,36 +126,23 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
             }
         }
 
-        public async Task Update(StudyLoad model)
+        public async Task Update(List<StudyLoad> model)
         {
             try
             {
                 _logger.LogInformation("Trying to execute sql update study load query");
-                model.Id = await QuerySingleOrDefaultAsync<int>(@"
+                await ExecuteAsync(@"
                     update set
+                        Id = @Id,
                         FacultyId = @FacultyId,
-                        SubjectName = @SubjectName
-                        SemesterNumber = @SemesterNumber
-                        StudyWeeksCount = @StudyWeeksCount
-                        Lections = @Lections
-                        PracticalWorks = @PracticalWorks
-                        LaboratoryWorks = @LaboratoryWorks
-                        TemathicalDiscussions = @TemathicalDiscussions
-                        Consultations = @Consultations
-                        Exams = @Exams
-                        Offests = @Offests
-                        ControlWorks = @ControlWorks
-                        Abstrats = @Abstrats
-                        ESControlWorks = @ESControlWorks
-                        StateExams = @StateExams
-                        PSEntryExams = @PSEntryExams
-                        Practices = @Practices
-                        DepartmentManagement = @DepartmentManagement
-                        ResearchWorks = @ResearchWorks
-                        CourseWorks = @CourseWorks
-                        GraduationWorkManagement = @GraduationWorkManagement
-                        MasterProgramManagement = @MasterProgramManagement
-                        UndergraduateProgramManagement = @UndergraduateProgramManagement
+                        DepartmentId = @DepartmentId,
+                        DisciplineTitleId = @DisciplineTitleId,
+                        SemesterNumber = @SemesterNumber,
+                        StudyWeeksCount = @StudyWeeksCount,
+                        GroupsInTheStream = @GroupsInTheStream,
+                        Value = @Value,
+                        UserId = @UserId,
+                        ProjectType = @ProjectType
                     from StudyLoad
                     where Id = @Id
                 ", model);

@@ -45,8 +45,7 @@ namespace Andromeda.Services
 
             if (model.PinnedDisciplines != null)
             {
-                model.PinnedDisciplines.ForEach(o => o.UserId = model.Id);
-                await _pinnedDisciplineService.Create(model.PinnedDisciplines);
+                await UpdateUserPinnedDisciplines(model.Id, model.PinnedDisciplines);
             }
 
             return model;

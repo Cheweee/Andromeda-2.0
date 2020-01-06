@@ -76,6 +76,19 @@
             "stopAtEntry": false
         },
         {
+            "name": "Andromeda (reset azure database)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
+            "args": [
+                "reset --database-host tcp:andromeda20.database.windows.net --database-port 1433 --database-name andromeda --database-user-name chewee --database-password Futureisnear1 --database-provider 0"
+            ],
+            "cwd": "${workspaceFolder}/Andromeda.API",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
             "name": "Andromeda (app settings)",
             "type": "coreclr",
             "request": "launch",

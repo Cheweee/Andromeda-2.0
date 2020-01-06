@@ -364,7 +364,7 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
     }
 
     const handleDisciplineTitleDetailsAccept = (title: DisciplineTitle) => {
-        let newTitle = department.titles.find(o => o.id === title.id);
+        let newTitle = department.titles.find(o => o.name === title.name);
         if (newTitle) {
             newTitle.name = title.name;
             newTitle.shortname = title.shortname;

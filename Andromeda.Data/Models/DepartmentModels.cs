@@ -12,6 +12,7 @@ namespace Andromeda.Data.Models
         public Department Parent { get; set; }
         public DepartmentType Type { get; set; }
 
+        public List<Department> ChildDepartments { get; set; }
         public List<DisciplineTitle> Titles { get; set; }
         public List<RoleInDepartment> Roles { get; set; }
         public List<UserRoleInDepartment> Users { get; set; }
@@ -28,5 +29,7 @@ namespace Andromeda.Data.Models
         public DepartmentType? Type { get; set; }
         public string FullName { get; set; }
         public int? RoleId { get; set; }
+
+        public IReadOnlyList<string> Names { get; set; }
     }
 }

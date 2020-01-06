@@ -25,7 +25,7 @@ namespace Andromeda.Data.Models
     {
         public int? DepartmentId { get; set; }
         public IReadOnlyList<int> DepartmentIds { get; set; }
-        public int? StudyLoadId { get; set; }
+        public IReadOnlyList<string> Names { get; set; }
         public string Search { get; set; }
     }
 }

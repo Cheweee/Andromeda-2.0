@@ -45,7 +45,7 @@ namespace Andromeda.API
                     (MigrateDownOptions options) => RunMigrateDown(services.GetService<ILogger<MigrateDown>>(), appsettings.DatabaseConnectionSettings, options),
                     (SolutionSettingsOptions options) => RunSettingsUpdate(services.GetService<ILogger<SettingsUpdate>>(), appsettings, options),
                     (SeedOptions options) => RunSeed(services.GetService<ILogger<Seed>>(), hostingEnvironment, departmentService),
-                    errs => 1
+                    (IEnumerable<Error> errors) => RunError(errors, services.GetService<ILogger<Program>>(), host) 
                 );
             }
         }
@@ -82,5 +82,15 @@ namespace Andromeda.API
         static int RunMigrateDown(ILogger logger, DatabaseConnectionSettings settings, MigrateDownOptions options) => MigrateDown.Run(logger, settings);
         static int RunSettingsUpdate(ILogger logger, Appsettings appsettings, SolutionSettingsOptions options) => SettingsUpdate.Run(logger, appsettings, options);
         static int RunSeed(ILogger logger, IHostingEnvironment hostingEnvironment, DepartmentService departmentService) => Seed.Run(logger, hostingEnvironment, departmentService);
+    
+        static int RunError(IEnumerable<Error> errors, ILogger logger, IWebHost host)
+        {
+            if(errors.FirstOrDefault().Tag == ErrorType.NoVerbSelectedError)
+            {
+                return RunApi(logger, host);
+            }
+
+            return 1;
+        }
     }
 }

@@ -35,7 +35,7 @@ namespace Andromeda.API
                 var departmentService = services.GetService<DepartmentService>();
 
 
-                return CommandLine.Parser.Default.ParseArguments<ApiOptions, MigrateUpOptions, MigrateDownOptions, DropOptions, CreateOptions, ResetOptions, SolutionSettingsOptions>(args)
+                return CommandLine.Parser.Default.ParseArguments<ApiOptions, MigrateUpOptions, MigrateDownOptions, DropOptions, CreateOptions, ResetOptions, SolutionSettingsOptions, SeedOptions>(args)
                 .MapResult(
                     (ApiOptions options) => RunApi(services.GetService<ILogger<Program>>(), host),
                     (DropOptions options) => RunDrop(services.GetService<ILogger<Drop>>(), appsettings.DatabaseConnectionSettings, options),

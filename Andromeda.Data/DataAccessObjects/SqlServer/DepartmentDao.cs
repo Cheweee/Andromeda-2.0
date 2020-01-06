@@ -97,38 +97,29 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
 
                 int conditionIndex = 0;
                 if (options.Id.HasValue)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (d.Id = @id)");
-                }
+
                 if (options.Type.HasValue)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (d.Type = @Type)");
-                }
+
                 if (options.ParentId.HasValue)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (d.ParentId = @ParentId)");
-                }
+
                 if (options.RoleId.HasValue)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (rind.RoleID = @RoleId)");
-                }
+
                 if (options.Ids != null)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (d.Id in @ids)");
-                }
+
+                if(options.Names != null)
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (d.Name in @Names)");
+
                 if (!string.IsNullOrEmpty(options.NormalizedSearch))
-                {
-                    sql.AppendLine($@"
-                        {(conditionIndex++ == 0 ? "where" : "and")} (lower(d.Name) like lower(@NormalizedSearch)
-                        or lower(d.FullName) like lower(@NormalizedSearch))
-                    ");
-                }
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (lower(d.Name) like lower(@NormalizedSearch) or lower(d.FullName) like lower(@NormalizedSearch))");
+
                 if (!string.IsNullOrEmpty(options.FullName))
-                {
-                    sql.AppendLine($@"
-                        {(conditionIndex++ == 0 ? "where" : "and")} (d.FullName = @FullName)
-                    ");
-                }
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (d.FullName = @FullName)");
+
                 _logger.LogInformation($"Sql query successfully created:\n{sql.ToString()}");
 
                 _logger.LogInformation("Try to execute sql get departments query");

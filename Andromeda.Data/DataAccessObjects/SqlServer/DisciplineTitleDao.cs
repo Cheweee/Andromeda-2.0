@@ -81,25 +81,23 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
 
                 int conditionIndex = 0;
                 if (options.Id.HasValue)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} pd.Id = @id");
-                }
+
                 if (options.DepartmentId.HasValue)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} dt.DepartmentId = @DepartmentId");
-                }
+
                 if (options.NotPinned.HasValue)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} pd.Id is null");
-                }
+
                 if (options.Ids != null)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} pd.Id in @Ids");
-                }
+
                 if (options.DepartmentIds != null)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} dt.DepartmentId in @DepartmentIds");
-                }
+
+                if (options.Titles != null)
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} dt.Name in @Titles");
+
                 _logger.LogInformation($"Sql query successfully created:\n{sql.ToString()}");
 
                 _logger.LogInformation("Try to execute sql get disciplines titles query");

@@ -83,14 +83,13 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 ");
 
                 int conditionIndex = 0;
+                if(options.Id.HasValue)
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} Id = @Id");
                 if (options.DepartmentId.HasValue)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} DepartmentId = @DepartmentId");
-                }
                 if (options.DepartmentIds != null)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} DepartmentId in @DepartmentIds");
-                }
+
                 _logger.LogInformation($"Sql query successfully created:\n{sql.ToString()}");
 
                 _logger.LogInformation("Try to execute sql get departments loads query");

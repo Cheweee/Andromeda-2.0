@@ -78,21 +78,19 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
 
                 int conditionIndex = 0;
                 if (options.Id.HasValue)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} Id = @id");
-                }
+
                 if(options.DepartmentId.HasValue)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} DepartmentId = @DepartmentId");
-                }
+
                 if (options.Ids != null)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} Id = any(@ids)");
-                }
+
                 if (options.DepartmentIds != null)
-                {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (DepartmentId in @DepartmentIds)");
-                }
+                    
+                if (options.Names != null)
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (Name in @Names)");
                 _logger.LogInformation($"Sql query successfully created:\n{sql.ToString()}");
 
                 _logger.LogInformation("Try to execute sql get study directions query");

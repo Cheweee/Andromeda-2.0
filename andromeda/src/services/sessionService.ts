@@ -85,7 +85,7 @@ class SessionService {
                 if (matches && matches.length > 0) {
                     delete init["credentials"]; // we cant put this header because of CROS limitations
                     const offset = matches[0].length;
-                    input = `https://andromed-test-2-0.azurewebsites.net/${input.substring(offset)}`;
+                    input = `http://localhost:5000/api/${input.substring(offset)}`;
                 }
             }
 

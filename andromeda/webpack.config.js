@@ -62,7 +62,7 @@ module.exports = (env) => {
         },
         plugins: [
             new HtmlWebpackPlugin({
-                filename: path.resolve(__dirname, 'src', 'views', 'index.html'),
+                filename: path.resolve(__dirname, 'build', 'index.html'),
                 template: path.resolve(__dirname, 'src', 'views', 'index.html.template'),
                 templateParameters: { baseHref: '' },
                 chunks: ['main'],

@@ -48,6 +48,13 @@ namespace Andromeda.API.Controllers
         }
 
         [Authorize]
+        [HttpPost("import")]
+        public async Task<IActionResult> Import([FromQuery]DepartmentLoadImportOptions options)
+        {
+            return Ok(await _service.Import(options));
+        }
+
+        [Authorize]
         [HttpDelete]
         public async Task<IActionResult> Delete([FromBody] IReadOnlyList<int> ids)
         {

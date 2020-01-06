@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Andromeda.Utilities\Andromeda.Utilities.csproj" />
+    <ProjectReference Include="..\Andromeda.Shared\Andromeda.Shared.csproj" />
   </ItemGroup>
 
 </Project>

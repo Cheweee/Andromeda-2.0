@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Andromeda.Data.Interfaces;
 using Andromeda.Data.Models;
-using Andromeda.Utilities;
+using Andromeda.Shared;
 using Microsoft.Extensions.Logging;
 
 namespace Andromeda.Services
@@ -91,6 +91,15 @@ namespace Andromeda.Services
                 await _discplineTitleService.Create(model.Titles);
             }
 
+            if(model.ChildDepartments != null)
+            {
+                foreach(var department in model.ChildDepartments)
+                {
+                    department.ParentId = model.Id;
+                    await Create(department);
+                }
+            }
+
             return model;
         }
 
@@ -146,7 +155,7 @@ namespace Andromeda.Services
             }
         }
 
-        private async Task UpdateDepartmentDisciplinesTitles(int departmentId, List<DisciplineTitle> models)
+        public async Task UpdateDepartmentDisciplinesTitles(int departmentId, List<DisciplineTitle> models)
         {
             var old = await _discplineTitleService.Get(new DisciplineTitleGetOptions { DepartmentId = departmentId });
 
@@ -161,7 +170,7 @@ namespace Andromeda.Services
             await _discplineTitleService.Create(toCreate);
         }
 
-        private async Task UpdateDepartmentUsersRoles(int departmentId, List<UserRoleInDepartment> models)
+        public async Task UpdateDepartmentUsersRoles(int departmentId, List<UserRoleInDepartment> models)
         {
             var old = await _userRoleInDepartmentService.Get(new UserRoleInDepartmentGetOptions
             {
@@ -178,7 +187,7 @@ namespace Andromeda.Services
             await _userRoleInDepartmentService.Create(toCreate);
         }
 
-        private async Task UpdateDepartmentStudyDirections(int departmentId, List<StudyDirection> models)
+        public async Task UpdateDepartmentStudyDirections(int departmentId, List<StudyDirection> models)
         {
             var old = await _studyDirectionService.Get(new StudyDirectionGetOptions
             {
@@ -195,7 +204,7 @@ namespace Andromeda.Services
             await _studyDirectionService.Create(toCreate);
         }
 
-        private async Task UpdateDepartmentStudentsGroups(int departmentId, List<StudentGroup> models)
+        public async Task UpdateDepartmentStudentsGroups(int departmentId, List<StudentGroup> models)
         {
             var studyDirections = await _studyDirectionService.Get(new StudyDirectionGetOptions { DepartmentId = departmentId });
             var old = await _studentGroupService.Get(new StudentGroupGetOptions { DepartmentId = departmentId });

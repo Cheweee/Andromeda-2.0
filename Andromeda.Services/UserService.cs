@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Andromeda.Data.Interfaces;
 using Andromeda.Data.Models;
 using Andromeda.Shared;
-using Andromeda.Utilities;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Andromeda.Services

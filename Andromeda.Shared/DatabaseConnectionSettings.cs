@@ -32,7 +32,7 @@ namespace Andromeda.Shared
 
         public string PostgresConnectionString { get => $"host={databaseHost};port={databasePort};username={databaseUserName};password={databasePassword}"; }
 
-        public string SqlServerConnectionString { get => $"data source={databaseHost};user id={databaseUserName};password={databasePassword};"; }
+        public string SqlServerConnectionString { get => $"data source={databaseHost};user id={databaseUserName};password={databasePassword}"; }
 
         public string SqlServerDatabaseConnectionString { get => $"{SqlServerConnectionString};initial catalog={databaseName};"; }
 

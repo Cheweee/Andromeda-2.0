@@ -11,11 +11,22 @@ namespace Andromeda.Services
     {
         private readonly IStudyLoadDao _dao;
         private readonly StudentGroupService _studentGroupService;
+        private readonly DepartmentService _departmentService;
+        private readonly UserService _userService;
+        private readonly DisciplineTitleService _disciplineTitleService;
 
-        public StudyLoadService(IStudyLoadDao dao, StudentGroupService studentGroupService)
+        public StudyLoadService(
+            IStudyLoadDao dao,
+            StudentGroupService studentGroupService,
+            DepartmentService departmentService,
+            UserService userService,
+            DisciplineTitleService disciplineTitleService)
         {
             _dao = dao ?? throw new ArgumentNullException(nameof(dao));
             _studentGroupService = studentGroupService ?? throw new ArgumentNullException(nameof(studentGroupService));
+            _departmentService = departmentService ?? throw new ArgumentNullException(nameof(departmentService));
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _disciplineTitleService = disciplineTitleService ?? throw new ArgumentNullException(nameof(disciplineTitleService));
         }
 
         public async Task<IEnumerable<StudyLoad>> Get(StudyLoadGetOptions options)
@@ -24,10 +35,7 @@ namespace Andromeda.Services
 
             var studyLoadIds = studyLoad.Select(o => o.Id).ToList();
             var studentGroups = await _studentGroupService.Get(new StudentGroupGetOptions { Ids = studyLoadIds });
-            // studyLoad = studyLoad.GroupJoin(studentGroups, sl => sl.Id, sg => sg.StudyLoadId, (sl, sg) => {
-            //     sl.Groups = sg;
-            //     return sl;
-            // });
+            
 
             return studyLoad;
         }

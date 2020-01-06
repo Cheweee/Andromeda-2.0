@@ -22,7 +22,7 @@ const getFacultyPath = (idParameter: string) => `/faculties/${idParameter}`;
 const getTrainingDepartmentPath = (idParameter: string) => `/trainingdepartments/${idParameter}`;
 const getRolePath = (idParameter: string) => `/roles/${idParameter}`;
 const getDepartmentloadsPath = (idParameter: string) => `/trainingdepartments/${idParameter}/departmentloads`;
-const getDepartmentloadPath = (departmentIdParameter: string, idParameter: string) => `/trainingdepartments/${departmentIdParameter}/departmentloads${idParameter}`;
+const getDepartmentloadPath = (departmentIdParameter: string, idParameter: string) => `/trainingdepartments/${departmentIdParameter}/departmentloads/${idParameter}`;
 
 export const paths = {
     dashboardPath: '/',

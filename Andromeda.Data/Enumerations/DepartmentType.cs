@@ -1,4 +1,4 @@
-using Andromeda.Utilities;
+using Andromeda.Shared;
 
 namespace Andromeda.Data.Enumerations
 {

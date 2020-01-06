@@ -82,8 +82,8 @@ export const commonStyles = (theme: Theme) => ({
     bottom: 0,
     right: 0,
     left: 0,
-    paddingLeft: "112px",
-    paddingRight: "36px"
+    paddingLeft: "105px",
+    paddingRight: "50px"
   },
   footerContainer: {
     borderTopLeftRadius: "4px",

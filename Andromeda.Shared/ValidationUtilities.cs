@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace Andromeda.Utilities
+namespace Andromeda.Shared
 {
     public class ValidationUtilities
     {

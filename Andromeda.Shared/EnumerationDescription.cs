@@ -1,6 +1,6 @@
 using System;
 
-namespace Andromeda.Utilities
+namespace Andromeda.Shared
 {
     [AttributeUsage(AttributeTargets.Field)]
     public class EnumerationDescription : Attribute

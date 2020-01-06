@@ -1,10 +1,11 @@
-import { GetOptions, StudyLoad,User } from ".";
+import { GetOptions, StudyLoad, User } from ".";
 import { TooltipPayload } from "recharts";
+import { Validation } from "./commonModels";
 
 export interface DepartmentLoad {
     id?: number;
     departmentId?: number;
-    studyYears: string;
+    studyYear: string;
     totalLoad: number;
 
     studyLoad?: StudyLoad[];
@@ -13,6 +14,17 @@ export interface DepartmentLoad {
 export interface DepartmentLoadGetOptions extends GetOptions {
     departmentId?: number;
     departmentIds?: number[];
+}
+
+export interface DepartmentLoadImportOptions {
+    departmentId?: number;
+    file?: File;
+    fileName?: string;
+    updateDisciplinesTitles?: boolean;
+}
+
+export interface DepartmentLoadImportOptionsValidation extends Validation {
+    fileError?: string;
 }
 
 export interface DistributionExtendedTooltipPayload extends TooltipPayload {
@@ -40,7 +52,7 @@ export interface DistributionData {
     masterProgramManagements?: number,
     postgraduateProgramManagements?: number,
     others?: number
-    
+
     total: number;
     editable?: boolean;
 }

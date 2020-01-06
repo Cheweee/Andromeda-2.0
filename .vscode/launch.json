@@ -69,7 +69,20 @@
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
             "args": [
-                "reset --database-host localhost\\sqlserver --database-name andromeda --database-user-name sa --database-password qwerty_123 --database-provider 0"
+                "reset"
+            ],
+            "cwd": "${workspaceFolder}/Andromeda.API",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Andromeda (app settings)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
+            "args": [
+                "app-settings --database-host localhost\/sqlexpress --database-name andromeda --database-user-name sa --database-password qwerty_123 --database-provider 0"
             ],
             "cwd": "${workspaceFolder}/Andromeda.API",
             "console": "internalConsole",
@@ -96,29 +109,6 @@
             "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
             "args": [
                 "migrate-down"
-            ],
-            "cwd": "${workspaceFolder}/Andromeda.API",
-            "console": "internalConsole",
-            "stopAtEntry": false
-        },
-        {
-            "name": "Andromeda (init app settings)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
-            "args": [
-                "app-settings",
-                "--database-host",
-                "localhost",
-                "--database-name",
-                "andromeda",
-                "--database-port",
-                "5432",
-                "--database-user-name",
-                "postgres",
-                "--database-password",
-                "admin"
             ],
             "cwd": "${workspaceFolder}/Andromeda.API",
             "console": "internalConsole",

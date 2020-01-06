@@ -1,4 +1,4 @@
-import { DepartmentLoad, DepartmentLoadGetOptions } from "../models";
+import { DepartmentLoad, DepartmentLoadGetOptions, DepartmentLoadImportOptions } from "../models";
 import { ResponseHandler, handleJsonResponse, handleResponse } from "../utilities";
 
 class DepartmentLoadService {
@@ -20,6 +20,23 @@ class DepartmentLoadService {
             method: 'PATCH',
             headers: this.jsonHeaders,
             body: JSON.stringify(departmentLoad)
+        }).then(handleJsonResponse as ResponseHandler<DepartmentLoad>);
+    }
+
+    public async import(options: DepartmentLoadImportOptions) {
+        let url = `${this.apiUrl}/import`;
+        let conditionIndex: number = 0;
+        if (options.departmentId)
+            url += `${conditionIndex++ === 0 ? '?' : '&'}departmentId=${options.departmentId}`;
+        if (options.fileName)
+            url += `${conditionIndex++ === 0 ? '?' : '&'}fileName=${options.fileName}`;
+        if (options.updateDisciplinesTitles)
+            url += `${conditionIndex++ === 0 ? '?' : '&'}updateDisciplinesTitles=${options.updateDisciplinesTitles}`;
+        return fetch(url, {
+            credentials: 'include',
+            method: 'POST',
+            headers: this.jsonHeaders,
+            body: options.file
         }).then(handleJsonResponse as ResponseHandler<DepartmentLoad>);
     }
 

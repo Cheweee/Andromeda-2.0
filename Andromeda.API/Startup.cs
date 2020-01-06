@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using Andromeda.Data;
-using Andromeda.Data.Enumerations;
 using Andromeda.Data.Interfaces;
 using Andromeda.Services;
 using Andromeda.Services.GenerateLoadStrategies;
@@ -13,15 +8,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Andromeda.API.Utility;
 
 namespace Andromeda.API
@@ -29,10 +20,12 @@ namespace Andromeda.API
     public class Startup
     {
         private readonly ILogger _logger;
-        public Startup(ILoggerFactory loggerFactory, IConfiguration configuration)
+        private readonly IHostingEnvironment _hostingEnvironment;
+        public Startup(ILoggerFactory loggerFactory, IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
             Configuration = configuration;
             _logger = loggerFactory.CreateLogger<Startup>();
+            _hostingEnvironment = hostingEnvironment;
         }
 
         public IConfiguration Configuration { get; }
@@ -156,17 +149,33 @@ namespace Andromeda.API
             {
                 var daoFactory = provider.GetService<IDaoFactory>();
                 var studentGroupService = provider.GetService<StudentGroupService>();
-                return new StudyLoadService(daoFactory.StudyLoadDao, studentGroupService);
+                var departmentService = provider.GetService<DepartmentService>();
+                var userService = provider.GetService<UserService>();
+                var disciplineTitleService = provider.GetService<DisciplineTitleService>();
+                return new StudyLoadService(daoFactory.StudyLoadDao, studentGroupService, departmentService, userService, disciplineTitleService);
             });
 
             services.AddScoped(provider =>
             {
                 var daoFactory = provider.GetService<IDaoFactory>();
+                var departmentService = provider.GetService<DepartmentService>();
+                var disciplineTitleService = provider.GetService<DisciplineTitleService>();
+                var studentGroupService = provider.GetService<StudentGroupService>();
+                var studyDirectionService = provider.GetService<StudyDirectionService>();
                 var studyLoadService = provider.GetService<StudyLoadService>();
+                var logger = provider.GetService<ILogger<DepartmentLoadService>>();
+                var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
+
                 return new DepartmentLoadService(
                     daoFactory.DepartmentLoadDao,
+                    departmentService,
+                    disciplineTitleService,
+                    studentGroupService,
                     studyLoadService,
-                    provider.ComposeGenerateStrategies() 
+                    provider.ComposeGenerateStrategies(),
+                    _hostingEnvironment,
+                    logger,
+                    httpContextAccessor
                 );
             });
 

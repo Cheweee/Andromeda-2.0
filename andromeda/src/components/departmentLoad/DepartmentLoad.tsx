@@ -7,11 +7,11 @@ import { mergeStyles } from "../../utilities";
 import { DepartmentLoad, ApplicationError, SnackbarVariant, Filter, StudyLoad, User, ProjectType, DistributionData } from "../../models";
 import { paths } from "../../sharedConstants";
 import { useSnackbarState } from "../../hooks";
-import { Grid, Card, CardHeader, CardContent, Typography, Tooltip, Fab, CircularProgress } from "@material-ui/core";
+import { Grid, Card, CardHeader, CardContent, Typography, Tooltip, Fab, CircularProgress, IconButton } from "@material-ui/core";
 import { departmentLoadService } from "../../services/departmentLoadService";
 import { MessageSnackbar, PercentageCircularProgress, SearchInput } from "../common";
 import { DepartmentLoadDetails } from "./DepartmentLoadDetails";
-import { Search, PieChartRounded, PieChartSharp, Add, Save, Check } from "@material-ui/icons";
+import { Search, PieChartRounded, PieChartSharp, Add, Save, Check, ArrowBack } from "@material-ui/icons";
 import { useFilterState } from "../../hooks/filterStateHook";
 import clsx from "clsx";
 import { StudyLoadCard, StudyLoadChart } from "./studyLoad";
@@ -24,7 +24,7 @@ const currentYear = new Date().getFullYear();
 const nextYear = currentYear + 1;
 
 const initialDepartmentLoad: DepartmentLoad = {
-    studyYears: currentYear + ' - ' + nextYear,
+    studyYear: currentYear + ' - ' + nextYear,
     totalLoad: 0
 };
 
@@ -41,7 +41,7 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
             setLoading(true);
             const id = parseInt(tempId, 0);
             if (id) {
-                const loads = departmentLoadService.getDepartmentLoads({ id });
+                const loads = await departmentLoadService.getDepartmentLoads({ id });
                 departmentLoad = loads[0];
             }
 
@@ -90,8 +90,8 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
 
             setDepartmentLoad(load);
         }
-        catch(error) {
-            if(error instanceof ApplicationError) {
+        catch (error) {
+            if (error instanceof ApplicationError) {
                 setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
@@ -105,6 +105,9 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
 
         // setData(newData);
     }
+
+    useEffect(() => { getDepartmentLoad(); }, [props.match.params]);
+
     //#endregion
 
     //#region Filter state
@@ -119,9 +122,12 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     const [loading, setLoading] = useState<boolean>(false);
     const [generating, setGenerating] = useState<boolean>(false);
 
-    const [snackbar, setSnackbar] = useSnackbarState();
+    const [snackbar, setSnackbar] = useSnackbarState();    
 
-    useEffect(() => { getDepartmentLoad(); }, [props.match.params]);
+    const handleBackClick = () => {
+        const { history } = props;
+        history.push(paths.trainingDepartmentsPath);
+    }
 
     const { classes } = props;
 
@@ -197,46 +203,48 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
 
     return (
         <Grid container direction="column">
-            <Grid container direction="column">
-                <Grid container direction="row" alignItems="center">
-                    <Grid item>
-                        <Card className={classes.fixedHeight300}>
-                            <CardHeader title="Нагрузка кафедры" />
-                            <CardContent>
-                                <DepartmentLoadDetails departmentLoad={departmentLoad} />
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={3}>
-                        <Card className={classes.fixedHeight300}>
-                            <CardHeader title="Прогресс" />
-                            <CardContent>
-                                <Grid container direction="column" alignItems="center" justify="space-between">
-                                    <PercentageCircularProgress size={140} variant="static" value={percentage} />
-                                    <Typography variant="h6">Осталось: {unallocatedStudyLoad}ч.</Typography>
-                                </Grid>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                </Grid>
-                <Grid container direction="row">
-                    <Card className={classes.fixedHeight300}>
-                        <CardHeader title="Нагрузка преподавателей" />
+            <Grid container direction="row">
+                <Grid className={classes.margin1Right} item xs>
+                    <Card>
+                        <CardHeader title="Нагрузка кафедры" />
                         <CardContent>
-                            <StudyLoadChart chartData={barData} />
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid className={classes.margin2Top} container direction="row">
-                    <Grid container direction="row" justify="flex-end" alignItems="center">
-                        <Search className={classes.searchIcon} />
-                        <SearchInput
-                            onSearch={getDepartmentLoad}
-                            onSearchChange={handleSearchChange}
-                            debounce={filter.debounce}
-                            search={filter.search}
-                        />
-                    </Grid>
+                <Grid className={classes.margin1Left} item xs={3}>
+                    <Card>
+                        <CardHeader title="Прогресс" />
+                        <CardContent>
+                            <Grid container direction="column" alignItems="center" justify="space-between">
+                                <PercentageCircularProgress size={140} variant="static" value={percentage} />
+                            </Grid>
+                            <Grid container direction="column">
+                                <Typography variant="h6">Осталось: {unallocatedStudyLoad}ч.</Typography>
+                                <DepartmentLoadDetails departmentLoad={departmentLoad} />
+                            </Grid>
+                        </CardContent>
+                    </Card>
+                </Grid>
+            </Grid>
+            <Grid className={classes.margin2Top} container direction="row">
+                <Card className={classes.fixedHeight300}>
+                    <CardHeader title="Нагрузка преподавателей" />
+                    <CardContent>
+                        <StudyLoadChart chartData={barData} />
+                    </CardContent>
+                </Card>
+            </Grid>
+            <Grid className={classes.margin2Top} container direction="column">
+                <Grid container direction="row" justify="flex-end" alignItems="center">
+                    <Search className={classes.searchIcon} />
+                    <SearchInput
+                        onSearch={getDepartmentLoad}
+                        onSearchChange={handleSearchChange}
+                        debounce={filter.debounce}
+                        search={filter.search}
+                    />
+                </Grid>
+                <Grid container direction="row">
                     {barData && barData.map(o =>
                         <Grid item xs={4}>
                             <StudyLoadCard
@@ -246,10 +254,15 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                         </Grid>
                     )}
                 </Grid>
-                <div className={classes.footerSpacer}></div>
             </Grid>
+            <div className={classes.footerSpacer}></div>
             <footer className={classes.footer}>
                 <Grid className={clsx(classes.footerContainer, classes.padding1)} container direction="row" alignItems="center">
+                    <Tooltip title="Вернуться назад">
+                        <IconButton disabled={loading} onClick={handleBackClick}>
+                            <ArrowBack />
+                        </IconButton>
+                    </Tooltip>
                     <Typography variant="h6">Всего нагрузки: {studyLoad}ч. Распределено: {allocatedStudyLoad}ч.</Typography>
                     <Grid item xs />
                     <Tooltip title="Автоматическое распределение нагрузки">

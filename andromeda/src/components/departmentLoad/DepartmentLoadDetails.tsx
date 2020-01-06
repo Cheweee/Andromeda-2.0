@@ -18,15 +18,8 @@ export const DepartmentLoadDetails = withStyles(styles)(function (props: Props) 
     } = props;
     return (
         <Grid container direction="column">
-            <Grid container direction="row">
-                <Typography>Учебный год:</Typography>
-                <Typography variant="h4"> {departmentLoad.studyYears} </Typography>
-            </Grid>
-            <Grid container direction="row">
-                <Typography>Всего нагрузки:</Typography>
-                <Typography variant="h4"> {departmentLoad.totalLoad} </Typography>
-                <Typography>ч.</Typography>
-            </Grid>
+            <Typography variant="h6">Учебный год: {departmentLoad.studyYear}</Typography>
+            <Typography variant="h6">Всего нагрузки: {departmentLoad.totalLoad}ч.</Typography>
         </Grid>
     )
 });

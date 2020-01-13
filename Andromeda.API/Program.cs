@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.AzureAppServices;
 using Newtonsoft.Json;
 
 namespace Andromeda.API
@@ -45,7 +46,7 @@ namespace Andromeda.API
                     (MigrateDownOptions options) => RunMigrateDown(services.GetService<ILogger<MigrateDown>>(), appsettings.DatabaseConnectionSettings, options),
                     (SolutionSettingsOptions options) => RunSettingsUpdate(services.GetService<ILogger<SettingsUpdate>>(), appsettings, options),
                     (SeedOptions options) => RunSeed(services.GetService<ILogger<Seed>>(), hostingEnvironment, departmentService),
-                    (IEnumerable<Error> errors) => RunError(errors, services.GetService<ILogger<Program>>(), host) 
+                    (IEnumerable<Error> errors) => RunError(errors, services.GetService<ILogger<Program>>(), host)
                 );
             }
         }
@@ -57,7 +58,18 @@ namespace Andromeda.API
                 {
                     builder.ClearProviders();
                     builder.AddConsole();
+                    builder.AddAzureWebAppDiagnostics();
                 })
+                .ConfigureServices(serviceCollection => serviceCollection
+                .Configure<AzureFileLoggerOptions>(options =>
+                {
+                    options.FileName = "azure-diagnostics-";
+                    options.FileSizeLimit = 50 * 1024;
+                    options.RetainedFileCountLimit = 5;
+                }).Configure<AzureBlobLoggerOptions>(options =>
+                {
+                    options.BlobName = "log.txt";
+                }))
                 .UseStartup<Startup>().Build();
         }
 
@@ -82,7 +94,7 @@ namespace Andromeda.API
         static int RunMigrateDown(ILogger logger, DatabaseConnectionSettings settings, MigrateDownOptions options) => MigrateDown.Run(logger, settings);
         static int RunSettingsUpdate(ILogger logger, Appsettings appsettings, SolutionSettingsOptions options) => SettingsUpdate.Run(logger, appsettings, options);
         static int RunSeed(ILogger logger, IHostingEnvironment hostingEnvironment, DepartmentService departmentService) => Seed.Run(logger, hostingEnvironment, departmentService);
-    
+
         static int RunError(IEnumerable<Error> errors, ILogger logger, IWebHost host)
         {
             if(errors.FirstOrDefault().Tag == ErrorType.NoVerbSelectedError)

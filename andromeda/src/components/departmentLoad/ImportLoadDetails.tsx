@@ -156,6 +156,17 @@ export const ImportLoadDetails = withStyles(styles)(function (props: Props) {
                         }
                         label="Обновить наименование дисциплин кафедры?"
                     />
+                    <FormControlLabel
+                        className={classes.margin1Top}
+                        control={
+                            <Checkbox
+                                checked={options.updateStudentsGroups}
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => setOptions({ ...options, updateStudentsGroups: event.target && event.target.checked })}
+                                value="Update student groups"
+                            />
+                        }
+                        label="Обновить учебные группы кафедры?"
+                    />
                 </Grid>
             </DialogContent>
             <DialogActions>

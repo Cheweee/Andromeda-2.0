@@ -88,7 +88,7 @@ namespace Andromeda.Data.DataAccessObjects
                 {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} [Id] = @id");
                 }
-                if (options.Ids != null)
+                if (options.Ids != null && options.Ids.Count > 0)
                 {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} [Id] in @ids");
                 }

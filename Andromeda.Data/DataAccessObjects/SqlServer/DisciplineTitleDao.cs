@@ -89,13 +89,13 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 if (options.NotPinned.HasValue)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} pd.Id is null");
 
-                if (options.Ids != null)
+                if (options.Ids != null && options.Ids.Count > 0)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} pd.Id in @Ids");
 
-                if (options.DepartmentIds != null)
+                if (options.DepartmentIds != null && options.DepartmentIds.Count > 0)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} dt.DepartmentId in @DepartmentIds");
 
-                if (options.Titles != null)
+                if (options.Titles != null && options.Titles.Count > 0)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} dt.Name in @Titles");
 
                 _logger.LogInformation($"Sql query successfully created:\n{sql.ToString()}");

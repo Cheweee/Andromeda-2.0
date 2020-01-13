@@ -78,17 +78,21 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 export const StudyLoadChart = withStyles(styles)(function (props: Props) {
+    const {
+        chartData,
+        classes
+    } = props;
     return (
         <ResponsiveContainer width="100%" minWidth={600} height={200}>
             <BarChart
-                data={props.chartData}
+                data={chartData}
             >
                 <ChartTooltip
                     isAnimationActive={false}
                     cursor={false}
-                    content={<DistributionChartTooltip classes={props.classes} />}
+                    content={<DistributionChartTooltip classes={classes} />}
                 />
-                <Bar dataKey="total" stackId="a" className={props.classes.bar} />
+                <Bar dataKey="total" stackId="a" className={classes.bar} />
             </BarChart>
         </ResponsiveContainer>
     );

@@ -87,15 +87,15 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} pd.DisciplineTitleId = @DisciplineTitleId");
                 }
-                if (options.Ids != null)
+                if (options.Ids != null && options.Ids.Count > 0)
                 {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} pd.Id in @Ids");
                 }
-                if (options.DisciplineTitlesIds != null)
+                if (options.DisciplineTitlesIds != null && options.DisciplineTitlesIds.Count > 0)
                 {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} pd.DisciplineTitleId in @DisciplineTitlesIds");
                 }
-                if (options.UsersIds != null)
+                if (options.UsersIds != null && options.UsersIds.Count > 0)
                 {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} pd.UserId in @UsersIds");
                 }

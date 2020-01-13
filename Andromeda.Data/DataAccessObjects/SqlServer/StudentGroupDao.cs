@@ -85,20 +85,20 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 if (options.Id.HasValue)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} Id = @id");
 
-                if(options.DepartmentId.HasValue)
+                if (options.DepartmentId.HasValue)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} DepartmentId = @DepartmentId");
 
-                if (options.Ids != null)
+                if (options.Ids != null && options.Ids.Count > 0)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} Id in @Ids");
 
-                if(options.DepartmentIds != null)
+                if (options.DepartmentIds != null && options.DepartmentIds.Count > 0)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} DepartmentId in @DepartmentIds");
 
-                if (options.Search != null)
-                    sql.AppendLine($@"{(conditionIndex++ == 0 ? "where" : "and")} lower(StudyDirection) like '%lower(@search)%' or lower(Name) like '%lower(@search)%'");
-
-                if(options.Names != null)
+                if (options.Names != null && options.Names.Count > 0)
                     sql.AppendLine($@"{(conditionIndex++ == 0 ? "where" : "and")} Name in @Names");
+
+                if (!string.IsNullOrEmpty(options.Search))
+                    sql.AppendLine($@"{(conditionIndex++ == 0 ? "where" : "and")} lower(Name) like '%lower(@search)%'");
 
                 _logger.LogInformation($"Sql query successfully created:\n{sql.ToString()}");
 

@@ -172,6 +172,7 @@ namespace Andromeda.API
                     disciplineTitleService,
                     studentGroupService,
                     studyLoadService,
+                    studyDirectionService,
                     provider.ComposeGenerateStrategies(),
                     _hostingEnvironment,
                     logger,

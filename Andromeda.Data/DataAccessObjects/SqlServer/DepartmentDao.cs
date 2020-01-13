@@ -108,10 +108,10 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 if (options.RoleId.HasValue)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (rind.RoleID = @RoleId)");
 
-                if (options.Ids != null)
+                if (options.Ids != null && options.Ids.Count > 0)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (d.Id in @ids)");
 
-                if(options.Names != null)
+                if(options.Names != null && options.Names.Count > 0)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (d.Name in @Names)");
 
                 if (!string.IsNullOrEmpty(options.NormalizedSearch))

@@ -55,7 +55,9 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
         history.push(paths.getDepartmentloadPath(props.match.params[paths.idParameterName], `${data.id}`));
     }
 
-    function handleDelete(id: number) {
+    async function handleDelete(id: number) {
+        await departmentLoadService.delete([id]);
+        await getDepartmentLoads();
     }
     //#endregion
 
@@ -139,7 +141,8 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
                             <Card>
                                 <CardContent>
                                     <DepartmentLoadDetails
-                                        departmentLoad={o}
+                                        studyYear={o.studyYear}
+                                        totalLoad={o.totalLoad}
                                     />
                                 </CardContent>
                                 <CardActions>

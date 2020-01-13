@@ -21,6 +21,7 @@ export interface DepartmentLoadImportOptions {
     file?: File;
     fileName?: string;
     updateDisciplinesTitles?: boolean;
+    updateStudentsGroups?:boolean;
 }
 
 export interface DepartmentLoadImportOptionsValidation extends Validation {

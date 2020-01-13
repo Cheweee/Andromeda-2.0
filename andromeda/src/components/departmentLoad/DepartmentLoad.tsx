@@ -25,7 +25,8 @@ const nextYear = currentYear + 1;
 
 const initialDepartmentLoad: DepartmentLoad = {
     studyYear: currentYear + ' - ' + nextYear,
-    totalLoad: 0
+    totalLoad: 0,
+    studyLoad: []
 };
 
 export const DepartmentLoadComponent = withStyles(styles)(function (props: Props) {
@@ -122,7 +123,7 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     const [loading, setLoading] = useState<boolean>(false);
     const [generating, setGenerating] = useState<boolean>(false);
 
-    const [snackbar, setSnackbar] = useSnackbarState();    
+    const [snackbar, setSnackbar] = useSnackbarState();
 
     const handleBackClick = () => {
         const { history } = props;
@@ -134,7 +135,8 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     const studyLoad = departmentLoad.studyLoad || [];
 
     const lecturerDictionary: [User, StudyLoad[]][] = [];
-    for (const load of studyLoad) {
+    const distributedLoad = studyLoad.filter(o => o.userId);
+    for (const load of distributedLoad) {
         let item: [User, StudyLoad[]] = lecturerDictionary.find(o => o[0].id === load.userId);
         if (!item) {
             const loads = [load];
@@ -197,7 +199,7 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
         }
     );
 
-    const allocatedStudyLoad = studyLoad.map(o => o.value).reduce((sum, current) => sum + current, 0);
+    const allocatedStudyLoad = studyLoad.filter(o => { if (o.userId > 0) return o; }).map(o => o.value).reduce((sum, current) => sum + current, 0);
     const unallocatedStudyLoad = departmentLoad.totalLoad - allocatedStudyLoad;
     const percentage = (100 * allocatedStudyLoad / departmentLoad.totalLoad) | 0;
 
@@ -220,7 +222,10 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                             </Grid>
                             <Grid container direction="column">
                                 <Typography variant="h6">Осталось: {unallocatedStudyLoad}ч.</Typography>
-                                <DepartmentLoadDetails departmentLoad={departmentLoad} />
+                                <DepartmentLoadDetails
+                                    studyYear={departmentLoad.studyYear}
+                                    totalLoad={departmentLoad.totalLoad}
+                                />
                             </Grid>
                         </CardContent>
                     </Card>
@@ -263,7 +268,7 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                             <ArrowBack />
                         </IconButton>
                     </Tooltip>
-                    <Typography variant="h6">Всего нагрузки: {studyLoad}ч. Распределено: {allocatedStudyLoad}ч.</Typography>
+                    <Typography variant="h6">Всего нагрузки: {departmentLoad.totalLoad}ч. Распределено: {allocatedStudyLoad}ч.</Typography>
                     <Grid item xs />
                     <Tooltip title="Автоматическое распределение нагрузки">
                         <div className={classes.wrapper}>

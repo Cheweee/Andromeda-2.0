@@ -32,6 +32,8 @@ class DepartmentLoadService {
             url += `${conditionIndex++ === 0 ? '?' : '&'}fileName=${options.fileName}`;
         if (options.updateDisciplinesTitles)
             url += `${conditionIndex++ === 0 ? '?' : '&'}updateDisciplinesTitles=${options.updateDisciplinesTitles}`;
+        if (options.updateStudentsGroups)
+            url += `${conditionIndex++ === 0 ? '?' : '&'}updateStudentsGroups=${options.updateStudentsGroups}`;
         return fetch(url, {
             credentials: 'include',
             method: 'POST',

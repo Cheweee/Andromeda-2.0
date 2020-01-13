@@ -8,18 +8,20 @@ import { DepartmentLoad } from "../../models";
 const styles = mergeStyles(commonStyles)
 
 interface Props extends WithStyles<typeof styles> {
-    departmentLoad: DepartmentLoad;
+    studyYear: string;
+    totalLoad: number;
 }
 
 export const DepartmentLoadDetails = withStyles(styles)(function (props: Props) {
     const {
         classes,
-        departmentLoad
+        studyYear,
+        totalLoad
     } = props;
     return (
         <Grid container direction="column">
-            <Typography variant="h6">Учебный год: {departmentLoad.studyYear}</Typography>
-            <Typography variant="h6">Всего нагрузки: {departmentLoad.totalLoad}ч.</Typography>
+            <Typography variant="h6">Учебный год: {studyYear}</Typography>
+            <Typography variant="h6">Всего нагрузки: {totalLoad.toFixed(2)}ч.</Typography>
         </Grid>
     )
 });

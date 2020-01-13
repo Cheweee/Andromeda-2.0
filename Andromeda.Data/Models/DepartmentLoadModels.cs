@@ -24,5 +24,6 @@ namespace Andromeda.Data.Models
         public int? DepartmentId { get; set; }
         public string FileName { get; set; }
         public bool UpdateDisciplinesTitles { get; set; }
+        public bool UpdateStudentsGroups { get; set; }
     }
 }

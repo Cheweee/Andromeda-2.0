@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using System.Data;
 using Microsoft.AspNetCore.Http;
+using System.Text.RegularExpressions;
 
 namespace Andromeda.Services
 {
@@ -25,6 +26,7 @@ namespace Andromeda.Services
         private readonly DisciplineTitleService _disciplineTitleService;
         private readonly StudentGroupService _studentGroupService;
         private readonly StudyLoadService _studyLoadService;
+        private readonly StudyDirectionService _studyDirectionService;
 
         private readonly IGenerateStrategy _generateStrategy;
 
@@ -38,6 +40,7 @@ namespace Andromeda.Services
             DisciplineTitleService disciplineTitleService,
             StudentGroupService studentGroupService,
             StudyLoadService studyLoadService,
+            StudyDirectionService studyDirectionService,
             IGenerateStrategy generateStrategy,
             IHostingEnvironment hostingEnvironment,
             ILogger<DepartmentLoadService> logger,
@@ -49,6 +52,7 @@ namespace Andromeda.Services
             _disciplineTitleService = disciplineTitleService ?? throw new ArgumentException(nameof(disciplineTitleService));
             _studentGroupService = studentGroupService ?? throw new ArgumentException(nameof(studentGroupService));
             _studyLoadService = studyLoadService ?? throw new ArgumentException(nameof(studyLoadService));
+            _studyDirectionService = studyDirectionService ?? throw new ArgumentException(nameof(studyDirectionService));
 
             _generateStrategy = generateStrategy ?? throw new ArgumentException(nameof(generateStrategy));
 
@@ -57,15 +61,17 @@ namespace Andromeda.Services
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentException(nameof(httpContextAccessor));
         }
 
-        public async Task<IEnumerable<DepartmentLoad>> Get(DepartmentLoadGetOptions options) {
+        public async Task<IEnumerable<DepartmentLoad>> Get(DepartmentLoadGetOptions options)
+        {
             var loads = await _dao.Get(options);
-            var loadsIds = loads.Select(o=> o.Id).ToList();
+            var loadsIds = loads.Select(o => o.Id).ToList();
 
-            var studyLoad = await _studyLoadService.Get(new StudyLoadGetOptions {
+            var studyLoad = await _studyLoadService.Get(new StudyLoadGetOptions
+            {
                 DepartmentLoadsIds = loadsIds
             });
 
-            foreach(var load in loads)
+            foreach (var load in loads)
             {
                 load.StudyLoad = studyLoad.Where(o => o.DepartmentLoadId == load.Id);
             }
@@ -117,13 +123,14 @@ namespace Andromeda.Services
                 };
                 var departments = await _departmentService.Get(new DepartmentGetOptions { Id = options.DepartmentId });
                 var department = departments.FirstOrDefault();
-                List<string> disciplinesTitles = new List<string>();
-                List<int> semesters = new List<int>();
-                List<string> studyDirections = new List<string>();
-                List<string> faculties = new List<string>();
-                List<int> courses = new List<int>();
-                List<string> studentGroups = new List<string>();
-                List<int> studentsCount = new List<int>();
+                List<DisciplineTitle> disciplinesTitles = new List<DisciplineTitle>();
+                List<StudentGroup> studentGroups = new List<StudentGroup>();
+                IEnumerable<StudyDirection> studyDirections = await _studyDirectionService.Get(new StudyDirectionGetOptions());
+                IEnumerable<Department> faculties = await _departmentService.Get(new DepartmentGetOptions
+                {
+                    Type = DepartmentType.Faculty
+                });
+
                 using (var fileStream = PrepareFile(options.FileName, file, fileContentLength))
                 {
                     IWorkbook workbook = WorkbookFactory.Create(fileStream);
@@ -145,36 +152,53 @@ namespace Andromeda.Services
                     }
 
                     GetStudyYearFromSheet(departmentLoad, loadSheet);
-                    await GetLoadFromSheet(
+                    GetLoadFromSheet(
                         departmentLoad,
                         loadSheet,
+                        studyDirections.ToList(),
+                        faculties.ToList(),
                         disciplinesTitles,
-                        semesters,
-                        studyDirections,
-                        faculties,
-                        courses,
-                        studentGroups,
-                        studentsCount
+                        studentGroups
                     );
+                }
+
+                if (options.UpdateStudentsGroups)
+                {
+                    var groups = new List<StudentGroup>();
+                    var departmentGroups = studentGroups.Where(o => o.DepartmentId == options.DepartmentId).ToList();
+                    foreach (var group in departmentGroups)
+                    {
+                        var direction = group.StudyDirection;
+                        if (direction != null)
+                        {
+                            groups.Add(group);
+                        }
+                    }
+                    await _departmentService.UpdateDepartmentStudentsGroups(options.DepartmentId.Value, groups);
                 }
 
                 if (options.UpdateDisciplinesTitles)
                 {
-                    var titles = new List<DisciplineTitle>();
-                    var uniqueTitles = disciplinesTitles.Distinct();
-                    foreach (var title in uniqueTitles)
-                    {
-                        titles.Add(new DisciplineTitle
-                        {
-                            DepartmentId = options.DepartmentId.Value,
-                            Name = title,
-                            Shortname = title.GetShortening()
-                        });
-                    }
 
-                    await _departmentService.UpdateDepartmentDisciplinesTitles(options.DepartmentId.Value, titles);
+                    await _departmentService.UpdateDepartmentDisciplinesTitles(options.DepartmentId.Value, disciplinesTitles);
                 }
 
+                var newGroups = await _studentGroupService.Get(new StudentGroupGetOptions());
+                var newTitles = await _disciplineTitleService.Get(new DisciplineTitleGetOptions());
+
+                foreach (var load in departmentLoad.StudyLoad)
+                {
+                    var title = newTitles.FirstOrDefault(o => o.Name == load.DisciplineTitle.Name);
+                    if (title != null)
+                        load.DisciplineTitleId = title.Id;
+
+                    var group = newGroups.FirstOrDefault(o => o.Name == load.StudentGroup.Name);
+                    if (group != null)
+                        load.StudentGroupId = group.Id;
+                }
+
+                departmentLoad.StudyLoad = departmentLoad.StudyLoad.Where(o => newGroups.Any(g => g.Id == o.StudentGroupId)
+                && newTitles.Any(t => t.Id == o.DisciplineTitleId));
                 await Create(departmentLoad);
                 return departmentLoad;
             }
@@ -231,16 +255,13 @@ namespace Andromeda.Services
             }
         }
 
-        private async Task GetLoadFromSheet(
+        private void GetLoadFromSheet(
             DepartmentLoad departmentLoad,
             ISheet loadSheet,
-            List<string> disciplinesTitles,
-            List<int> semesters,
-            List<string> studyDirections,
-            List<string> faculties,
-            List<int> courses,
-            List<string> studentGroups,
-            List<int> studentsCount
+            List<StudyDirection> studyDirections,
+            List<Department> faculties,
+            List<DisciplineTitle> disciplinesTitles,
+            List<StudentGroup> studentGroups
         )
         {
             #region Define columns numbers
@@ -283,6 +304,8 @@ namespace Andromeda.Services
             int firstRow = firstRowIndex.Value + 1;
 
             #region Define values arrays
+            List<StudyLoad> studyLoad = new List<StudyLoad>();
+            List<int> semesters = new List<int>();
             List<int> groupsInTheStream = new List<int>();
             List<int> studyWeeks = new List<int>();
             List<double> lections = new List<double>();
@@ -355,458 +378,352 @@ namespace Andromeda.Services
                 #endregion
 
                 #region Get values from cells
-                disciplinesTitles.Add(disciplineTitleCell.StringCellValue);
-                semesters.Add(Convert.ToInt32(semesterCell.NumericCellValue));
-                studyDirections.Add(studyDirectionCell.StringCellValue);
-                faculties.Add(facultyCell.StringCellValue);
-                courses.Add(Convert.ToInt32(courseCell.NumericCellValue));
-                studentGroups.Add(studentGroupCell.StringCellValue);
-                studentsCount.Add(Convert.ToInt32(studentsCountCell.NumericCellValue));
-                groupsInTheStream.Add(Convert.ToInt32(groupsInStreamCell.NumericCellValue));
-                studyWeeks.Add(Convert.ToInt32(studyWeeksCell.NumericCellValue));
+                string tempStartYear = Regex.Match(studentGroupCell.StringCellValue, @"[а-я,А-Я]\d{2}").Value;
+                int startYear = int.Parse(Regex.Match(tempStartYear, @"\d{2}").Value);
+                string directionCode = Regex.Match(studyDirectionCell.StringCellValue, @"\d{2}.\d{2}.\d{2}").Value;
+                var studyDirection = studyDirections.Find(o => directionCode == o.Code);
 
-                lections.Add(lectionsCell != null ? ConvertCellValueToDouble(lectionsCell) : 0);
-                practicalLessons.Add(practicalLessonsCell != null ? ConvertCellValueToDouble(practicalLessonsCell) : 0);
-                laboratoryLessons.Add(laboratoryLessonsCell != null ? ConvertCellValueToDouble(laboratoryLessonsCell) : 0);
-                thematicalDiscussions.Add(thematicalDiscussionsCell != null ? ConvertCellValueToDouble(thematicalDiscussionsCell) : 0);
-                consultasions.Add(consultasionsCell != null ? ConvertCellValueToDouble(consultasionsCell) : 0);
-                exams.Add(examsCell != null ? ConvertCellValueToDouble(examsCell) : 0);
-                offsets.Add(offsetsCell != null ? ConvertCellValueToDouble(offsetsCell) : 0);
-                others.Add(otherCell != null ? ConvertCellValueToDouble(otherCell) : 0);
-                abstracts.Add(abstractCell != null ? ConvertCellValueToDouble(abstractCell) : 0);
-                esTestPapers.Add(esTestPapersCell != null ? ConvertCellValueToDouble(esTestPapersCell) : 0);
-                stateExams.Add(stateExamsCell != null ? ConvertCellValueToDouble(stateExamsCell) : 0);
-                postgraduateExams.Add(postgraduateExamsCell != null ? ConvertCellValueToDouble(postgraduateExamsCell) : 0);
-                practices.Add(practicesCell != null ? ConvertCellValueToDouble(practicesCell) : 0);
-                departmentManagements.Add(departmentManagementCell != null ? ConvertCellValueToDouble(departmentManagementCell) : 0);
-                studentResearchs.Add(studentReserachWorkCell != null ? ConvertCellValueToDouble(studentReserachWorkCell) : 0);
-                courseWorks.Add(courseWorksCell != null ? ConvertCellValueToDouble(courseWorksCell) : 0);
-                graduationQualificationManagements.Add(graduationQualificationManagementCell != null ? ConvertCellValueToDouble(graduationQualificationManagementCell) : 0);
-                masterProgramManagements.Add(masterProgramManagementCell != null ? ConvertCellValueToDouble(masterProgramManagementCell) : 0);
-                postgraduateProgramManagements.Add(postgraduateProgramManagementCell != null ? ConvertCellValueToDouble(postgraduateProgramManagementCell) : 0);
+                var title = new DisciplineTitle
+                {
+                    DepartmentId = departmentLoad.DepartmentId,
+                    Name = disciplineTitleCell.StringCellValue,
+                    Shortname = disciplineTitleCell.StringCellValue.GetShortening()
+                };
+
+                if (!disciplinesTitles.Any(o => o.Name == title.Name))
+                    disciplinesTitles.Add(title);
+
+                if (studyDirection != null)
+                {
+                    var group = new StudentGroup
+                    {
+                        CurrentCourse = Convert.ToInt32(courseCell.NumericCellValue),
+                        DepartmentId = studyDirection.DepartmentId,
+                        Name = studentGroupCell.StringCellValue,
+                        StartYear = startYear,
+                        StudentsCount = Convert.ToInt32(studentsCountCell.NumericCellValue),
+                        StudyDirection = studyDirection,
+                        StudyDirectionId = studyDirection.Id
+                    };
+                    if (!studentGroups.Any(o => o.Name == group.Name))
+                        studentGroups.Add(group);
+
+                    var faculty = faculties.Find(o => o.Name == facultyCell.StringCellValue
+                    || o.FullName == facultyCell.StringCellValue);
+
+                    int semesterNumber = Convert.ToInt32(semesterCell.NumericCellValue);
+                    int groups = Convert.ToInt32(groupsInStreamCell.NumericCellValue);
+                    int studyWeeksCount = Convert.ToInt32(studyWeeksCell.NumericCellValue);
+
+                    double lectionsValue = lectionsCell != null ? ConvertCellValueToDouble(lectionsCell) : 0;
+                    double practicalLessonsValue = practicalLessonsCell != null ? ConvertCellValueToDouble(practicalLessonsCell) : 0;
+                    double laboratoryLessonsValue = laboratoryLessonsCell != null ? ConvertCellValueToDouble(laboratoryLessonsCell) : 0;
+                    double thematicalDiscussionsValue = thematicalDiscussionsCell != null ? ConvertCellValueToDouble(thematicalDiscussionsCell) : 0;
+                    double consultasionsValue = consultasionsCell != null ? ConvertCellValueToDouble(consultasionsCell) : 0;
+                    double examsValue = examsCell != null ? ConvertCellValueToDouble(examsCell) : 0;
+                    double offsetsValue = offsetsCell != null ? ConvertCellValueToDouble(offsetsCell) : 0;
+                    double othersValue = otherCell != null ? ConvertCellValueToDouble(otherCell) : 0;
+                    double abstractsValue = abstractCell != null ? ConvertCellValueToDouble(abstractCell) : 0;
+                    double esTestPapersValue = esTestPapersCell != null ? ConvertCellValueToDouble(esTestPapersCell) : 0;
+                    double stateExamsValue = stateExamsCell != null ? ConvertCellValueToDouble(stateExamsCell) : 0;
+                    double postgraduateExamsValue = postgraduateExamsCell != null ? ConvertCellValueToDouble(postgraduateExamsCell) : 0;
+                    double practicesValue = practicesCell != null ? ConvertCellValueToDouble(practicesCell) : 0;
+                    double departmentManagementsValue = departmentManagementCell != null ? ConvertCellValueToDouble(departmentManagementCell) : 0;
+                    double studentResearchsValue = studentReserachWorkCell != null ? ConvertCellValueToDouble(studentReserachWorkCell) : 0;
+                    double courseWorksValue = courseWorksCell != null ? ConvertCellValueToDouble(courseWorksCell) : 0;
+                    double graduationQualificationManagementsValue = graduationQualificationManagementCell != null ? ConvertCellValueToDouble(graduationQualificationManagementCell) : 0;
+                    double masterProgramManagementsValue = masterProgramManagementCell != null ? ConvertCellValueToDouble(masterProgramManagementCell) : 0;
+                    double postgraduateProgramManagementsValue = postgraduateProgramManagementCell != null ? ConvertCellValueToDouble(postgraduateProgramManagementCell) : 0;
+
+                    if (lectionsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = lectionsValue,
+                            ProjectType = ProjectType.Lection
+                        });
+                    if (practicalLessonsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = practicalLessonsValue,
+                            ProjectType = ProjectType.PracticalLesson
+                        });
+                    if (laboratoryLessonsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = laboratoryLessonsValue,
+                            ProjectType = ProjectType.LaboratoryLesson
+                        });
+                    if (thematicalDiscussionsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = thematicalDiscussionsValue,
+                            ProjectType = ProjectType.ThematicalDiscussion
+                        });
+                    if (consultasionsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = consultasionsValue,
+                            ProjectType = ProjectType.Consultation
+                        });
+                    if (examsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = examsValue,
+                            ProjectType = ProjectType.Exam
+                        });
+                    if (offsetsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = offsetsValue,
+                            ProjectType = ProjectType.Offest
+                        });
+                    if (othersValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = othersValue,
+                            ProjectType = ProjectType.Other
+                        });
+                    if (abstractsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = abstractsValue,
+                            ProjectType = ProjectType.Abstract
+                        });
+                    if (esTestPapersValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = esTestPapersValue,
+                            ProjectType = ProjectType.EsTestPapers
+                        });
+                    if (stateExamsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = stateExamsValue,
+                            ProjectType = ProjectType.StateExam
+                        });
+                    if (postgraduateExamsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = postgraduateExamsValue,
+                            ProjectType = ProjectType.PostgraduateEntranceExam
+                        });
+                    if (practicesValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = practicesValue,
+                            ProjectType = ProjectType.Practice
+                        });
+                    if (departmentManagementsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = departmentManagementsValue,
+                            ProjectType = ProjectType.DepartmentManagement
+                        });
+                    if (studentResearchsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = studentResearchsValue,
+                            ProjectType = ProjectType.StudentResearchWork
+                        });
+                    if (courseWorksValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = courseWorksValue,
+                            ProjectType = ProjectType.CourseWork
+                        });
+                    if (graduationQualificationManagementsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = graduationQualificationManagementsValue,
+                            ProjectType = ProjectType.GraduationQualificationManagement
+                        });
+                    if (masterProgramManagementsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = masterProgramManagementsValue,
+                            ProjectType = ProjectType.MasterProgramManagement
+                        });
+                    if (postgraduateProgramManagementsValue > 0)
+                        studyLoad.Add(new StudyLoad
+                        {
+                            DisciplineTitle = title,
+                            DisciplineTitleId = title.Id,
+                            Faculty = faculty,
+                            FacultyId = faculty.Id,
+                            SemesterNumber = semesterNumber,
+                            StudyWeeksCount = studyWeeksCount,
+                            GroupsInTheStream = groups,
+                            StudentGroup = group,
+                            StudentGroupId = group.Id,
+                            Value = postgraduateProgramManagementsValue,
+                            ProjectType = ProjectType.PostgraduateProgramManagement
+                        });
+                }
                 #endregion
             }
-
-            var disciplinesTitlesList = await _disciplineTitleService.Get(new DisciplineTitleGetOptions
-            {
-                Titles = disciplinesTitles.Distinct().ToList()
-            });
-
-            var studentGroupsList = await _studentGroupService.Get(new StudentGroupGetOptions
-            {
-                Names = studentGroups.Distinct().ToList()
-            });
-
-            var facultiesList = await _departmentService.Get(new DepartmentGetOptions
-            {
-                Type = DepartmentType.Faculty,
-                Names = faculties.Distinct().ToList()
-            });
-
-            List<StudyLoad> studyLoad = new List<StudyLoad>();
-            StudyLoadFormation(
-                studyLoad,
-                disciplinesTitlesList,
-                studentGroupsList,
-                facultiesList,
-                disciplinesTitles,
-                semesters,
-                studyDirections,
-                faculties,
-                courses,
-                studentGroups,
-                studentsCount,
-                groupsInTheStream,
-                studyWeeks,
-                lections,
-                practicalLessons,
-                laboratoryLessons,
-                thematicalDiscussions,
-                consultasions,
-                exams,
-                offsets,
-                others,
-                abstracts,
-                esTestPapers,
-                stateExams,
-                postgraduateExams,
-                practices,
-                departmentManagements,
-                studentResearchs,
-                courseWorks,
-                graduationQualificationManagements,
-                masterProgramManagements,
-                postgraduateProgramManagements
-            );
-
             departmentLoad.StudyLoad = studyLoad;
-        }
-
-        private void StudyLoadFormation(
-            List<StudyLoad> departmentLoad,
-            IEnumerable<DisciplineTitle> disciplineTitlesList,
-            IEnumerable<StudentGroup> studentGroupsList,
-            IEnumerable<Department> facultiesList,
-            List<string> disciplinesTitles,
-            List<int> semesters,
-            List<string> studyDirections,
-            List<string> faculties,
-            List<int> courses,
-            List<string> studentGroups,
-            List<int> studentsCount,
-            List<int> groupsInTheStream,
-            List<int> studyWeeks,
-            List<double> lections,
-            List<double> practicalLessons,
-            List<double> laboratoryLessons,
-            List<double> thematicalDiscussions,
-            List<double> consultasions,
-            List<double> exams,
-            List<double> offsets,
-            List<double> others,
-            List<double> abstracts,
-            List<double> esTestPapers,
-            List<double> stateExams,
-            List<double> postgraduateExams,
-            List<double> practices,
-            List<double> departmentManagements,
-            List<double> studentResearchs,
-            List<double> courseWorks,
-            List<double> graduationQualificationManagements,
-            List<double> masterProgramManagements,
-            List<double> postgraduateProgramManagements
-        )
-        {
-            for (int i = 0; i < disciplinesTitles.Count; i++)
-            {
-                var title = disciplineTitlesList.FirstOrDefault(o => o.Name == disciplinesTitles[i]);
-                if (title == null)
-                {
-                    _logger.LogWarning($"Наименование дисциплины (\"{disciplinesTitles[i]}\") не найдено, поэтому нагрузка будет пропущена.");
-                    continue;
-                }
-                var faculty = facultiesList.FirstOrDefault(o => o.Name == faculties[i]);
-                if (faculty == null)
-                {
-                    _logger.LogWarning($"Факультет (\"{faculties[i]}\") не найден, поэтому нагрузка будет пропущена.");
-                    continue;
-                }
-                int semesterNumber = semesters[i];
-                int studyWeeksCount = studyWeeks[i];
-                int groups = groupsInTheStream[i];
-                var group = studentGroupsList.FirstOrDefault(o => o.Name == studentGroups[i]);
-                if (group == null)
-                {
-                    _logger.LogWarning($"Группа (\"{studentGroups[i]}\") не найдена, поэтому нагрузка будет пропущена.");
-                    continue;
-                }
-
-                double lectionsValue = lections[i];
-                double practicalLessonsValue = practicalLessons[i];
-                double laboratoryLessonsValue = laboratoryLessons[i];
-                double thematicalDiscussionsValue = thematicalDiscussions[i];
-                double consultasionsValue = consultasions[i];
-                double examsValue = exams[i];
-                double offsetsValue = offsets[i];
-                double othersValue = others[i];
-                double abstractsValue = abstracts[i];
-                double esTestPapersValue = esTestPapers[i];
-                double stateExamsValue = stateExams[i];
-                double postgraduateExamsValue = postgraduateExams[i];
-                double practicesValue = practices[i];
-                double departmentManagementsValue = departmentManagements[i];
-                double studentResearchsValue = studentResearchs[i];
-                double courseWorksValue = courseWorks[i];
-                double graduationQualificationManagementsValue = graduationQualificationManagements[i];
-                double masterProgramManagementsValue = masterProgramManagements[i];
-                double postgraduateProgramManagementsValue = postgraduateProgramManagements[i];
-
-                if (lectionsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = lectionsValue,
-                        ProjectType = ProjectType.Lection
-                    });
-                if (practicalLessonsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = practicalLessonsValue,
-                        ProjectType = ProjectType.PracticalLesson
-                    });
-                if (laboratoryLessonsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = laboratoryLessonsValue,
-                        ProjectType = ProjectType.LaboratoryLesson
-                    });
-                if (thematicalDiscussionsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = thematicalDiscussionsValue,
-                        ProjectType = ProjectType.ThematicalDiscussion
-                    });
-                if (consultasionsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = consultasionsValue,
-                        ProjectType = ProjectType.Consultation
-                    });
-                if (examsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = examsValue,
-                        ProjectType = ProjectType.Exam
-                    });
-                if (offsetsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = offsetsValue,
-                        ProjectType = ProjectType.Offest
-                    });
-                if (othersValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = othersValue,
-                        ProjectType = ProjectType.Other
-                    });
-                if (abstractsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = abstractsValue,
-                        ProjectType = ProjectType.Abstract
-                    });
-                if (esTestPapersValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = esTestPapersValue,
-                        ProjectType = ProjectType.EsTestPapers
-                    });
-                if (stateExamsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = stateExamsValue,
-                        ProjectType = ProjectType.StateExam
-                    });
-                if (postgraduateExamsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = postgraduateExamsValue,
-                        ProjectType = ProjectType.PostgraduateEntranceExam
-                    });
-                if (practicesValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = practicesValue,
-                        ProjectType = ProjectType.Practice
-                    });
-                if (departmentManagementsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = departmentManagementsValue,
-                        ProjectType = ProjectType.DepartmentManagement
-                    });
-                if (studentResearchsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = studentResearchsValue,
-                        ProjectType = ProjectType.StudentResearchWork
-                    });
-                if (courseWorksValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = courseWorksValue,
-                        ProjectType = ProjectType.CourseWork
-                    });
-                if (graduationQualificationManagementsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = graduationQualificationManagementsValue,
-                        ProjectType = ProjectType.GraduationQualificationManagement
-                    });
-                if (masterProgramManagementsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = masterProgramManagementsValue,
-                        ProjectType = ProjectType.MasterProgramManagement
-                    });
-                if (postgraduateProgramManagementsValue > 0)
-                    departmentLoad.Add(new StudyLoad
-                    {
-                        DisciplineTitle = title,
-                        DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
-                        SemesterNumber = semesterNumber,
-                        StudyWeeksCount = studyWeeksCount,
-                        GroupsInTheStream = groups,
-                        StudentGroup = group,
-                        StudentGroupId = group.Id,
-                        Value = postgraduateProgramManagementsValue,
-                        ProjectType = ProjectType.PostgraduateProgramManagement
-                    });
-            }
         }
 
         private int? GetFirstRowIndex(ISheet sheet)

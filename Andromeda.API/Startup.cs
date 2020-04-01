@@ -152,7 +152,22 @@ namespace Andromeda.API
                 var departmentService = provider.GetService<DepartmentService>();
                 var userService = provider.GetService<UserService>();
                 var disciplineTitleService = provider.GetService<DisciplineTitleService>();
-                return new StudyLoadService(daoFactory.StudyLoadDao, studentGroupService, departmentService, userService, disciplineTitleService);
+                return new StudyLoadService(daoFactory.StudyLoadDao);
+            });
+
+            services.AddScoped(provider => 
+            {
+                var daoFactory = provider.GetService<IDaoFactory>();
+                var studyLoadService = provider.GetService<StudyLoadService>();
+                var disciplineTitleService = provider.GetService<DisciplineTitleService>();
+                var studentGroupService = provider.GetService<StudentGroupService>();
+                
+                return new GroupDisciplineLoadService(
+                    daoFactory.GroupDisciplineLoadDao,
+                    studyLoadService,
+                    disciplineTitleService,
+                    studentGroupService
+                );
             });
 
             services.AddScoped(provider =>
@@ -162,6 +177,7 @@ namespace Andromeda.API
                 var disciplineTitleService = provider.GetService<DisciplineTitleService>();
                 var studentGroupService = provider.GetService<StudentGroupService>();
                 var studyDirectionService = provider.GetService<StudyDirectionService>();
+                var groupDisciplineLoadService = provider.GetService<GroupDisciplineLoadService>();
                 var studyLoadService = provider.GetService<StudyLoadService>();
                 var logger = provider.GetService<ILogger<DepartmentLoadService>>();
                 var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
@@ -171,6 +187,7 @@ namespace Andromeda.API
                     departmentService,
                     disciplineTitleService,
                     studentGroupService,
+                    groupDisciplineLoadService,
                     studyLoadService,
                     studyDirectionService,
                     provider.ComposeGenerateStrategies(),

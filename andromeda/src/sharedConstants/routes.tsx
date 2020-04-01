@@ -25,7 +25,7 @@ const getDepartmentloadsPath = (idParameter: string) => `/trainingdepartments/${
 const getDepartmentloadPath = (departmentIdParameter: string, idParameter: string) => `/trainingdepartments/${departmentIdParameter}/departmentloads/${idParameter}`;
 
 export const paths = {
-    dashboardPath: '/',
+    dashboardPath: '/dashboard',
     usersPath: '/users',
     facultiesPath: '/factulties',
     trainingDepartmentsPath: '/trainingdepartments',
@@ -45,15 +45,31 @@ export const paths = {
     getDepartmentloadsPath,
     getDepartmentloadPath,
 
-    idParameterName
+    idParameterName,
+    departmentIdParameterName
 };
 
 export const routes: Route[] = [
-    { exact: true, name: 'dashboard', text: 'Доска задач', path: paths.dashboardPath, icon: DashboardIcon, component: Dashboard },
-    { exact: true, name: 'users', text: 'Пользователи', path: paths.usersPath, icon: SupervisorAccount, component: Users },
-    { exact: true, name: 'faculties', text: 'Факультеты и институты', path: paths.facultiesPath, icon: Apartment, component: Faculties },
-    { exact: true, name: 'trainingdepartments', text: 'Кафедры', path: paths.trainingDepartmentsPath, icon: AccountBalance, component: TrainingDepartments },
-    { exact: true, name: 'roles', text: 'Роли', path: paths.rolesPath, icon: AssignmentInd, component: Roles },
+    {
+        exact: true, name: 'dashboard', path: paths.dashboardPath, component: Dashboard,
+        text: 'Доска задач', icon: DashboardIcon
+    },
+    {
+        exact: true, name: 'users', path: paths.usersPath, component: Users,
+        text: 'Пользователи', icon: SupervisorAccount
+    },
+    {
+        exact: true, name: 'faculties', path: paths.facultiesPath, component: Faculties,
+        text: 'Факультеты и институты', icon: Apartment
+    },
+    {
+        exact: true, name: 'trainingdepartments', path: paths.trainingDepartmentsPath, component: TrainingDepartments,
+        text: 'Кафедры', icon: AccountBalance
+    },
+    {
+        exact: true, name: 'roles', path: paths.rolesPath, component: Roles,
+        text: 'Роли', icon: AssignmentInd
+    },
     { exact: false, name: 'departmentLoad', path: paths.departmentloadPath, component: DepartmentLoadComponent },
     { exact: false, name: 'departmentLoads', path: paths.departmentloadsPath, component: DepartmentLoads },
     { exact: false, name: 'user', path: paths.userPath, component: UserComponent },
@@ -61,3 +77,7 @@ export const routes: Route[] = [
     { exact: false, name: 'trainingdepartment', path: paths.trainingDepartmentPath, component: TrainingDepartmentComponent },
     { exact: false, name: 'role', path: paths.rolePath, component: RoleComponent }
 ];
+
+export function isMenuItemSelected(menuItemPath: string, currentPath: string): boolean {
+    return currentPath.includes(menuItemPath);
+}

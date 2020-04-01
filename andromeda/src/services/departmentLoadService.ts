@@ -1,4 +1,4 @@
-import { DepartmentLoad, DepartmentLoadGetOptions, DepartmentLoadImportOptions } from "../models";
+import { DepartmentLoad, DepartmentLoadGetOptions, DepartmentLoadImportOptions, StudyLoad, ProjectType, GroupDisciplineLoad, GroupDisciplineLoadValidation, DisciplineTitle, StudentGroup, UserDisciplineLoadValidation, UserDisciplineLoad, User } from "../models";
 import { ResponseHandler, handleJsonResponse, handleResponse } from "../utilities";
 
 class DepartmentLoadService {
@@ -75,6 +75,73 @@ class DepartmentLoadService {
             headers: this.jsonHeaders,
             body: JSON.stringify(ids)
         }).then(handleResponse);
+    }
+
+    public isStudyLoadForGroup(load: StudyLoad[]) {
+        return !load.find(o => o.projectType === ProjectType.practice
+            || o.projectType === ProjectType.departmentManagement
+            || o.projectType === ProjectType.graduationQualificationManagement
+            || o.projectType === ProjectType.masterProgramManagement
+            || o.projectType === ProjectType.studentResearchWork)
+    }
+
+    private validateDisciplineTitle(value: DisciplineTitle): string {
+        const isValid = Boolean(value && value.id);
+        return isValid ? '' : 'Учебная дисциплина обязательна';
+    }
+
+    private validateStudentGroup(value: StudentGroup): string {
+        const isValid = Boolean(value && value.id);
+        return isValid ? '' : 'Учебная группа обязательна';
+    }
+
+    private validateSemesterNumber(value: number): string {
+        const isValid = value && value > 0;
+        return isValid ? '' : 'Номер семестра должен быть больше нуля'
+    }
+
+    public validateGroupDisciplineLoad(value: GroupDisciplineLoad): GroupDisciplineLoadValidation {
+        const disciplineTitleError = this.validateDisciplineTitle(value.disciplineTitle);
+        const studentGroupError = this.validateStudentGroup(value.studentGroup);
+        const semesterNumberError = this.validateSemesterNumber(value.semesterNumber);
+
+        //TODO: Доделать валидацию типов работ
+        const isValid = !disciplineTitleError && !studentGroupError && !semesterNumberError;
+
+        return {
+            disciplineTitleError: disciplineTitleError,
+            studentGroupError: studentGroupError,
+            semesterNumberError: semesterNumberError,
+            isValid: isValid
+        };
+    }
+
+    public validateGroupDisciplineLoadNotNull(value: GroupDisciplineLoad): string {
+        const isValid = Boolean(value);
+        return isValid ? '' : 'Выберите нагрузку чтобы распределить на пользователя';
+    }
+
+    private validateUser(value: User): string {
+        const isValid = Boolean(value);
+        return isValid ? '' : 'Выберите пользователя, на которого распределить нагрузку';
+    }
+
+    private validateStudyLoad(value: StudyLoad[]) {
+        const isValid = Boolean(value);
+        return isValid ? '' : 'Невозможно распределить нагрузку не указав работы';
+    }
+
+    public validateUserDisciplineLoad(value: UserDisciplineLoad): UserDisciplineLoadValidation {
+        const userError: string = this.validateUser(value.user);
+        const studyLoadError: string = this.validateStudyLoad(value.studyLoad);
+
+        const isValid = !userError && !studyLoadError;
+
+        return {
+            userError: userError,
+            studyLoadError: studyLoadError,
+            isValid: isValid
+        };
     }
 }
 

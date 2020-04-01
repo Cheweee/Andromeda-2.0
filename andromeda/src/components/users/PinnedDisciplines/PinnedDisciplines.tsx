@@ -1,11 +1,11 @@
 import * as React from "react";
-import { withStyles, WithStyles } from "@material-ui/styles";
+import { withStyles, WithStyles } from "@material-ui/core/styles";
 import { mergeStyles } from "../../../utilities";
 import { commonStyles } from "../../../muiTheme";
 import { Grid, List, Typography, ListItemText, ListItem, ListItemSecondaryAction, IconButton } from "@material-ui/core";
 import { Edit, Delete } from "@material-ui/icons";
 import { PinnedDiscipline } from "../../../models";
-import { ProjectType, getProjectTypeDescription } from "../../../models/commonModels";
+import { ProjectType } from "../../../models/commonModels";
 
 const styles = mergeStyles(commonStyles);
 
@@ -29,7 +29,7 @@ export const PinnedDisciplines = withStyles(styles)(function (props: Props) {
             continue;
 
         const projectsTypes = pinnedDisciplines.filter(o => o.disciplineTitleId === discipline.disciplineTitleId).map(o => o.projectType);
-        const projectsTypesDescription: string = projectsTypes.reduce((previous: string, current: ProjectType) => (previous ? (previous + '; ') : '') + getProjectTypeDescription(current), undefined);
+        const projectsTypesDescription: string = projectsTypes.reduce((previous: string, current: ProjectType) => (previous ? (previous + '; ') : '') + ProjectType.getProjectTypeDescription(current), undefined);
 
         disciplinesDisctionary.push({
             disciplineTitle: discipline.disciplineTitle,

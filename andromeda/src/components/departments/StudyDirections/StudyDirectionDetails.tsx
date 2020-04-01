@@ -1,7 +1,7 @@
 import * as React from "react";
 import { mergeStyles, getShortening } from "../../../utilities";
 import { commonStyles } from "../../../muiTheme";
-import { withStyles, WithStyles } from "@material-ui/styles";
+import { withStyles, WithStyles } from "@material-ui/core/styles";
 import { StudyDirection, StudyDirectionValidation } from "../../../models";
 import { useState, useEffect } from "react";
 import { Dialog, DialogTitle, DialogContent, Grid, TextField, DialogActions, Button } from "@material-ui/core";

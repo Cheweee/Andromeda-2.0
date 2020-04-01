@@ -18,7 +18,8 @@ module.exports = (env) => {
         },
         output: {
             path: path.resolve(__dirname, './build'),
-            filename: '[name].js'
+            filename: '[name].js',
+            publicPath: '/'
         },
         devServer: {
             contentBase: path.resolve(__dirname, 'src', 'views'),

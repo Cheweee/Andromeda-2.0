@@ -1,7 +1,7 @@
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
 
-import { WithStyles, withStyles } from "@material-ui/styles";
+import { WithStyles, withStyles } from "@material-ui/core/styles";
 import { Grid, Card, CardContent, CardHeader, Tooltip, IconButton, TextField, LinearProgress, ExpansionPanel, ExpansionPanelSummary, Typography, ExpansionPanelDetails } from "@material-ui/core";
 
 import { mergeStyles } from "../../utilities";
@@ -24,20 +24,34 @@ const styles = mergeStyles(commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
-const initialUser: User = {
-    email: '',
-    firstname: '',
-    lastname: '',
-    username: '',
-
-    pinnedDisciplines: []
-};
-
-const initialFormErrors: UserValidation = { isValid: false }
-
 export const UserComponent = withStyles(styles)(function (props: Props) {
     //#region User state
-    const [user, setUser] = useState(initialUser);
+    const [user, setUser] = useState(User.initial);
+
+    async function loadUser() {
+        const { match } = props;
+
+        const tempId = match.params && match.params[paths.idParameterName];
+        let user: User = User.initial;
+        try {
+            setLoading(true);
+            const id = parseInt(tempId, 0);
+            if (id) {
+                const models = await userService.get({ id });
+                user = models[0];
+            }
+        }
+        catch (error) {
+            if (error instanceof ApplicationError) {
+                setLoading(false);
+                setSnackbar(error.message, true, SnackbarVariant.error);
+            }
+        }
+        finally {
+            setLoading(false);
+            setUser(user);
+        }
+    }
 
     function handleFirstnameChange(event: React.ChangeEvent<HTMLInputElement>) {
         setUser({ ...user, firstname: event.target && event.target.value });
@@ -69,6 +83,23 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
     const [selectedProjectTypes, setSelectedProjectTypes] = useState<ProjectType[]>([]);
     const [pinnedDisciplineDetailsOpen, setPinnedDisciplineDetailsOpen] = useState<boolean>(false);
     const [disciplinesTitles, setDisciplinesTitles] = useState<DisciplineTitle[]>([]);
+
+    async function loadNotPinnedDiscilines() {
+        try {
+            setLoading(true);
+            const titles = await disciplinetitleService.getTitles({});
+            setDisciplinesTitles(titles);
+        }
+        catch (error) {
+            if (error instanceof ApplicationError) {
+                setLoading(false);
+                setSnackbar(error.message, true, SnackbarVariant.error);
+            }
+        }
+        finally {
+            setLoading(false);
+        }
+    }
 
     function handlePinnedDisciplineAdd(event: React.MouseEvent<Element, MouseEvent>) {
         event.stopPropagation();
@@ -120,7 +151,7 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
     }
     //#endregion
 
-    const [formErrors, setFormErrors] = useState<UserValidation>(initialFormErrors);
+    const [formErrors, setFormErrors] = useState<UserValidation>(UserValidation.initial);
     const [loading, setLoading] = useState<boolean>(false);
     const [snackbar, setSnackbar] = useSnackbarState();
 
@@ -130,48 +161,6 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
         const formErrors = userService.validateUser(user);
         setFormErrors(formErrors);
     }, [user]);
-
-    async function loadUser() {
-        const { match } = props;
-
-        const tempId = match.params && match.params[paths.idParameterName];
-        let user: User = initialUser;
-        try {
-            setLoading(true);
-            const id = parseInt(tempId, 0);
-            if (id) {
-                const models = await userService.get({ id });
-                user = models[0];
-            }
-        }
-        catch (error) {
-            if (error instanceof ApplicationError) {
-                setLoading(false);
-                setSnackbar(error.message, true, SnackbarVariant.error);
-            }
-        }
-        finally {
-            setLoading(false);
-            setUser(user);
-        }
-    }
-
-    async function loadNotPinnedDiscilines() {
-        try {
-            setLoading(true);
-            const titles = await disciplinetitleService.getTitles({});
-            setDisciplinesTitles(titles);
-        }
-        catch (error) {
-            if (error instanceof ApplicationError) {
-                setLoading(false);
-                setSnackbar(error.message, true, SnackbarVariant.error);
-            }
-        }
-        finally {
-            setLoading(false);
-        }
-    }
 
     async function initialize() {
         await loadUser();
@@ -225,20 +214,26 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
                 <Grid item xs container direction="column">
                     <Grid container direction="row">
                         <Tooltip title="Вернуться назад">
-                            <IconButton disabled={loading} onClick={handleBackClick}>
-                                <ArrowBack />
-                            </IconButton>
+                            <span>
+                                <IconButton disabled={loading} onClick={handleBackClick}>
+                                    <ArrowBack />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <Grid item xs />
                         <Tooltip title="Отменить">
-                            <IconButton disabled={loading} onClick={handleCancelClick}>
-                                <Close />
-                            </IconButton>
+                            <span>
+                                <IconButton disabled={loading} onClick={handleCancelClick}>
+                                    <Close />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <Tooltip title="Сохранить">
-                            <IconButton color="primary" disabled={loading || !formErrors.isValid} onClick={handleSaveClick}>
-                                <Check />
-                            </IconButton>
+                            <span>
+                                <IconButton color="primary" disabled={loading || !formErrors.isValid} onClick={handleSaveClick}>
+                                    <Check />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                     </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>

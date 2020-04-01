@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { RouteComponentProps, withRouter } from "react-router";
 
 import clsx from "clsx";
-import { WithStyles, withStyles } from "@material-ui/styles";
+import { WithStyles, withStyles } from "@material-ui/core/styles";
 import { ArrowBack, Close, Check, ExpandMore, Add, BarChart } from "@material-ui/icons";
 import {
     Grid,
@@ -50,27 +50,12 @@ const styles = mergeStyles(commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
-const initialDepartment: TrainingDepartment = {
-    type: DepartmentType.TrainingDepartment,
-    fullName: '',
-    name: '',
-    parent: null,
-
-    roles: [],
-    users: [],
-    studyDirections: [],
-    groups: [],
-    titles: []
-};
-
-const initialFormErrors: DepartmentValidation = { isValid: false };
-
 export const TrainingDepartmentComponent = withStyles(styles)(withRouter(function (props: Props) {
-    const [department, setDepartment] = useState(initialDepartment);
-    const [formErrors, setFormErrors] = useState(initialFormErrors);
-    const [faculties, setFaculties] = useState([]);
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [department, setDepartment] = useState<TrainingDepartment>(TrainingDepartment.initial);
+    const [formErrors, setFormErrors] = useState<DepartmentValidation>(DepartmentValidation.initial);
+    const [faculties, setFaculties] = useState<Faculty[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
 
     //#region Study direction details state
     const [selectedStudyDirection, setSelectedStudyDirection] = useState(null);
@@ -108,7 +93,7 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
         const { match } = props;
 
         const tempId = match.params && match.params[paths.idParameterName];
-        let department: TrainingDepartment = initialDepartment;
+        let department: TrainingDepartment = TrainingDepartment.initial;
         try {
             setLoading(true);
             const id = parseInt(tempId, 0);
@@ -127,6 +112,7 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
             if (error instanceof ApplicationError) {
                 setLoading(false);
                 setSnackbarState(error.message, true, SnackbarVariant.error);
+                throw error;
             }
         }
     }
@@ -401,20 +387,26 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                 <Grid item xs container direction="column">
                     <Grid container direction="row">
                         <Tooltip title="Вернуться назад">
-                            <IconButton disabled={loading} onClick={handleBackClick}>
-                                <ArrowBack />
-                            </IconButton>
+                            <span>
+                                <IconButton disabled={loading} onClick={handleBackClick}>
+                                    <ArrowBack />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <Grid item xs />
                         <Tooltip title="Отменить">
-                            <IconButton disabled={loading} onClick={handleCancelClick}>
-                                <Close />
-                            </IconButton>
+                            <span>
+                                <IconButton disabled={loading} onClick={handleCancelClick}>
+                                    <Close />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <Tooltip title="Сохранить">
-                            <IconButton color="primary" disabled={loading || !formErrors.isValid} onClick={handleSaveClick}>
-                                <Check />
-                            </IconButton>
+                            <span>
+                                <IconButton color="primary" disabled={loading || !formErrors.isValid} onClick={handleSaveClick}>
+                                    <Check />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                     </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
@@ -423,9 +415,11 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                                 <Typography>Кафедра</Typography>
                                 {department.id && (
                                     <Tooltip title="Нагрузка кафедры">
-                                        <IconButton disabled={loading} onClick={handleStudyload}>
-                                            <BarChart />
-                                        </IconButton>
+                                        <span>
+                                            <IconButton disabled={loading} onClick={handleStudyload}>
+                                                <BarChart />
+                                            </IconButton>
+                                        </span>
                                     </Tooltip>
                                 )}
                             </Grid>
@@ -439,6 +433,7 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                                 handleParentChange={handleFacultyChange}
                                 handleFullNameChange={handleFullNameChange}
                                 handleNameChange={handleNameChange}
+                                parentDepartment={department.parent}
                                 parentDepartments={faculties}
                             />
                         </CardContent>
@@ -450,9 +445,11 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                                     <Typography className={classes.heading}>Названия дисциплин</Typography>
                                     <Grid item xs />
                                     <Tooltip title="Добавить наименование дисциплин">
-                                        <IconButton onClick={handleDisciplineTitleAdd}>
-                                            <Add />
-                                        </IconButton>
+                                        <span>
+                                            <IconButton onClick={handleDisciplineTitleAdd}>
+                                                <Add />
+                                            </IconButton>
+                                        </span>
                                     </Tooltip>
                                 </Grid>
                             </ExpansionPanelSummary>
@@ -472,9 +469,11 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                                     <Typography className={classes.heading}>Сотрудники</Typography>
                                     <Grid item xs />
                                     <Tooltip title="Редактировать сотрудников подразделения">
-                                        <IconButton onClick={handleUserRolesAdd}>
-                                            <Add />
-                                        </IconButton>
+                                        <span>
+                                            <IconButton onClick={handleUserRolesAdd}>
+                                                <Add />
+                                            </IconButton>
+                                        </span>
                                     </Tooltip>
                                 </Grid>
                             </ExpansionPanelSummary>
@@ -496,9 +495,11 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                                     <Typography className={classes.heading}>Направления подготовки</Typography>
                                     <Grid item xs />
                                     <Tooltip title="Добавить направление подготовки">
-                                        <IconButton onClick={handleStudyDirectionAdd}>
-                                            <Add />
-                                        </IconButton>
+                                        <span>
+                                            <IconButton onClick={handleStudyDirectionAdd}>
+                                                <Add />
+                                            </IconButton>
+                                        </span>
                                     </Tooltip>
                                 </Grid>
                             </ExpansionPanelSummary>
@@ -518,9 +519,11 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                                     <Typography className={classes.heading}>Учебные группы</Typography>
                                     <Grid item xs />
                                     <Tooltip title="Добавить группу">
-                                        <IconButton onClick={handleGroupAdd}>
-                                            <Add />
-                                        </IconButton>
+                                        <span>
+                                            <IconButton onClick={handleGroupAdd}>
+                                                <Add />
+                                            </IconButton>
+                                        </span>
                                     </Tooltip>
                                 </Grid>
                             </ExpansionPanelSummary>

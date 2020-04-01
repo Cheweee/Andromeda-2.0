@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html style="height:100%;">
     <head>
         <title>Andromeda</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,8 +10,8 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
         <base href="<%= baseHref %>" />            
     </head>
-    <body style="margin: 0">
-        <div id="app-container"></div>
+    <body style="margin: 0;height: 100%;">
+        <div id="app-container" style="height:100%;"></div>
         <script>__REACT_DEVTOOLS_GLOBAL_HOOK__ = parent.__REACT_DEVTOOLS_GLOBAL_HOOK__</script>
 
         <!-- Main -->

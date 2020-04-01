@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState } from "react";
 
 import { InputBase } from "@material-ui/core";
-import { WithStyles, withStyles } from "@material-ui/styles";
+import { WithStyles, withStyles } from "@material-ui/core/styles";
 
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
@@ -12,7 +12,7 @@ const styles = mergeStyles(commonStyles);
 
 interface Props extends IFilter, WithStyles<typeof styles> {
     onSearchChange: (newValue: string) => void;
-    onSearch: () => void;
+    onSearch?: () => void;
 }
 
 export const SearchInput = withStyles(styles)(function (props: Props) {
@@ -28,7 +28,7 @@ export const SearchInput = withStyles(styles)(function (props: Props) {
         const search = event.target.value;
         onSearchChange(search);
 
-        if (!timerId) {
+        if (!timerId && onSearch) {
             let newTimerId = setTimeout(() => {
                 onSearch();
                 clearTimeout(timerId);

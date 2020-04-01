@@ -1,7 +1,7 @@
 import * as React from "react";
 import { mergeStyles } from "../../../utilities";
 import { commonStyles } from "../../../muiTheme";
-import { withStyles, WithStyles } from "@material-ui/styles";
+import { withStyles, WithStyles } from "@material-ui/core/styles";
 import { StudyDirection } from "../../../models/studyDirectionModels";
 import { Grid, List, Typography, ListItem, ListItemText, ListItemSecondaryAction, IconButton } from "@material-ui/core";
 import { Edit, Delete } from "@material-ui/icons";

@@ -1,12 +1,12 @@
 import * as React from "react";
-import { withStyles, WithStyles } from "@material-ui/styles";
+import { withStyles, WithStyles } from "@material-ui/core/styles";
 import { mergeStyles } from "../../../utilities";
 import { commonStyles } from "../../../muiTheme";
 import { Dialog, DialogTitle, DialogContent, Grid, TextField, InputAdornment, DialogActions, Button, FormControl, FormHelperText } from "@material-ui/core";
-import { PinnedDisciplineValidation, DisciplineTitle } from "../../../models";
+import { PinnedDisciplineValidation, DisciplineTitle, DisciplineTitleValidation, PinnedDiscipline } from "../../../models";
 import { useState, useEffect } from "react";
 import { Autocomplete } from "@material-ui/lab";
-import { ProjectTypes, ProjectType, getProjectTypeDescription } from "../../../models/commonModels";
+import { ProjectTypes, ProjectType } from "../../../models/commonModels";
 
 const styles = mergeStyles(commonStyles);
 
@@ -19,18 +19,10 @@ interface Props extends WithStyles<typeof styles> {
     onAccept: (disciplinesTitle: DisciplineTitle, projectTypes: ProjectType[]) => void;
 }
 
-const initialPinnedDiscipline: DisciplineTitle = {
-    name: '',
-};
-
-const initialValidation: PinnedDisciplineValidation = {
-    isValid: false,
-};
-
 export const PinnedDisciplineDetails = withStyles(styles)(function (props: Props) {
-    const [disciplineTitle, setDisciplineTitle] = useState<DisciplineTitle>(initialPinnedDiscipline);
+    const [disciplineTitle, setDisciplineTitle] = useState<DisciplineTitle>(DisciplineTitle.initial);
     const [projectTypes, setProjectTypes] = useState<ProjectType[]>([]);
-    const [formErrors, setFormErrors] = useState(initialValidation);
+    const [formErrors, setFormErrors] = useState<PinnedDisciplineValidation>(PinnedDisciplineValidation.initial);
 
     useEffect(() => {
         setDisciplineTitle(props.disciplineTitle);
@@ -68,7 +60,7 @@ export const PinnedDisciplineDetails = withStyles(styles)(function (props: Props
 
     const handleAccept = () => {
         onAccept(disciplineTitle, projectTypes);
-        setDisciplineTitle(initialPinnedDiscipline);
+        setDisciplineTitle(DisciplineTitle.initial);
         setProjectTypes([]);
     }
 
@@ -103,11 +95,11 @@ export const PinnedDisciplineDetails = withStyles(styles)(function (props: Props
                         className={classes.w100}
                         multiple
                         noOptionsText={"Тип работ не найден"}
-                        getOptionLabel={(option: ProjectType) => `${getProjectTypeDescription(option)}`}
+                        getOptionLabel={(option: ProjectType) => `${ProjectType.getProjectTypeDescription(option)}`}
                         options={ProjectTypes}
                         value={projectTypes}
                         onChange={handleProjectTypeChange}
-                        renderOption={(option: ProjectType) => `${getProjectTypeDescription(option)}`}
+                        renderOption={(option: ProjectType) => `${ProjectType.getProjectTypeDescription(option)}`}
                         renderInput={params => (
                             <TextField
                                 {...params}

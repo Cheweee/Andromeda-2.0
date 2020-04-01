@@ -1,14 +1,8 @@
 import * as React from "react";
-import { mergeStyles } from "../../utilities";
-import { layoutStyles } from "../../muiTheme";
-import { withStyles, WithStyles } from "@material-ui/styles";
 import { Grid, Typography } from "@material-ui/core";
 import { Receipt } from "@material-ui/icons";
 
-const styles = mergeStyles(layoutStyles);
-
-export const IsUnderConstruction = withStyles(styles)(function (props: WithStyles<typeof styles>) {
-    const { classes } = props;
+export const IsUnderConstruction = function () {
     return (
         <Grid container direction="row" alignItems="center" justify="center">
             <Grid item xs />
@@ -19,4 +13,4 @@ export const IsUnderConstruction = withStyles(styles)(function (props: WithStyle
             <Grid item xs />
         </Grid>
     );
-});
+};

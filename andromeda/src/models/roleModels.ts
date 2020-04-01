@@ -8,6 +8,13 @@ export interface Role {
     roleDepartments: RoleInDepartment[];
 }
 
+export namespace Role {
+    export const initial: Role = {
+        name: '',
+        roleDepartments: []
+    }
+}
+
 export interface RoleInDepartment {
     id?: number;
     roleId?: number;
@@ -23,4 +30,8 @@ export interface RoleGetOptions extends GetOptions {
 
 export interface RoleValidation extends Validation {
     nameError?: string;
+}
+
+export namespace RoleValidation {
+    export const initial: RoleValidation = Validation.initial;
 }

@@ -3,13 +3,15 @@ import { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router';
 
 import { Grid, Paper, Avatar, Typography, TextField, FormControlLabel, Checkbox, Button, CircularProgress, Link } from '@material-ui/core';
-import { WithStyles, withStyles } from '@material-ui/styles';
+import { WithStyles, withStyles } from '@material-ui/core/styles';
 import { Face } from '@material-ui/icons';
 
 import { mergeStyles } from '../../utilities';
 import { commonStyles, layoutStyles, authenticateStyles } from '../../muiTheme';
 import { AuthenticatedUser, ApplicationError, UserValidation } from '../../models';
 import { sessionService, userService } from '../../services';
+
+import clsx from "clsx";
 
 const styles = mergeStyles(layoutStyles, authenticateStyles, commonStyles);
 
@@ -65,10 +67,10 @@ export const Signin = withStyles(styles)(function (props: Props) {
     const { classes } = props;
 
     return (
-        <Grid container component="main" className={classes.root} >
-            <Grid item xs={false} sm={6} md={7} className={classes.fulllogo} >
+        <Grid container component="main" className={clsx(classes.root, classes.h100)} >
+            <Grid item xs={false} sm={6} md={8} className={classes.fulllogo} >
             </Grid>
-            <Grid item xs={12} sm={6} md={5} component={Paper} elevation={6} square>
+            <Grid item xs={12} sm={6} md={4} component={Paper} elevation={6} square>
                 <Grid className={classes.paper}>
                     <Avatar className={classes.avatar}>
                         <Face />

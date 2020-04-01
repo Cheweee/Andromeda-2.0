@@ -4,7 +4,7 @@ import { commonStyles } from "../../../muiTheme";
 import { Department, RoleInDepartment, UserRoleInDepartment, User, Role } from "../../../models";
 import { Dialog, DialogTitle, DialogContent, Grid, InputBase, List, ListSubheader, ListItem, ListItemIcon, Checkbox, ListItemText, DialogActions, Button, TextField, CircularProgress } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import { WithStyles, withStyles } from "@material-ui/styles";
+import { WithStyles, withStyles } from "@material-ui/core/styles";
 import { useState, useEffect } from "react";
 
 const styles = mergeStyles(commonStyles);

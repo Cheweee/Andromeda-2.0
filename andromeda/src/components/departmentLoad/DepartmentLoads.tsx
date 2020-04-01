@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState, useRef, useEffect } from "react";
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
-import { WithStyles, withStyles } from "@material-ui/styles";
+import { WithStyles, withStyles } from "@material-ui/core/styles";
 import { DepartmentLoad, Filter, ApplicationError, SnackbarVariant, DepartmentLoadImportOptions } from "../../models";
 import { Grid, Card, CardContent, Typography, IconButton, Tooltip, CircularProgress, CardActions } from "@material-ui/core";
 import { DepartmentLoadDetails } from "./DepartmentLoadDetails";
@@ -22,6 +22,7 @@ interface Props extends RouteComponentProps, WithStyles<typeof styles> {
 export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Props) {
     //#region Department loads state
     const [departmentLoads, setDepartmentLoads] = useState<DepartmentLoad[]>([]);
+    const [deparmtnetId, setDepartmentId] = useState<number>(0);
 
     useEffect(() => { getDepartmentLoads(); }, [props.match.params]);
 
@@ -34,6 +35,7 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
                 departmentId: departmentId
             });
 
+            setDepartmentId(departmentId);
             setDepartmentLoads(loads);
         }
         catch (error) {
@@ -85,7 +87,7 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
     }
     //#endregion
 
-    const [filter, setFilter] = useFilterState(Filter.initialFilter);
+    const [filter, setFilter] = useFilterState(Filter.initial);
     const [snackbar, setSnackbar] = useSnackbarState();
 
     const [loading, setLoading] = useState<boolean>(false);
@@ -96,7 +98,7 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
 
     function handleBackClick() {
         const { history } = props;
-        history.push(paths.trainingDepartmentsPath);
+        history.push(paths.getTrainingDepartmentPath(departmentId));
     }
 
     const { classes } = props;
@@ -106,9 +108,11 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
         <Grid container direction="column">
             <Grid container direction="row" alignItems="center">
                 <Tooltip title="Вернуться назад">
-                    <IconButton disabled={loading} onClick={handleBackClick}>
-                        <ArrowBack />
-                    </IconButton>
+                    <span>
+                        <IconButton disabled={loading} onClick={handleBackClick}>
+                            <ArrowBack />
+                        </IconButton>
+                    </span>
                 </Tooltip>
                 <Typography>Нагрузка кафедры</Typography>
                 <Grid item xs />
@@ -119,21 +123,26 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
                     onSearchChange={handleSearchChange}
                     onSearch={getDepartmentLoads}
                 />
-                <IconButton disabled={loading} onClick={handleAdd}>
-                    <Add />
-                </IconButton>
+                <Tooltip title={"Создать учебную нагрузку"}>
+                    <span>
+                        <IconButton disabled={loading} onClick={handleAdd}>
+                            <Add />
+                        </IconButton>
+                    </span>
+                </Tooltip>
                 <Tooltip title={"Экспортировать из Excel"}>
-                    <IconButton disabled={loading} onClick={() => setImportDetailsOpen(true)}>
-                        <InsertDriveFile />
-                    </IconButton>
+                    <span>
+                        <IconButton disabled={loading} onClick={() => setImportDetailsOpen(true)}>
+                            <InsertDriveFile />
+                        </IconButton>
+                    </span>
                 </Tooltip>
             </Grid>
             {loading && (
                 <Grid container direction="row" justify="center">
                     <CircularProgress />
                 </Grid>
-            )
-            }
+            )}
             {!loading && (
                 <Grid container direction="row" wrap="wrap">
                     {departmentLoads.length ? departmentLoads.map(o =>
@@ -142,7 +151,7 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
                                 <CardContent>
                                     <DepartmentLoadDetails
                                         studyYear={o.studyYear}
-                                        totalLoad={o.totalLoad}
+                                        totalLoad={o.total}
                                     />
                                 </CardContent>
                                 <CardActions>
@@ -161,8 +170,7 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
                             </Grid>
                         )}
                 </Grid>
-            )
-            }
+            )}
             <MessageSnackbar
                 variant={snackbar.variant}
                 message={snackbar.message}

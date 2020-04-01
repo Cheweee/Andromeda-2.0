@@ -18,7 +18,7 @@ interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const Roles = withStyles(styles)(withRouter(function (props: Props) {
     const [roles, setRoles] = useState<Role[]>([]);
-    const [filter, setFilter] = useFilterState(Filter.initialFilter);
+    const [filter, setFilter] = useFilterState(Filter.initial);
     const [id, setId] = useState<number>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [snackbar, setSnackbar] = useSnackbarState();

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 
-import { WithStyles, withStyles } from "@material-ui/styles";
+import { WithStyles, withStyles } from "@material-ui/core/styles";
 import { AttachFile } from "@material-ui/icons";
 import {
     Dialog,
@@ -40,18 +40,11 @@ interface Props extends WithStyles<typeof styles> {
     onCancel: () => void;
 }
 
-const initialOptions: DepartmentLoadImportOptions = {
-    departmentId: null,
-    file: null,
-    fileName: null,
-    updateDisciplinesTitles: false
-};
-
 const initalFormErrors: DepartmentLoadImportOptionsValidation = { isValid: false };
 
 export const ImportLoadDetails = withStyles(styles)(function (props: Props) {
-    const [options, setOptions] = useState<DepartmentLoadImportOptions>(initialOptions);
-    const [formErrors, setFormErrors] = useState<DepartmentLoadImportOptionsValidation>(initalFormErrors);
+    const [options, setOptions] = useState<DepartmentLoadImportOptions>(DepartmentLoadImportOptions.initial);
+    const [formErrors, setFormErrors] = useState<DepartmentLoadImportOptionsValidation>(DepartmentLoadImportOptionsValidation.initial);
     const [loading, setLoading] = useState<boolean>(false);
     const [snackbar, setSnackbar] = useSnackbarState();
 
@@ -75,7 +68,7 @@ export const ImportLoadDetails = withStyles(styles)(function (props: Props) {
     function handleAccept() {
         const { onAccept } = props;
         onAccept(options);
-        setOptions(initialOptions);
+        setOptions(DepartmentLoadImportOptions.initial);
     }
 
     function handleFileLoad() {

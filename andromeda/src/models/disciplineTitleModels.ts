@@ -8,9 +8,17 @@ export interface DisciplineTitle {
     pinned?: boolean;
 }
 
+export namespace DisciplineTitle {
+    export const initial: DisciplineTitle = { name: '' };
+}
+
 export interface DisciplineTitleValidation extends Validation {
     shortnameError?: string;
     nameError?: string;
+}
+
+export namespace DisciplineTitleValidation {
+    export const initial: DisciplineTitleValidation = Validation.initial;
 }
 
 export interface DisciplineTitleGetOptions extends GetOptions {

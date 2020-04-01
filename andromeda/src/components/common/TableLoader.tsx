@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { WithStyles, withStyles } from "@material-ui/styles";
+import { WithStyles, withStyles } from "@material-ui/core/styles";
 import { LinearProgress } from "@material-ui/core";
 
 import { mergeStyles } from "../../utilities";

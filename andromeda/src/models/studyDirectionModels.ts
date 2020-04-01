@@ -8,6 +8,14 @@ export interface StudyDirection {
     shortName: string;
 }
 
+export namespace StudyDirection {
+    export const initial: StudyDirection = {
+        code: '',
+        name: '',
+        shortName: ''
+    }
+}
+
 export interface StudyDirectionValidation extends Validation {
     nameError?: string;
     shortNameError?: string;

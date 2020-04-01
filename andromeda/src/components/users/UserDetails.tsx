@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Grid, TextField } from "@material-ui/core";
-import { WithStyles, withStyles } from "@material-ui/styles";
+import { WithStyles, withStyles } from "@material-ui/core/styles";
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { User, UserValidation } from "../../models";

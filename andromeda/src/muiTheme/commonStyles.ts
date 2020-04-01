@@ -10,6 +10,9 @@ export const commonStyles = (theme: Theme) => ({
     margin: theme.spacing(1),
     position: 'relative',
   },
+  whiteBackground: {
+    background: '#fff'
+  },
   buttonProgress: {
     position: 'absolute',
     top: '50%',
@@ -43,56 +46,89 @@ export const commonStyles = (theme: Theme) => ({
     padding: 0
   },
   padding1: {
-    padding: "1em"
+    padding: ".5em"
+  },
+  padding1X: {
+    paddingLeft: ".5em",
+    paddingRight: ".5em"
+  },
+  padding1Y: {
+    paddingTop: ".5em",
+    paddingBottom: ".5em"
+  },
+  padding1Left: {
+    paddingLeft: ".5em"
+  },
+  padding1Right: {
+    paddingRight: ".5em"
+  },
+  padding1Top: {
+    paddingTop: ".5em"
+  },
+  padding1Bottom: {
+    paddingBottom: ".5em"
   },
   padding2: {
-    padding: "2em"
+    padding: "1em"
+  },
+  padding2X: {
+    paddingLeft: "1em",
+    paddingRight: "1em"
+  },
+  padding2Y: {
+    paddingTop: "1em",
+    paddingBottom: "1em"
+  },
+  padding2Left: {
+    paddingLeft: "1em"
+  },
+  padding2Right: {
+    paddingRight: "1em"
+  },
+  padding2Top: {
+    paddingTop: "1em"
+  },
+  padding2Bottom: {
+    paddingBottom: "1em"
   },
   margin1Top: {
-    marginTop: "12px"
+    marginTop: ".5em"
   },
   margin1X: {
-    marginLeft: "0.5em",
-    marginRight: "0.5em"
+    marginLeft: ".5em",
+    marginRight: ".5em"
   },
   margin1Left: {
-    marginLeft: "0.5em"
+    marginLeft: ".5em"
   },
   margin1Right: {
-    marginRight: "0.5em"
+    marginRight: ".5em"
   },
   margin1Y: {
-    marginTop: "0.5em",
-    marginBottom: "0.5em"
+    marginTop: ".5em",
+    marginBottom: ".5em"
   },
   margin2Top: {
-    marginTop: "24px"
+    marginTop: "1em"
   },
   margin1: {
-    margin: "12px"
+    margin: ".5em"
   },
   margin2: {
-    margin: "24px"
+    margin: "1em"
   },
   w100: {
     width: "100%"
   },
+  h100: {
+    height: "100%"
+  },
   footer: {
-    position: "absolute",
+    position: "sticky",
     bottom: 0,
     right: 0,
     left: 0,
-    paddingLeft: "105px",
-    paddingRight: "50px"
-  },
-  footerContainer: {
-    borderTopLeftRadius: "4px",
-    borderTopRightRadius: "4px",
-    background: "#fff",
-    boxShadow: "0px 1px 3px 0px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 2px 1px -1px rgba(0,0,0,0.12)",
-  },
-  footerSpacer: {
-    height: "100px"
+    marginTop: "10px"
   },
   notUnderlined: {
     '&:before': {

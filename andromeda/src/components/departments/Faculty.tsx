@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { RouteComponentProps, withRouter } from "react-router";
 
 import clsx from "clsx";
-import { WithStyles, withStyles } from "@material-ui/styles";
+import { WithStyles, withStyles } from "@material-ui/core/styles";
 import { ArrowBack, Close, Check, ExpandMore, Add } from "@material-ui/icons";
 import {
     Grid,
@@ -29,7 +29,8 @@ import {
     DepartmentType,
     TrainingDepartment,
     User,
-    RoleInDepartment
+    RoleInDepartment,
+    UserRoleInDepartment
 } from "../../models";
 
 import { departmentService, userService } from "../../services";
@@ -45,27 +46,15 @@ const styles = mergeStyles(commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
-const initialDepartment: Faculty = {
-    id: null,
-    type: DepartmentType.Faculty,
-    fullName: '',
-    name: '',
-
-    users: [],
-    roles: [],
-};
-
-const initialFormErrors: DepartmentValidation = { isValid: false };
-
 export const FacultyComponent = withStyles(styles)(withRouter(function (props: Props) {
-    const [department, setDepartment] = useState(initialDepartment);
-    const [facultyDepartments, setFacultyDepartments] = useState([]);
-    const [allUsers, setAllUsers] = useState([]);
-    const [formErrors, setFormErrors] = useState(initialFormErrors);
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [selectedRoles, setSelectedRoles] = useState([]);
-    const [selectUserRolesDialogOpen, setSelectUserRolesDialogOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [department, setDepartment] = useState<Faculty>(Faculty.initial);
+    const [facultyDepartments, setFacultyDepartments] = useState<TrainingDepartment[]>([]);
+    const [allUsers, setAllUsers] = useState<User[]>([]);
+    const [formErrors, setFormErrors] = useState<DepartmentValidation>(DepartmentValidation.initial);
+    const [selectedUser, setSelectedUser] = useState<User>(null);
+    const [selectedRoles, setSelectedRoles] = useState<RoleInDepartment[]>([]);
+    const [selectUserRolesDialogOpen, setSelectUserRolesDialogOpen] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const [snackbar, setSnackbar] = useSnackbarState();
 
     useEffect(() => { loadDepartment(); }, [props.match.params]);
@@ -175,7 +164,7 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
     }
 
     const handleUserRolesEdit = (userId: number) => {
-        const selectedUser = users.find(o => o.id === userId);
+        const selectedUser = allUsers.find(o => o.id === userId);
         const selectedRolesInDepartmentIds = department.users.filter(o => o.userId === userId).map(o => o.roleInDepartmentId);
         const selectedRolesInDepartment = department.roles.filter(o => selectedRolesInDepartmentIds.includes(o.id));
 
@@ -224,7 +213,7 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
     if (!selectedUser) {
         usersForDialog = allUsers.filter(o => !users.map(u => u.userId).includes(o.id));
     } else {
-        const usersWithoutSelectedUser = allUsers.filter(o => o.userId !== selectedUser.id).map(o => o.userId);
+        const usersWithoutSelectedUser = allUsers.filter(o => o.id !== selectedUser.id).map(o => o.id);
         usersForDialog = allUsers.filter(o => !usersWithoutSelectedUser.includes(o.id));
     }
 
@@ -235,20 +224,26 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
                 <Grid item xs container direction="column">
                     <Grid container direction="row">
                         <Tooltip title="Вернуться назад">
-                            <IconButton disabled={loading} onClick={handleBackClick}>
-                                <ArrowBack />
-                            </IconButton>
+                            <span>
+                                <IconButton disabled={loading} onClick={handleBackClick}>
+                                    <ArrowBack />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <Grid item xs />
                         <Tooltip title="Отменить">
-                            <IconButton disabled={loading} onClick={handleCancelClick}>
-                                <Close />
-                            </IconButton>
+                            <span>
+                                <IconButton disabled={loading} onClick={handleCancelClick}>
+                                    <Close />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <Tooltip title="Сохранить">
-                            <IconButton color="primary" disabled={loading || !formErrors.isValid} onClick={handleSaveClick}>
-                                <Check />
-                            </IconButton>
+                            <span>
+                                <IconButton color="primary" disabled={loading || !formErrors.isValid} onClick={handleSaveClick}>
+                                    <Check />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                     </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
@@ -288,9 +283,11 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
                                     <Typography className={classes.heading}>Сотрудники</Typography>
                                     <Grid item xs />
                                     <Tooltip title="Редактировать подразделения роли">
-                                        <IconButton onClick={handleUserRolesAdd}>
-                                            <Add />
-                                        </IconButton>
+                                        <span>
+                                            <IconButton onClick={handleUserRolesAdd}>
+                                                <Add />
+                                            </IconButton>
+                                        </span>
                                     </Tooltip>
                                 </Grid>
                             </ExpansionPanelSummary>

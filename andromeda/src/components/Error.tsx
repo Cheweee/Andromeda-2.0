@@ -16,7 +16,7 @@ export const ErrorPage = function (props: Props) {
     useEffect(() => {
         const { location: { state: locationState } } = props;
 
-        setMessage(locationState && locationState.message);
+        setMessage(locationState && locationState['message']);
     }, [props.location]);
 
     return (

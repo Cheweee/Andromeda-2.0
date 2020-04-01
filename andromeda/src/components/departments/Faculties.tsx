@@ -19,7 +19,7 @@ interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const Faculties = withStyles(styles)(withRouter(function (props: Props) {
     const [faculties, setFaculties] = useState<Faculty[]>([]);
-    const [filter, setFilter] = useFilterState(Filter.initialFilter);
+    const [filter, setFilter] = useFilterState(Filter.initial);
     const [loading, setLoading] = useState<boolean>(false);
     const [open, setOpen] = useState<boolean>(false)
     const [id, setId] = useState<number>(null);

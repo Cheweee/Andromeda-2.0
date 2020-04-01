@@ -21,6 +21,17 @@ export interface Department {
     users: UserRoleInDepartment[];
 }
 
+export namespace Department {
+    export const initial: Department = {
+        name: '',
+        fullName: '',
+        type: null,
+
+        roles: [],
+        users: []
+    };
+}
+
 export interface UserRoleInDepartment {
     id?: number;
     roleInDepartmentId;
@@ -37,12 +48,35 @@ export interface Faculty extends Department {
     readonly type: DepartmentType.Faculty
 }
 
+export namespace Faculty {
+    export const initial: Faculty = {
+        fullName: '',
+        name: '',
+        roles: [],
+        type: DepartmentType.Faculty,
+        users: []
+    };
+}
+
 export interface TrainingDepartment extends Department {
     readonly type: DepartmentType.TrainingDepartment
 
     groups: StudentGroup[];
     studyDirections: StudyDirection[];
-    titles: DisciplineTitle[]; 
+    titles: DisciplineTitle[];
+}
+
+export namespace TrainingDepartment {
+    export const initial: TrainingDepartment = {
+        fullName: '',
+        name: '',
+        roles: [],
+        type: DepartmentType.TrainingDepartment,
+        users: [],
+        groups: [],
+        studyDirections: [],
+        titles: []
+    }
 }
 
 export interface DepartmentGetOptions extends GetOptions {
@@ -63,4 +97,8 @@ export interface DepartmentValidation extends Validation {
     nameError?: string;
     fullNameError?: string;
     parentIdError?: string;
+}
+
+export namespace DepartmentValidation {
+    export const initial: DepartmentValidation = Validation.initial;
 }

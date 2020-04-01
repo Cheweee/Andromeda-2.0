@@ -1,5 +1,5 @@
 import * as React from "react";
-import { withStyles, WithStyles } from "@material-ui/styles";
+import { withStyles, WithStyles } from "@material-ui/core/styles";
 import { mergeStyles } from "../../../utilities";
 import { commonStyles } from "../../../muiTheme";
 import { Dialog, DialogTitle, DialogContent, Grid, TextField, InputAdornment, DialogActions, Button, FormControl, FormHelperText } from "@material-ui/core";

@@ -40,6 +40,8 @@ class UserService {
             url += `${conditionIndex++ === 0 ? '?' : '&'}ids=${options.ids}`;
         if (options.search !== undefined)
             url += `${conditionIndex++ === 0 ? '?' : '&'}search=${options.search}`;
+        if (options.departmentId !== undefined)
+            url += `${conditionIndex++ === 0 ? '?' : '&'}departmentId=${options.departmentId}`
 
         return fetch(url, {
             credentials: 'include',

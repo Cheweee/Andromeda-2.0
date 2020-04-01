@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { WithStyles, withStyles } from '@material-ui/styles';
+import { WithStyles, withStyles } from '@material-ui/core/styles';
 
 import { mergeStyles } from '../../utilities';
 import { commonStyles } from '../../muiTheme';
@@ -26,7 +26,7 @@ interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const Users = withStyles(styles)(withRouter(function (props: Props) {
     const [users, setUsers] = useState<User[]>([]);
-    const [filter, setFilter] = useFilterState(Filter.initialFilter);
+    const [filter, setFilter] = useFilterState(Filter.initial);
     const [id, setId] = useState<number>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [snackbar, setSnackbar] = useSnackbarState();

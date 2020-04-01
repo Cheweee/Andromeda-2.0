@@ -1,5 +1,5 @@
 import * as React from "react";
-import { withStyles, WithStyles } from "@material-ui/styles";
+import { withStyles, WithStyles } from "@material-ui/core/styles";
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { Department, DepartmentType } from "../../models";
@@ -39,9 +39,8 @@ export const ChildDepartments = withStyles(styles)(function (props: Props) {
     return (
         <List>
             {childDepartments.map(department => (
-                <ListItem>
+                <ListItem key={department.id}>
                     <ListItemText
-                        key={department.id}
                         primary={department.fullName}
                     />
                 </ListItem>

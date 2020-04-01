@@ -1,6 +1,6 @@
 import * as React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
-import { WithStyles, withStyles } from "@material-ui/styles";
+import { WithStyles, withStyles } from "@material-ui/core/styles";
 import { commonStyles } from "../../muiTheme";
 import { mergeStyles } from "../../utilities";
 import { Role, RoleValidation, ApplicationError, DepartmentType, Department, RoleInDepartment } from "../../models";
@@ -37,16 +37,9 @@ const styles = mergeStyles(commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
-const initialRole: Role = {
-    name: '',
-    roleDepartments: []
-};
-
-const initialFormErrors: RoleValidation = { isValid: false };
-
 export const RoleComponent = withStyles(styles)(withRouter(function (props: Props) {
     //#region Role state
-    const [role, setRole] = useState<Role>(initialRole);
+    const [role, setRole] = useState<Role>(Role.initial);
 
     function handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
         const name = event.target && event.target.value;
@@ -68,7 +61,7 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
         setRole({ ...role, roleDepartments: selected });
     }
     //#endregion
-    const [formErrors, setFormErrors] = useState<RoleValidation>(initialFormErrors);
+    const [formErrors, setFormErrors] = useState<RoleValidation>(RoleValidation.initial);
     const [loading, setLoading] = useState<boolean>(false);
     const [snackbar, setSnackbar] = useSnackbarState();
 
@@ -83,7 +76,7 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
         const { match } = props;
 
         const tempId = match.params && match.params[paths.idParameterName];
-        let role: Role = initialRole;
+        let role: Role = Role.initial;
         try {
             setLoading(true);
             const id = parseInt(tempId, 0);

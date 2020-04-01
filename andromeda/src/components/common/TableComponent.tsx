@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { WithStyles, withStyles } from '@material-ui/styles';
+import { WithStyles, withStyles } from '@material-ui/core/styles';
 
 import { mergeStyles } from '../../utilities';
 import { commonStyles } from '../../muiTheme';
@@ -37,32 +37,34 @@ export const TableComponent = withStyles(styles)(function (props: Props) {
         setPage(0);
     };
 
-    function getRow(data, columns: Column[]) {
+    function getRow(data, index, columns: Column[]) {
         const { classes } = props;
         const rowCells: JSX.Element[] = [];
+        let cellIndex: number = 0;
         for (const column of columns) {
             rowCells.push(
-                <TableCell className={classes.td} padding={column.padding} component="td" scope="row">
+                <TableCell key={cellIndex} className={classes.td} padding={column.padding} component="td" scope="row">
                     {column.render ? column.render(data) : data[column.name]}
                 </TableCell>
             );
+            cellIndex++;
         }
 
-        const row = (<TableRow>{rowCells}</TableRow>);
+        const row = (<TableRow key={index}>{rowCells}</TableRow>);
 
         return row;
     }
 
     const { loading, columns, data } = props;
 
-    const rows = data.slice(rowsPerPage * page, rowsPerPage * (page + 1)).map(data => getRow(data, columns));
+    const rows = data.slice(rowsPerPage * page, rowsPerPage * (page + 1)).map((data, index: number) => getRow(data, index, columns));
 
     return (
         <Grid>
             <Table >
                 <TableHead>
                     <TableRow>
-                        {columns.map(column => <TableCell padding={column.padding}>{column.displayName}</TableCell>)}
+                        {columns.map((column, index) => <TableCell key={index} padding={column.padding}>{column.displayName}</TableCell>)}
                     </TableRow>
                 </TableHead >
                 <TableBody>

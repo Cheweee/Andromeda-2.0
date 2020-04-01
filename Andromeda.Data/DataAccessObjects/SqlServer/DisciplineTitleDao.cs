@@ -66,6 +66,7 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
 
                 sql.AppendLine(@"
                     select 
+                        distinct
                         dt.Id,
                         dt.Name,
                         dt.Shortname,
@@ -77,6 +78,7 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
 	                    end as Pinned
                     from DisciplineTitle dt
                     left join PinnedDiscipline pd on pd.DisciplineTitleId = dt.Id
+                    left join GroupDisciplineLoad gdl on gdl.DisciplineTitleId = dt.Id
                 ");
 
                 int conditionIndex = 0;
@@ -97,6 +99,9 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
 
                 if (options.Titles != null && options.Titles.Count > 0)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} dt.Name in @Titles");
+
+                if(options.DepartmentLoadsIds != null && options.DepartmentLoadsIds.Count > 0)
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} gdl.DepartmentLoadId in @DepartmentLoadsIds");
 
                 _logger.LogInformation($"Sql query successfully created:\n{sql.ToString()}");
 

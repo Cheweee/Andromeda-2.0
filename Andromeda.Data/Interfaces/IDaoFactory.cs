@@ -13,5 +13,6 @@ namespace Andromeda.Data.Interfaces
         IDisciplineTitleDao DisciplineTitleDao { get; }
         IPinnedDisciplineDao PinnedDisciplineDao { get; }
         IDepartmentLoadDao DepartmentLoadDao { get; }
+        IGroupDisciplineLoadDao GroupDisciplineLoadDao { get; }
     }
 }

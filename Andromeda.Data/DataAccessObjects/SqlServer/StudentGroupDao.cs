@@ -72,33 +72,39 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
 
                 sql.AppendLine(@"
                     select 
-                        Id,
-                        StudyDirectionId,
-                        Name,
-                        StudentsCount,
-                        StartYear,
-                        CurrentCourse,
-                        DepartmentId
-                    from StudentGroup");
+                        distinct
+                        sg.Id,
+                        sg.StudyDirectionId,
+                        sg.Name,
+                        sg.StudentsCount,
+                        sg.StartYear,
+                        sg.CurrentCourse,
+                        sg.DepartmentId
+                    from StudentGroup sg
+                    left join GroupDisciplineLoad gdl on gdl.StudentGroupId = sg.Id
+                    ");
 
                 int conditionIndex = 0;
                 if (options.Id.HasValue)
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} Id = @id");
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} sg.Id = @id");
 
                 if (options.DepartmentId.HasValue)
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} DepartmentId = @DepartmentId");
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} sg.DepartmentId = @DepartmentId");
 
                 if (options.Ids != null && options.Ids.Count > 0)
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} Id in @Ids");
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} sg.Id in @Ids");
 
                 if (options.DepartmentIds != null && options.DepartmentIds.Count > 0)
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} DepartmentId in @DepartmentIds");
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} sg.DepartmentId in @DepartmentIds");
 
                 if (options.Names != null && options.Names.Count > 0)
-                    sql.AppendLine($@"{(conditionIndex++ == 0 ? "where" : "and")} Name in @Names");
+                    sql.AppendLine($@"{(conditionIndex++ == 0 ? "where" : "and")} sg.Name in @Names");
+
+                if(options.DepartmentLoadsIds != null && options.DepartmentLoadsIds.Count > 0)
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} gdl.DepartmentLoadId in @DepartmentLoadsIds");
 
                 if (!string.IsNullOrEmpty(options.Search))
-                    sql.AppendLine($@"{(conditionIndex++ == 0 ? "where" : "and")} lower(Name) like '%lower(@search)%'");
+                    sql.AppendLine($@"{(conditionIndex++ == 0 ? "where" : "and")} lower(sg.Name) like '%lower(@search)%'");
 
                 _logger.LogInformation($"Sql query successfully created:\n{sql.ToString()}");
 

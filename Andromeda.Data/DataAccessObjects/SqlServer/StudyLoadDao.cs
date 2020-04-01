@@ -22,26 +22,14 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 _logger.LogInformation("Trying to execute sql create study load query");
                 await ExecuteAsync(@"
                         insert into StudyLoad (
-                            FacultyId,
-                            DepartmentLoadId,
-                            DisciplineTitleId,
-                            StudentGroupId,
-                            SemesterNumber,
-                            StudyWeeksCount,
-                            GroupsInTheStream,
+                            GroupDisciplineLoadId,
+                            ShownValue,
                             Value,
-                            UserId,
                             ProjectType
                         ) values (
-                            @FacultyId,
-                            @DepartmentLoadId,
-                            @DisciplineTitleId,
-                            @StudentGroupId,
-                            @SemesterNumber,
-                            @StudyWeeksCount,
-                            @GroupsInTheStream,
+                            @GroupDisciplineLoadId,
+                            @ShownValue,
                             @Value,
-                            @UserId,
                             @ProjectType                           
                         );
                         select SCOPE_IDENTITY();
@@ -84,37 +72,28 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 sql.AppendLine(@"
                     select
                         sl.Id,
-                        sl.FacultyId,
-                        sl.DepartmentLoadId,
-                        sl.DisciplineTitleId,
-                        sl.SemesterNumber,
-                        sl.StudyWeeksCount,
-                        sl.GroupsInTheStream,
+                        sl.GroupDisciplineLoadId,
+                        sl.ShownValue,
                         sl.Value,
-                        sl.UserId,
                         sl.ProjectType
                     from StudyLoad sl
-                    left join [User] u on u.Id = sl.UserId
-                    left join Department d on d.Id = sl.FacultyId
-                    left join DisciplineTitle dt on dt.Id = sl.DisciplineTitleId
+                    left join UserLoad ul on ul.StudyLoadId = sl.Id
                 ");
 
                 int conditionIndex = 0;
-                if (options.DepartmentLoadId.HasValue)
-                {
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (sl.DepartmentLoadId = @DepartmentLoadId)");
-                }
-                if (options.OnlyDistributed.HasValue)
-                {
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (sl.UserId is not null)");
-                }
-                if (options.OnlyNotDistibuted.HasValue)
-                {
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (sl.UserId is null)");
-                }
+                
+                if(options.GroupDisciplineLoadId.HasValue)
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (sl.GroupDisciplineLoadId = @GroupDisciplineLoadId)");
 
-                if(options.DepartmentLoadsIds != null)
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (sl.DepartmentLoadId in @DepartmentLoadsIds)");
+                if (options.OnlyDistributed.HasValue)
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (ul.UserId is not null)");
+
+                if (options.OnlyNotDistibuted.HasValue)
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (ul.UserId is null)");
+
+                if(options.GroupDisciplineLoadsIds != null)
+                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} (sl.GroupDisciplineLoadId in @GroupDisciplineLoadsIds)");
+
                 _logger.LogInformation($"Sql query successfully created:\n{sql.ToString()}");
 
                 _logger.LogInformation("Try to execute sql get study load query");
@@ -136,15 +115,9 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 _logger.LogInformation("Trying to execute sql update study load query");
                 await ExecuteAsync(@"
                     update set
-                        FacultyId = @FacultyId,
-                        DepartmentLoadId = @DepartmentLoadId,
-                        DisciplineTitleId = @DisciplineTitleId,
-                        StudentGroupId = @StudentGroupId,
-                        SemesterNumber = @SemesterNumber,
-                        StudyWeeksCount = @StudyWeeksCount,
-                        GroupsInTheStream = @GroupsInTheStream,
+                        GroupDisciplineLoadId = @GroupDisciplineLoadId,
+                        ShownValue = @ShownValue,
                         Value = @Value,
-                        UserId = @UserId,
                         ProjectType = @ProjectType
                     from StudyLoad
                     where Id = @Id

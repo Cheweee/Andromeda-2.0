@@ -37,5 +37,7 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
         public IPinnedDisciplineDao PinnedDisciplineDao => new PinnedDisciplineDao(_settings, _logger);
 
         public IDepartmentLoadDao DepartmentLoadDao => new DepartmentLoadDao(_settings, _logger);
+
+        public IGroupDisciplineLoadDao GroupDisciplineLoadDao => new GroupDisciplineLoadDao(_settings, _logger);
     }
 }

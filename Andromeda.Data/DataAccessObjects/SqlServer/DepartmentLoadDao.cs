@@ -23,10 +23,12 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 model.Id = await QuerySingleOrDefaultAsync<int>(@"
                         insert into DepartmentLoad (
                             DepartmentId,
-                            StudyYear
+                            StudyYear,
+                            Total
                         ) values (
                             @DepartmentId,
-                            @StudyYear
+                            @StudyYear,
+                            @Total
                         );
                         select SCOPE_IDENTITY();
                 ", model);
@@ -66,20 +68,12 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 _logger.LogInformation("Try to create get department loads sql query");
 
                 sql.AppendLine(@"
-                    with load as (
-                        select 
-                        	DepartmentLoadId,
-                        	sum(Value) as TotalValue
-                        from StudyLoad
-                        group by DepartmentLoadId
-                    )
                     select 
                     	Id,
                     	StudyYear,
                     	DepartmentId,
-                    	coalesce(l.TotalValue, 0) as TotalLoad
+                        Total
                     from DepartmentLoad
-                    left join load l on l.DepartmentLoadId = Id
                 ");
 
                 int conditionIndex = 0;
@@ -112,7 +106,8 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 await ExecuteAsync(@"
                     update DepartmentLoad set
                         DepartmentId = @DepartmentId,
-                        StudyYear = @StudyYear
+                        StudyYear = @StudyYear,
+                        Total = @Total
                     from DepartmentLoad
                     where Id = @Id
                 ", model);

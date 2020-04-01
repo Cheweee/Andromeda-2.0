@@ -18,17 +18,17 @@ namespace Andromeda.Services.GenerateLoadStrategies
 
         public async Task<DepartmentLoad> Generate(DepartmentLoad model)
         {
-            int departmentId = model.DepartmentId;
-            var studyLoad = model.StudyLoad;
-            var disciplinesTitlesIds = model.StudyLoad.Select(o => o.DisciplineTitleId);
-            var pinnedDisciplines = await _pinnedDisciplineService.Get(new PinnedDisciplineGetOptions { DisciplineTitlesIds = disciplinesTitlesIds.ToList() });
-            var users = await _userService.Get(new UserGetOptions{ Ids = pinnedDisciplines.Select(o => o.UserId).ToList() });
-            foreach (var pd in pinnedDisciplines)
-            {
-                var load = studyLoad.FirstOrDefault(o => o.ProjectType == pd.ProjectType && o.DisciplineTitleId == pd.DisciplineTitleId);
-                load.UserId = pd.UserId;
-                load.User = users.FirstOrDefault(o => o.Id == pd.UserId);
-            }
+            // int departmentId = model.DepartmentId;
+            // var studyLoad = model.StudyLoad;
+            // var disciplinesTitlesIds = model.StudyLoad.Select(o => o.DisciplineTitleId);
+            // var pinnedDisciplines = await _pinnedDisciplineService.Get(new PinnedDisciplineGetOptions { DisciplineTitlesIds = disciplinesTitlesIds.ToList() });
+            // var users = await _userService.Get(new UserGetOptions{ Ids = pinnedDisciplines.Select(o => o.UserId).ToList() });
+            // foreach (var pd in pinnedDisciplines)
+            // {
+            //     var load = studyLoad.FirstOrDefault(o => o.ProjectType == pd.ProjectType && o.DisciplineTitleId == pd.DisciplineTitleId);
+            //     load.UserId = pd.UserId;
+            //     load.User = users.FirstOrDefault(o => o.Id == pd.UserId);
+            // }
 
             return model;
         }

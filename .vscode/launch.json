@@ -69,7 +69,12 @@
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
             "args": [
-                "reset"
+                "reset",
+                "--database-host", "localhost\\sqlexpress",
+                "--database-name", "andromeda",
+                "--database-user-name", "sa",
+                "--database-password", "qwerty_123",
+                "--database-provider", "0"
             ],
             "cwd": "${workspaceFolder}/Andromeda.API",
             "console": "internalConsole",
@@ -82,7 +87,13 @@
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
             "args": [
-                "reset --database-host tcp:andromeda20.database.windows.net --database-port 1433 --database-name andromeda --database-user-name chewee --database-password Futureisnear1 --database-provider 0"
+                "reset",
+                "--database-host", "tcp:andromeda20.database.windows.net",
+                "--database-port", "1433",
+                "--database-name", "andromeda",
+                "--database-user-name", "chewee",
+                "--database-password", "Futureisnear1",
+                "--database-provider", "0"
             ],
             "cwd": "${workspaceFolder}/Andromeda.API",
             "console": "internalConsole",
@@ -95,7 +106,12 @@
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
             "args": [
-                "app-settings --database-host localhost\/sqlexpress --database-name andromeda --database-user-name sa --database-password qwerty_123 --database-provider 0"
+                "app-settings",
+                "--database-host", "localhost\/sqlexpress",
+                "--database-name", "andromeda",
+                "--database-user-name", "sa",
+                "--database-password", "qwerty_123",
+                "--database-provider", "0"
             ],
             "cwd": "${workspaceFolder}/Andromeda.API",
             "console": "internalConsole",

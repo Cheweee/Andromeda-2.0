@@ -9,6 +9,8 @@ import { createBrowserHistory } from 'history';
 import { routes } from "./routes";
 import { sessionService } from "./services";
 import { deepPurple, amber } from "@material-ui/core/colors";
+import { Provider } from "react-redux";
+import configureStore from "./store/createStore";
 
 const theme = createMuiTheme({
     palette: {
@@ -23,14 +25,17 @@ const baseUrl = document
 
 sessionService.init();
 
+const store = configureStore();
 const history = createBrowserHistory({ basename: baseUrl });
 
 ReactDOM.render(
     <React.Fragment>
         <ThemeProvider theme={theme}>
-            <Router history={history}>
-                {routes}
-            </Router>
+            <Provider store={store}>
+                <Router history={history}>
+                    {routes}
+                </Router>
+            </Provider>
         </ThemeProvider>
     </React.Fragment>,
     document.getElementById("app-container")

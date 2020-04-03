@@ -56,7 +56,7 @@ export interface UserGetOptions extends GetOptions {
     departmentId?: number;
 }
 
-export interface UserAuthorizeOptions {
+export interface UserAuthenticateOptions {
     username: string;
     password: string;
     rememberMe: boolean;

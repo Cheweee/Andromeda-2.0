@@ -1,14 +1,19 @@
 import { handleJsonResponse, ResponseHandler, handleTextResponse, handleResponse } from "../utilities";
-import { AuthenticatedUser, User, UserAuthorizeOptions, UserGetOptions, UserValidation } from "../models";
+import { AuthenticatedUser, User, UserAuthenticateOptions, UserGetOptions, UserValidation } from "../models";
+import { sessionService } from "./sessionService";
 
 class UserService {
-    public async signin(options: UserAuthorizeOptions): Promise<AuthenticatedUser> {
+    public async signin(options: UserAuthenticateOptions): Promise<AuthenticatedUser> {
         return fetch('api/user/signin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(options)
         })
             .then(handleJsonResponse as ResponseHandler<AuthenticatedUser>);
+    }
+
+    public signout() {
+        sessionService.signOut();
     }
 
     public async create(user: User): Promise<User> {

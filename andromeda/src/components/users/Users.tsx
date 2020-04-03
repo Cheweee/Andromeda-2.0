@@ -1,54 +1,70 @@
 import * as React from 'react';
+import { connect, DispatchProp } from 'react-redux';
+import { RouteComponentProps, withRouter } from 'react-router';
 import { WithStyles, withStyles } from '@material-ui/core/styles';
-
-import { mergeStyles } from '../../utilities';
-import { commonStyles } from '../../muiTheme';
-import { User, ApplicationError } from '../../models';
-import { userService } from '../../services/userService';
+import { Search, Edit, Delete, Add, SupervisorAccount } from '@material-ui/icons';
 import {
     Paper,
     Grid,
     Typography,
-    InputBase,
     IconButton,
 } from '@material-ui/core';
-import { Search, Edit, Delete, Add, SupervisorAccount } from '@material-ui/icons';
-import { IFilter, Column, SnackbarVariant, Filter } from '../../models/commonModels';
+
+import { mergeStyles } from '../../utilities';
+import { commonStyles } from '../../muiTheme';
+import { User, ApplicationError, UserAuthenticateOptions, UserGetOptions} from '../../models';
+import { Column, SnackbarVariant, Filter } from '../../models/commonModels';
 import { TableComponent, ConfirmationDialog, SearchInput, MessageSnackbar } from '../common';
-import { RouteComponentProps, withRouter } from 'react-router';
 import { paths } from '../../sharedConstants';
-import { useEffect, useState } from 'react';
 import { useSnackbarState, useFilterState } from '../../hooks';
+import { UserState, userActions, UserActionsProps } from '../../store/userStore';
+import { AppState } from '../../store/createStore';
 
 const styles = mergeStyles(commonStyles);
 
-interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
+interface UsersStateProps {
+    state: UserState;
+}
 
-export const Users = withStyles(styles)(withRouter(function (props: Props) {
-    const [users, setUsers] = useState<User[]>([]);
+function mapStateToProps(state: AppState): UsersStateProps {
+    return { state: state.user };
+}
+function mapDispatchToProps(dispatch): UserActionsProps {
+    return {
+        createUser: (user: User) => dispatch(userActions.createUser(user)),
+        deleteUsers: (ids: number[]) => dispatch(userActions.deleteUsers(ids)),
+        getUsers: (options: UserGetOptions) => dispatch(userActions.getUsers(options)),
+        signin: (options: UserAuthenticateOptions) => dispatch(userActions.signin(options)),
+        signout: () => userActions.signout(),
+        updateUser: (user: User) => dispatch(userActions.updateUser(user)),
+        validateCredentials: (username: string, password: string) => userActions.validateCredentials(username, password),
+        validateUser: (user: User) => userActions.validateUser(user)
+    };
+};
+
+interface Props extends UsersStateProps, UserActionsProps, RouteComponentProps, WithStyles<typeof styles> {
+}
+
+export const Users = withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(withRouter(function (props: Props) {
+    const [users, setUsers] = React.useState<User[]>([]);
     const [filter, setFilter] = useFilterState(Filter.initial);
-    const [id, setId] = useState<number>(null);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [id, setId] = React.useState<number>(null);
+    const [loading, setLoading] = React.useState<boolean>(false);
     const [snackbar, setSnackbar] = useSnackbarState();
-    const [open, setOpen] = useState<boolean>(false);
+    const [open, setOpen] = React.useState<boolean>(false);
 
-    useEffect(() => { getUsers(); }, [props])
+    React.useEffect(() => { props.getUsers({ search: filter.search });}, [])
+    React.useEffect(() => { 
+        const { state } = props;
 
-    async function getUsers() {
-        try {
+        if(state.loading === true) {
             setLoading(true);
-            const users = await userService.get({ search: filter.search });
-            setUsers(users);
+            return;
         }
-        catch (error) {
-            if (error instanceof ApplicationError) {
-                setSnackbar(error.message, true, SnackbarVariant.error);
-            }
-        }
-        finally {
-            setLoading(false);
-        }
-    }
+
+        setLoading(false);
+        setUsers(state.users);
+    }, [props.state]);
 
     function handleAdd() {
         const { history } = props;
@@ -70,9 +86,9 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
             setOpen(false);
             if (result) {
                 const ids = [id];
-                await userService.delete(ids);
+                await userActions.deleteUsers(ids);
                 setSnackbar('Пользователь успешно удален.', true, SnackbarVariant.success);
-                await getUsers();
+                //await getUsers();
             }
         }
         catch (error) {
@@ -124,7 +140,7 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
                     debounce={filter.debounce}
                     search={filter.search}
                     onSearchChange={handleSearchChange}
-                    onSearch={getUsers}
+                    //onSearch={getUsers}
                 />
                 <IconButton onClick={handleAdd}>
                     <Add />
@@ -146,4 +162,4 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
             />
         </Grid >
     );
-}));
+})));

@@ -1,5 +1,4 @@
-import { User, AuthenticatedUser, ApplicationError, UserAuthenticateOptions } from "../../models"
-import { AppState } from "../createStore"
+import { User, AuthenticatedUser, UserAuthenticateOptions } from "../../models"
 
 export type UsersLoading = {
     loading: true;
@@ -18,7 +17,7 @@ export type Authenticating = {
 export type Authenticated = {
     authenticating: boolean;
     authenticated?: boolean;
-    authenticatedUser?: AuthenticatedUser;
+    currentUser?: AuthenticatedUser;
 }
 
 export type UsersDeleting = {
@@ -39,7 +38,7 @@ export type UserEditLoading = {
 export type UserEditLoaded = {
     updating: false;
     updated?: boolean;
-    user: User;
+    user?: User;
 }
 
 export type AuthenticationState = Authenticating | Authenticated;

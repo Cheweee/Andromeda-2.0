@@ -1,8 +1,8 @@
 import { Action } from "redux";
-import { ThunkAction } from "redux-thunk";
+
 import { User, ApplicationError, AuthenticatedUser, UserGetOptions, UserAuthenticateOptions, UserValidation } from "../../models";
 import { userService } from "../../services";
-import { AppState } from "../createStore";
+import { AppThunkAction } from "../../models/reduxModels";
 
 //#region Actions types enum
 export enum ActionType {
@@ -132,7 +132,7 @@ export type UserActions = Signin | Signout | GetUsers | CreateUser | UpdateUser 
 //#endregion
 
 //#region Actions
-function signin(options: UserAuthenticateOptions): ThunkAction<Promise<SigninSuccess | SigninFailure>, AppState, void, Action> {
+function signin(options: UserAuthenticateOptions): AppThunkAction<Promise<SigninSuccess | SigninFailure>> {
     return async (dispatch) => {
         dispatch(request(options));
 
@@ -156,7 +156,7 @@ function signout(): Signout {
     return { type: ActionType.signOut };
 }
 
-function createUser(user: User): ThunkAction<Promise<CreateSuccess | CreateFailure>, AppState, void, Action> {
+function createUser(user: User): AppThunkAction<Promise<CreateSuccess | CreateFailure>> {
     return async (dispatch) => {
         dispatch(request(user));
 
@@ -175,7 +175,7 @@ function createUser(user: User): ThunkAction<Promise<CreateSuccess | CreateFailu
     }
 }
 
-function getUsers(options: UserGetOptions): ThunkAction<Promise<GetSuccess | GetFailure>, AppState, void, Action> {
+function getUsers(options: UserGetOptions): AppThunkAction<Promise<GetSuccess | GetFailure>> {
     return async dispatch => {
         dispatch(request(options));
 
@@ -194,7 +194,7 @@ function getUsers(options: UserGetOptions): ThunkAction<Promise<GetSuccess | Get
     }
 }
 
-function updateUser(user: User): ThunkAction<Promise<UpdateSuccess | UpdateFailure>, AppState, void, Action> {
+function updateUser(user: User): AppThunkAction<Promise<UpdateSuccess | UpdateFailure>> {
     return async (dispatch) => {
         dispatch(request(user));
 
@@ -213,7 +213,7 @@ function updateUser(user: User): ThunkAction<Promise<UpdateSuccess | UpdateFailu
     }
 }
 
-function deleteUsers(ids: number[]): ThunkAction<Promise<DeleteSuccess | DeleteFailure>, AppState, void, Action> {
+function deleteUsers(ids: number[]): AppThunkAction<Promise<DeleteSuccess | DeleteFailure>> {
     return async (dispatch) => {
         dispatch(request(ids));
 
@@ -240,17 +240,6 @@ function validateCredentials(username: string, password: string): ValidateCreden
 function validateUser(user: User): Validate {
     const result = userService.validateUser(user);
     return { type: ActionType.validate, formErrors: result };
-}
-
-export interface UserActionsProps {
-    signin: (options: UserAuthenticateOptions) => Promise<SigninSuccess | SigninFailure>;
-    signout: () => Signout;
-    createUser: (user: User) => Promise<CreateSuccess | CreateFailure>;
-    getUsers: (options: UserGetOptions) => Promise<GetSuccess | GetFailure>;
-    updateUser: (user: User) => Promise<UpdateSuccess | UpdateFailure>;
-    deleteUsers: (ids: number[]) => Promise<DeleteSuccess | DeleteFailure>;
-    validateCredentials: (username: string, password: string) => ValidateCredentials;
-    validateUser: (user: User) => Validate;
 }
 
 export default {

@@ -5,10 +5,8 @@ import thunkMiddleware from 'redux-thunk';
 import { userReducer } from './userStore/reducers'
 
 const rootReducer = combineReducers({
-    user: userReducer
+    userState: userReducer
 });
-
-export type AppState = ReturnType<typeof rootReducer>;
 
 export default function configureStore() {
     const middlewares = [thunkMiddleware];

@@ -5,7 +5,7 @@ const initialState: UserState = {
     authenticating: false,
     loading: true,
     deleting: false,
-    updating: true,
+    updating: false,
 }
 
 export function userReducer(prevState: UserState = initialState, action: UserActions): UserState {
@@ -15,7 +15,7 @@ export function userReducer(prevState: UserState = initialState, action: UserAct
             return { ...prevState, ...state };
         }
         case ActionType.signinSuccess: {
-            const state: AuthenticationState = { authenticating: false, authenticated: true, authenticatedUser: action.user }
+            const state: AuthenticationState = { authenticating: false, authenticated: true, currentUser: action.user }
             return { ...prevState, ...state };
         }
         case ActionType.signinFailure: {
@@ -24,7 +24,7 @@ export function userReducer(prevState: UserState = initialState, action: UserAct
         }
 
         case ActionType.signOut: {
-            const state: AuthenticationState = { authenticating: false, authenticated: true, authenticatedUser: null }
+            const state: AuthenticationState = { authenticating: false, authenticated: true, currentUser: null }
             return { ...prevState, ...state };
         }
 

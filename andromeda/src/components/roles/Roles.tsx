@@ -10,7 +10,7 @@ import { Edit, Delete, Search, Add, Apartment, AssignmentInd } from "@material-u
 import { SearchInput, TableComponent, ConfirmationDialog, MessageSnackbar } from "../common";
 import { roleService } from "../../services";
 import { useState, useEffect } from "react";
-import { useSnackbarState, useFilterState } from "../../hooks";
+import { useFilterState } from "../../hooks";
 
 const styles = mergeStyles(commonStyles);
 
@@ -21,7 +21,6 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
     const [filter, setFilter] = useFilterState(Filter.initial);
     const [id, setId] = useState<number>(null);
     const [loading, setLoading] = useState<boolean>(false);
-    const [snackbar, setSnackbar] = useSnackbarState();
     const [open, setOpen] = useState<boolean>(false);
 
     useEffect(() => { getRoles(); }, [props]);
@@ -35,7 +34,7 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
         }
         catch (error) {
             if (error instanceof ApplicationError) {
-                setSnackbar(error.message, true, SnackbarVariant.error);
+                //setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
         finally { setLoading(false); }
@@ -62,13 +61,13 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
             if (result) {
                 const ids = [id];
                 await roleService.delete(ids);
-                setSnackbar('Роль успешно удалена', false, undefined);
+                //setSnackbar('Роль успешно удалена', false, undefined);
                 await getRoles();
             }
         }
         catch (error) {
             if (error instanceof ApplicationError) {
-                setSnackbar(error.message, true, SnackbarVariant.error);
+                //setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
         finally {
@@ -123,12 +122,6 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
                 open={open}
                 message={'Вы уверены, что хотите удалить роль?'}
                 onClose={handleConfirmationClose}
-            />
-            <MessageSnackbar
-                variant={snackbar.variant}
-                open={snackbar.open}
-                message={snackbar.message}
-                onClose={() => setSnackbar('', false, undefined)}
             />
         </Grid >
     );

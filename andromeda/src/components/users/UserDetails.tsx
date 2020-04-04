@@ -34,6 +34,9 @@ export const UserDetails = withStyles(styles)(function (props: Props) {
         handleUsernameChange,
         handlePasswordChange
     } = props;
+
+    const isUserExist = user && Boolean(user.id);
+
     return (
         <Grid container direction="column">
             <Grid container direction="row">
@@ -51,7 +54,7 @@ export const UserDetails = withStyles(styles)(function (props: Props) {
                         disabled={disabled}
                         error={Boolean(formErrors.firstnameError)}
                         helperText={formErrors.firstnameError}
-                        value={user.firstname}
+                        value={user && user.firstname}
                         onChange={handleFirstnameChange}
                     />
                 </Grid>
@@ -66,7 +69,7 @@ export const UserDetails = withStyles(styles)(function (props: Props) {
                         autoComplete="secondname"
                         fullWidth
                         disabled={disabled}
-                        value={user.secondname || ''}
+                        value={user && user.secondname || ''}
                         onChange={handleSecondnameChange}
                     />
                 </Grid>
@@ -82,7 +85,7 @@ export const UserDetails = withStyles(styles)(function (props: Props) {
                         required
                         autoComplete="familyname"
                         disabled={disabled}
-                        value={user.lastname}
+                        value={user && user.lastname}
                         onChange={handleLastnameChange}
                         error={Boolean(formErrors.lastnameError)}
                         helperText={formErrors.lastnameError}
@@ -104,7 +107,7 @@ export const UserDetails = withStyles(styles)(function (props: Props) {
                         disabled={disabled}
                         error={Boolean(formErrors.emailError)}
                         helperText={formErrors.emailError}
-                        value={user.email}
+                        value={user && user.email}
                         onChange={handleEmailChange}
                     />
                 </Grid>
@@ -119,17 +122,17 @@ export const UserDetails = withStyles(styles)(function (props: Props) {
                         autoComplete="username"
                         required
                         fullWidth
-                        disabled={disabled || user.id > 0}
+                        disabled={disabled || isUserExist}
                         InputProps={{
-                            readOnly: Boolean(user.id),
+                            readOnly: isUserExist,
                         }}
                         error={Boolean(formErrors.usernameError)}
                         helperText={formErrors.usernameError}
-                        value={user.username}
+                        value={user && user.username}
                         onChange={handleUsernameChange}
                     />
                 </Grid>
-                {!user.id &&
+                {!isUserExist &&
                     <Grid item xs className={classes.margin1X}>
                         <TextField
                             id="password"
@@ -144,7 +147,7 @@ export const UserDetails = withStyles(styles)(function (props: Props) {
                             disabled={disabled}
                             error={Boolean(formErrors.passwordError)}
                             helperText={formErrors.passwordError}
-                            value={user.password}
+                            value={user && user.password}
                             onChange={handlePasswordChange}
                         />
                     </Grid>

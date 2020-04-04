@@ -43,13 +43,13 @@ import { UsersRolesInDepartment, UserRolesInDepartmentDetails } from "./UsersRol
 import { StudentGroups, StudentGroupDetails } from "./StudentGroups";
 import { StudyDirections, StudyDirectionDetails } from "./StudyDirections";
 import { DisciplineTitleDetails, DisciplinesTitles } from "./DisciplinesTitles";
-import { useSnackbarState } from "../../hooks";
 import { SnackbarVariant } from "../../models/commonModels";
 
 const styles = mergeStyles(commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
+//TODO: Избавиться от всех стрелочных функций
 export const TrainingDepartmentComponent = withStyles(styles)(withRouter(function (props: Props) {
     const [department, setDepartment] = useState<TrainingDepartment>(TrainingDepartment.initial);
     const [formErrors, setFormErrors] = useState<DepartmentValidation>(DepartmentValidation.initial);
@@ -77,8 +77,6 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
     const [selectedRoles, setSelectedRoles] = useState([]);
     const [selectUserRolesDialogOpen, setSelectUserRolesDialogOpen] = useState(false);
     //#endregion
-
-    const [snackbarState, setSnackbarState] = useSnackbarState();
 
     useEffect(() => { loadDepartment(); }, [props.match.params]);
 
@@ -111,7 +109,7 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
         catch (error) {
             if (error instanceof ApplicationError) {
                 setLoading(false);
-                setSnackbarState(error.message, true, SnackbarVariant.error);
+                //setSnackbarState(error.message, true, SnackbarVariant.error);
                 throw error;
             }
         }
@@ -128,10 +126,6 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
         setLoading(false);
     }
 
-    const handleSnackbarClose = () => {
-        setSnackbarState('', false, undefined);
-    }
-
     const handleBackClick = () => {
         const { history } = props;
         history.push(paths.trainingDepartmentsPath);
@@ -145,12 +139,12 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
             else
                 await departmentService.create(department);
             setLoading(false);
-            setSnackbarState('Кафедра успешно сохранена', true, SnackbarVariant.success);
+            //setSnackbarState('Кафедра успешно сохранена', true, SnackbarVariant.success);
         }
         catch (error) {
             if (error instanceof ApplicationError) {
                 setLoading(false);
-                setSnackbarState(error.message, true, SnackbarVariant.error);
+                //setSnackbarState(error.message, true, SnackbarVariant.error);
             }
         }
     }
@@ -538,12 +532,6 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                     </Card>
                 </Grid>
                 <Grid item xs={2} />
-                <MessageSnackbar
-                    variant={snackbarState.variant}
-                    message={snackbarState.message}
-                    open={snackbarState.open}
-                    onClose={handleSnackbarClose}
-                />
                 <UserRolesInDepartmentDetails
                     open={selectUserRolesDialogOpen}
                     selectedUser={selectedUser}

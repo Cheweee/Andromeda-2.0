@@ -1,56 +1,45 @@
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
 
+import * as Redux from "react-redux";
+
 import { WithStyles, withStyles } from "@material-ui/core/styles";
-import { Grid, Card, CardContent, CardHeader, Tooltip, IconButton, TextField, LinearProgress, ExpansionPanel, ExpansionPanelSummary, Typography, ExpansionPanelDetails } from "@material-ui/core";
+import { Grid, Card, CardContent, CardHeader, Tooltip, IconButton, LinearProgress, ExpansionPanel, ExpansionPanelSummary, Typography, ExpansionPanelDetails } from "@material-ui/core";
+import { Check, Close, ArrowBack, ExpandMore, Add } from "@material-ui/icons";
+
+import clsx from "clsx";
 
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
-import { Check, Close, ArrowBack, ExpandMore, Add } from "@material-ui/icons";
 import { paths } from "../../sharedConstants";
 
-import clsx from "clsx";
-import { User, UserValidation, ApplicationError, PinnedDiscipline, DisciplineTitle } from '../../models';
-import { userService, departmentService } from "../../services";
-import { MessageSnackbar } from "../common";
-import { useState, useEffect } from "react";
-import { SnackbarVariant, ProjectType } from "../../models/commonModels";
+import { User, UserValidation, ApplicationError, DisciplineTitle, PinnedDiscipline } from '../../models';
+import { AppState } from "../../models/reduxModels";
+import { ProjectType } from "../../models/commonModels";
+import { userService } from "../../services";
+import { disciplinetitleService } from "../../services/disciplineTitleService";
+
 import { UserDetails } from "./UserDetails";
 import { PinnedDisciplineDetails, PinnedDisciplines } from "./PinnedDisciplines";
-import { disciplinetitleService } from "../../services/disciplineTitleService";
-import { useSnackbarState } from "../../hooks";
+
+import { userActions } from "../../store/userStore";
 
 const styles = mergeStyles(commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const UserComponent = withStyles(styles)(function (props: Props) {
+    const dispatch = Redux.useDispatch();
+    const { userState } = Redux.useSelector((state: AppState) => ({ userState: state.userState }));
+
     //#region User state
-    const [user, setUser] = useState(User.initial);
+    const [user, setUser] = React.useState<User>(User.initial);
 
-    async function loadUser() {
+    function loadUser() {
         const { match } = props;
-
         const tempId = match.params && match.params[paths.idParameterName];
-        let user: User = User.initial;
-        try {
-            setLoading(true);
-            const id = parseInt(tempId, 0);
-            if (id) {
-                const models = await userService.get({ id });
-                user = models[0];
-            }
-        }
-        catch (error) {
-            if (error instanceof ApplicationError) {
-                setLoading(false);
-                setSnackbar(error.message, true, SnackbarVariant.error);
-            }
-        }
-        finally {
-            setLoading(false);
-            setUser(user);
-        }
+        const id = parseInt(tempId, null);
+        dispatch(userActions.getUser(id));
     }
 
     function handleFirstnameChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -79,26 +68,14 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
     //#endregion
 
     //#region Pinned disciplines state
-    const [selectedTitle, setSelectedTitle] = useState<DisciplineTitle>(null);
-    const [selectedProjectTypes, setSelectedProjectTypes] = useState<ProjectType[]>([]);
-    const [pinnedDisciplineDetailsOpen, setPinnedDisciplineDetailsOpen] = useState<boolean>(false);
-    const [disciplinesTitles, setDisciplinesTitles] = useState<DisciplineTitle[]>([]);
+    const [selectedTitle, setSelectedTitle] = React.useState<DisciplineTitle>(null);
+    const [selectedProjectTypes, setSelectedProjectTypes] = React.useState<ProjectType[]>([]);
+    const [pinnedDisciplineDetailsOpen, setPinnedDisciplineDetailsOpen] = React.useState<boolean>(false);
+    const [disciplinesTitles, setDisciplinesTitles] = React.useState<DisciplineTitle[]>([]);
 
     async function loadNotPinnedDiscilines() {
-        try {
-            setLoading(true);
-            const titles = await disciplinetitleService.getTitles({});
-            setDisciplinesTitles(titles);
-        }
-        catch (error) {
-            if (error instanceof ApplicationError) {
-                setLoading(false);
-                setSnackbar(error.message, true, SnackbarVariant.error);
-            }
-        }
-        finally {
-            setLoading(false);
-        }
+        const titles = await disciplinetitleService.getTitles({});
+        setDisciplinesTitles(titles);
     }
 
     function handlePinnedDisciplineAdd(event: React.MouseEvent<Element, MouseEvent>) {
@@ -151,59 +128,48 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
     }
     //#endregion
 
-    const [formErrors, setFormErrors] = useState<UserValidation>(UserValidation.initial);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [snackbar, setSnackbar] = useSnackbarState();
+    const [formErrors, setFormErrors] = React.useState<UserValidation>(UserValidation.initial);
+    const [loading, setLoading] = React.useState<boolean>(true);
 
-    useEffect(() => { initialize(); }, [props.match.params]);
+    React.useEffect(() => { initialize(); }, [props.match.params]);
+    React.useEffect(() => {
+        if (userState.userLoading === false) {
+            setUser(userState.user);
+            setLoading(false);
+        }
+    }, [userState.userLoading]);
+    React.useEffect(() => { dispatch(userActions.validateUser(user)); }, [user])
+    React.useEffect(() => { setFormErrors(userState.formErrors) }, [userState.formErrors]);
 
-    useEffect(() => {
-        const formErrors = userService.validateUser(user);
-        setFormErrors(formErrors);
-    }, [user]);
-
-    async function initialize() {
-        await loadUser();
-        await loadNotPinnedDiscilines();
+    function initialize() {
+        loadUser();
+        loadNotPinnedDiscilines();
     }
 
-    function handleBackClick(event: React.MouseEvent<Element, MouseEvent>) {
+    function handleBackClick() {
         const { history } = props;
+        dispatch(userActions.clearEditionState());
         history.push(paths.usersPath);
     }
 
-    async function handleSaveClick(event: React.MouseEvent<Element, MouseEvent>) {
-        try {
-            setLoading(true);
-            if (user.id)
-                await userService.update(user);
-            else
-                await userService.create(user);
-            setLoading(false);
-            setSnackbar('Пользователь успешно сохранен', true, SnackbarVariant.success);
-        }
-        catch (error) {
-            if (error instanceof ApplicationError) {
-                setLoading(false)
-                setSnackbar(error.message, true, SnackbarVariant.error);
-            }
-        }
+    function handleSaveClick() {
+        dispatch(userActions.saveUser(user));
     }
 
-    function handleCancelClick(event: React.MouseEvent<Element, MouseEvent>) {
-        loadUser();
+    function handleCancelClick() {
+        initialize();
     }
 
     const { classes } = props;
 
-    const userDisciplines = user.pinnedDisciplines || [];
-
     let disciplinesForDialog: DisciplineTitle[] = [];
 
+    const pinnedDisciplines: PinnedDiscipline[] = user && user.pinnedDisciplines || [];
+
     if (!selectedTitle) {
-        disciplinesForDialog = disciplinesTitles.filter(o => !userDisciplines.map(o => o.disciplineTitleId).includes(o.id));
+        disciplinesForDialog = disciplinesTitles.filter(o => !pinnedDisciplines.map(o => o.disciplineTitleId).includes(o.id));
     } else {
-        const userDisciplinesWithoutSelectedDiscipline = userDisciplines.filter(o => o.disciplineTitleId !== selectedTitle.id).map(o => o.disciplineTitleId);
+        const userDisciplinesWithoutSelectedDiscipline = pinnedDisciplines.filter(o => o.disciplineTitleId !== selectedTitle.id).map(o => o.disciplineTitleId);
         disciplinesForDialog = disciplinesTitles.filter(o => !userDisciplinesWithoutSelectedDiscipline.includes(o.id));
     }
 
@@ -270,7 +236,7 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails>
                                 <PinnedDisciplines
-                                    pinnedDisciplines={user.pinnedDisciplines}
+                                    pinnedDisciplines={pinnedDisciplines}
                                     handleDelete={handlePinnedDisciplineDelete}
                                     handleEdit={handlePinnedDisciplineEdit}
                                 />
@@ -279,12 +245,6 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
                     </Card>
                 </Grid>
                 <Grid item xs={2} />
-                <MessageSnackbar
-                    variant={snackbar.variant}
-                    message={snackbar.message}
-                    open={snackbar.open}
-                    onClose={() => setSnackbar('', false, undefined)}
-                />
                 <PinnedDisciplineDetails
                     open={pinnedDisciplineDetailsOpen}
                     disciplineTitle={selectedTitle}

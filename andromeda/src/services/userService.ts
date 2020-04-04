@@ -62,7 +62,7 @@ class UserService {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(ids)
         })
-        .then(handleResponse);
+            .then(handleResponse);
     }
 
     private validateFirstname(firstname: string): string {
@@ -104,6 +104,8 @@ class UserService {
     }
 
     public validateUser(user: User) {
+        if (!user) return UserValidation.initial;
+
         const firstnameError = this.validateFirstname(user.firstname);
         const lastnameError = this.validateLastname(user.lastname);
         const usernameError = this.validateUsername(user.username);

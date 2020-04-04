@@ -11,7 +11,7 @@ import { paths } from "../../sharedConstants";
 import { Edit, Delete, AccountBalance, Search, Add, Apartment } from "@material-ui/icons";
 import { SearchInput, TableComponent, ConfirmationDialog, MessageSnackbar } from "../common";
 import { departmentService } from "../../services";
-import { useSnackbarState, useFilterState } from "../../hooks";
+import { useFilterState } from "../../hooks";
 
 const styles = mergeStyles(commonStyles);
 
@@ -23,7 +23,6 @@ export const Faculties = withStyles(styles)(withRouter(function (props: Props) {
     const [loading, setLoading] = useState<boolean>(false);
     const [open, setOpen] = useState<boolean>(false)
     const [id, setId] = useState<number>(null);
-    const [snackbar, setSnackbar] = useSnackbarState();
 
     useEffect(() => { getFaculties(); }, [props]);
 
@@ -39,7 +38,7 @@ export const Faculties = withStyles(styles)(withRouter(function (props: Props) {
         }
         catch (error) {
             if (error instanceof ApplicationError) {
-                setSnackbar(error.message, true, SnackbarVariant.error)
+                //setSnackbar(error.message, true, SnackbarVariant.error)
             }
         }
         finally {
@@ -68,13 +67,13 @@ export const Faculties = withStyles(styles)(withRouter(function (props: Props) {
             if (result) {
                 const ids = [id];
                 await departmentService.delete(ids);
-                setSnackbar('Факультет успешно удален.', true, SnackbarVariant.success);
+                //setSnackbar('Факультет успешно удален.', true, SnackbarVariant.success);
                 await getFaculties();
             }
         }
         catch (error) {
             if (error instanceof ApplicationError) {
-                setSnackbar(error.message, true, SnackbarVariant.error);
+                //setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
         finally {
@@ -131,12 +130,6 @@ export const Faculties = withStyles(styles)(withRouter(function (props: Props) {
                 open={open}
                 message={'Вы уверены, что хотите удалить факультет?'}
                 onClose={handleConfirmationClose}
-            />
-            <MessageSnackbar
-                message={snackbar.message}
-                open={snackbar.open}
-                variant={snackbar.variant}
-                onClose={() => setSnackbar('', false, undefined)}
             />
         </Grid >
     );

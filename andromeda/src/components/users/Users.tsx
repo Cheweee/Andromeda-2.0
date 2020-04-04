@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { connect, DispatchProp } from 'react-redux';
+import * as Redux from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { WithStyles, withStyles } from '@material-ui/core/styles';
 import { Search, Edit, Delete, Add, SupervisorAccount } from '@material-ui/icons';
@@ -12,60 +12,46 @@ import {
 
 import { mergeStyles } from '../../utilities';
 import { commonStyles } from '../../muiTheme';
-import { User, ApplicationError, UserAuthenticateOptions, UserGetOptions} from '../../models';
-import { Column, SnackbarVariant, Filter } from '../../models/commonModels';
-import { TableComponent, ConfirmationDialog, SearchInput, MessageSnackbar } from '../common';
+import { User } from '../../models';
+import { Column, Filter } from '../../models/commonModels';
+import { TableComponent, ConfirmationDialog, SearchInput } from '../common';
 import { paths } from '../../sharedConstants';
-import { useSnackbarState, useFilterState } from '../../hooks';
-import { UserState, userActions, UserActionsProps } from '../../store/userStore';
-import { AppState } from '../../store/createStore';
+import { useFilterState } from '../../hooks';
+import { AppState } from '../../models/reduxModels';
+import { userActions } from '../../store/userStore';
 
 const styles = mergeStyles(commonStyles);
 
-interface UsersStateProps {
-    state: UserState;
+interface Props extends RouteComponentProps, WithStyles<typeof styles> {
 }
 
-function mapStateToProps(state: AppState): UsersStateProps {
-    return { state: state.user };
-}
-function mapDispatchToProps(dispatch): UserActionsProps {
-    return {
-        createUser: (user: User) => dispatch(userActions.createUser(user)),
-        deleteUsers: (ids: number[]) => dispatch(userActions.deleteUsers(ids)),
-        getUsers: (options: UserGetOptions) => dispatch(userActions.getUsers(options)),
-        signin: (options: UserAuthenticateOptions) => dispatch(userActions.signin(options)),
-        signout: () => userActions.signout(),
-        updateUser: (user: User) => dispatch(userActions.updateUser(user)),
-        validateCredentials: (username: string, password: string) => userActions.validateCredentials(username, password),
-        validateUser: (user: User) => userActions.validateUser(user)
-    };
-};
+export const Users = withStyles(styles)(withRouter(function (props: Props) {
+    const dispatch = Redux.useDispatch();
+    const { userState } = Redux.useSelector((state: AppState) => ({ userState: state.userState }));
 
-interface Props extends UsersStateProps, UserActionsProps, RouteComponentProps, WithStyles<typeof styles> {
-}
-
-export const Users = withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(withRouter(function (props: Props) {
     const [users, setUsers] = React.useState<User[]>([]);
+    //FIXME: Issue with filter timeoute
     const [filter, setFilter] = useFilterState(Filter.initial);
     const [id, setId] = React.useState<number>(null);
     const [loading, setLoading] = React.useState<boolean>(false);
-    const [snackbar, setSnackbar] = useSnackbarState();
     const [open, setOpen] = React.useState<boolean>(false);
 
-    React.useEffect(() => { props.getUsers({ search: filter.search });}, [])
-    React.useEffect(() => { 
-        const { state } = props;
+    React.useEffect(getUsers, []);
 
-        if(state.loading === true) {
+    React.useEffect(() => {
+        if (userState.loading === true) {
             setLoading(true);
             return;
         }
 
         setLoading(false);
-        setUsers(state.users);
-    }, [props.state]);
+        setUsers(userState.users);
+    }, [userState]);
 
+    function getUsers() {
+        dispatch(userActions.getUsers({ search: filter.search }));
+    }
+    
     function handleAdd() {
         const { history } = props;
         history.push(paths.getUserPath('create'));
@@ -82,23 +68,12 @@ export const Users = withStyles(styles)(connect(mapStateToProps, mapDispatchToPr
     }
 
     async function handleConfirmationClose(result: boolean) {
-        try {
-            setOpen(false);
-            if (result) {
-                const ids = [id];
-                await userActions.deleteUsers(ids);
-                setSnackbar('Пользователь успешно удален.', true, SnackbarVariant.success);
-                //await getUsers();
-            }
+        setOpen(false);
+        if (result) {
+            const ids = [id];
+            await dispatch(userActions.deleteUsers(ids));
         }
-        catch (error) {
-            if (error instanceof ApplicationError) {
-                setSnackbar(error.message, true, SnackbarVariant.error);
-            }
-        }
-        finally {
-            setId(null);
-        }
+        setId(null);
     }
 
     async function handleSearchChange(value: string) {
@@ -140,7 +115,7 @@ export const Users = withStyles(styles)(connect(mapStateToProps, mapDispatchToPr
                     debounce={filter.debounce}
                     search={filter.search}
                     onSearchChange={handleSearchChange}
-                    //onSearch={getUsers}
+                    onSearch={getUsers}
                 />
                 <IconButton onClick={handleAdd}>
                     <Add />
@@ -154,12 +129,6 @@ export const Users = withStyles(styles)(connect(mapStateToProps, mapDispatchToPr
                 message={'Вы уверены, что хотите удалить пользователя?'}
                 onClose={handleConfirmationClose}
             />
-            <MessageSnackbar
-                variant={snackbar.variant}
-                open={snackbar.open}
-                message={snackbar.message}
-                onClose={() => setSnackbar('', false, undefined)}
-            />
         </Grid >
     );
-})));
+}));

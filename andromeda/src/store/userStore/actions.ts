@@ -1,8 +1,9 @@
 import { Action } from "redux";
 
-import { User, ApplicationError, AuthenticatedUser, UserGetOptions, UserAuthenticateOptions, UserValidation } from "../../models";
-import { userService } from "../../services";
-import { AppThunkAction } from "../../models/reduxModels";
+import { User, ApplicationError, AuthenticatedUser, UserGetOptions, UserAuthenticateOptions, UserValidation, SnackbarVariant } from "../../models";
+import { userService, sessionService } from "../../services";
+import { AppThunkAction, AppState, AppThunkDispatch } from "../../models/reduxModels";
+import { snackbarActions } from "../snackbarStore";
 
 //#region Actions types enum
 export enum ActionType {
@@ -12,17 +13,20 @@ export enum ActionType {
 
     signOut = 'SIGN_OUT',
 
-    getRequest = 'GET_USERS_REQUEST',
-    getSuccess = 'GET_USERS_SUCCESS',
-    getFailure = 'GET_USERS_FAILURE',
+    getUsersRequest = 'GET_USERS_REQUEST',
+    getUsersSuccess = 'GET_USERS_SUCCESS',
+    getUsersFailure = 'GET_USERS_FAILURE',
 
-    createRequest = 'CREATE_USER_REQUEST',
+    getRequest = 'GET_REQUEST',
+    getSuccess = 'GET_SUCCESS',
+    getFailure = 'GET_FAILURE',
+
+    saveRequest = 'SAVE_USER_REQUEST',
     createSuccess = 'CREATE_USER_SUCCESS',
-    createFailure = 'CREATE_USER_FAILURE',
-
-    updateRequest = 'UPDATE_USER_REQUEST',
     updateSuccess = 'UPDATE_USER_SUCCESS',
-    updateFailure = 'UPDATE_USER_FAILURE',
+    saveFailure = 'SAVE_USER_FAILURE',
+
+    clearEditionState = 'CLEAR_EDITION_STATE',
 
     deleteRequest = 'DELETE_USER_REQUEST',
     deleteSuccess = 'DELETE_USER_SUCCESS',
@@ -53,14 +57,29 @@ export interface Signout extends Action<ActionType> {
     type: ActionType.signOut;
 }
 
+export interface GetUsersRequest extends Action<ActionType> {
+    type: ActionType.getUsersRequest;
+    options: UserGetOptions;
+}
+
+export interface GetUsersSuccess extends Action<ActionType> {
+    type: ActionType.getUsersSuccess;
+    users: User[];
+}
+
+export interface GetUsersFailure extends Action<ActionType> {
+    type: ActionType.getUsersFailure;
+    error: ApplicationError;
+}
+
 export interface GetRequest extends Action<ActionType> {
     type: ActionType.getRequest;
-    options: UserGetOptions;
+    id?: number;
 }
 
 export interface GetSuccess extends Action<ActionType> {
     type: ActionType.getSuccess;
-    users: User[];
+    user: User;
 }
 
 export interface GetFailure extends Action<ActionType> {
@@ -68,8 +87,8 @@ export interface GetFailure extends Action<ActionType> {
     error: ApplicationError;
 }
 
-export interface CreateRequest extends Action<ActionType> {
-    type: ActionType.createRequest;
+export interface SaveRequest extends Action<ActionType> {
+    type: ActionType.saveRequest;
     user: User;
 }
 
@@ -78,24 +97,18 @@ export interface CreateSuccess extends Action<ActionType> {
     user: User;
 }
 
-export interface CreateFailure extends Action<ActionType> {
-    type: ActionType.createFailure;
-    error: ApplicationError;
-}
-
-export interface UpdateRequest extends Action<ActionType> {
-    type: ActionType.updateRequest;
-    user: User;
-}
-
 export interface UpdateSuccess extends Action<ActionType> {
     type: ActionType.updateSuccess;
     user: User;
 }
 
-export interface UpdateFailure extends Action<ActionType> {
-    type: ActionType.updateFailure;
+export interface SaveFailure extends Action<ActionType> {
+    type: ActionType.saveFailure;
     error: ApplicationError;
+}
+
+export interface ClearEditionState extends Action<ActionType> {
+    type: ActionType.clearEditionState;
 }
 
 export interface DeleteRequest extends Action<ActionType> {
@@ -123,12 +136,12 @@ export interface Validate extends Action<ActionType> {
 }
 
 export type Signin = SigninRequest | SigninSuccess | SigninFailure;
-export type GetUsers = GetRequest | GetSuccess | GetFailure;
-export type CreateUser = CreateRequest | CreateSuccess | CreateFailure;
-export type UpdateUser = UpdateRequest | UpdateSuccess | UpdateFailure;
+export type GetUsers = GetUsersRequest | GetUsersSuccess | GetUsersFailure;
+export type GetUser = GetRequest | GetSuccess | GetFailure
+export type SaveUser = SaveRequest | CreateSuccess | UpdateSuccess | SaveFailure;
 export type DeleteUser = DeleteRequest | DeleteSuccess | DeleteFailure;
 
-export type UserActions = Signin | Signout | GetUsers | CreateUser | UpdateUser | DeleteUser | ValidateCredentials | Validate;
+export type UserActions = Signin | Signout | GetUsers | GetUser | ClearEditionState | SaveUser | DeleteUser | ValidateCredentials | Validate;
 //#endregion
 
 //#region Actions
@@ -138,7 +151,13 @@ function signin(options: UserAuthenticateOptions): AppThunkAction<Promise<Signin
 
         try {
             const result = await userService.signin(options);
-            return dispatch(success(result));
+            if (result && result.token && sessionService.signIn(result.token)) {
+                return dispatch(success(result));
+            } else {
+                const error: ApplicationError = new ApplicationError('Неправильное имя пользователя или пароль');
+                dispatch(snackbarActions.showSnackbar(error.message, SnackbarVariant.error));
+                return dispatch(failure(error));
+            }
         }
         catch (error) {
             if (error instanceof ApplicationError)
@@ -156,26 +175,39 @@ function signout(): Signout {
     return { type: ActionType.signOut };
 }
 
-function createUser(user: User): AppThunkAction<Promise<CreateSuccess | CreateFailure>> {
+function saveUser(user: User): AppThunkAction<Promise<CreateSuccess | UpdateSuccess | SaveFailure>> {
     return async (dispatch) => {
         dispatch(request(user));
 
         try {
-            const result = await userService.create(user);
-            return dispatch(success(result));
+            if (user.id) {
+                const result = await userService.update(user);
+                dispatch(snackbarActions.showSnackbar('Пользователь успешно сохранен', SnackbarVariant.success));
+                return dispatch(updateSuccess(result));
+            } else {
+                const result = await userService.create(user);
+                dispatch(snackbarActions.showSnackbar('Пользователь успешно сохранен', SnackbarVariant.success));
+                return dispatch(createSuccess(result));
+            }
         }
         catch (error) {
             if (error instanceof ApplicationError)
-                return dispatch(failure(error));
+                dispatch(snackbarActions.showSnackbar(error.message, SnackbarVariant.error));
+            return dispatch(failure(error));
         }
 
-        function request(user: User): CreateRequest { return { type: ActionType.createRequest, user: user }; }
-        function success(user: User): CreateSuccess { return { type: ActionType.createSuccess, user: user }; }
-        function failure(error: ApplicationError): CreateFailure { return { type: ActionType.createFailure, error: error }; }
+        function request(user: User): SaveRequest { return { type: ActionType.saveRequest, user: user }; }
+        function createSuccess(user: User): CreateSuccess { return { type: ActionType.createSuccess, user: user }; }
+        function updateSuccess(user: User): UpdateSuccess { return { type: ActionType.updateSuccess, user: user }; }
+        function failure(error: ApplicationError): SaveFailure { return { type: ActionType.saveFailure, error: error }; }
     }
 }
 
-function getUsers(options: UserGetOptions): AppThunkAction<Promise<GetSuccess | GetFailure>> {
+function clearEditionState(): ClearEditionState {
+    return { type: ActionType.clearEditionState };
+}
+
+function getUsers(options: UserGetOptions): AppThunkAction<Promise<GetUsersSuccess | GetUsersFailure>> {
     return async dispatch => {
         dispatch(request(options));
 
@@ -185,31 +217,48 @@ function getUsers(options: UserGetOptions): AppThunkAction<Promise<GetSuccess | 
         }
         catch (error) {
             if (error instanceof ApplicationError)
-                return dispatch(failure(error));
+                dispatch(snackbarActions.showSnackbar(error.message, SnackbarVariant.error));
+            return dispatch(failure(error));
         }
 
-        function request(options: UserGetOptions): GetRequest { return { type: ActionType.getRequest, options: options }; }
-        function success(users: User[]): GetSuccess { return { type: ActionType.getSuccess, users: users }; }
-        function failure(error: ApplicationError): GetFailure { return { type: ActionType.getFailure, error: error }; }
+        function request(options: UserGetOptions): GetUsersRequest { return { type: ActionType.getUsersRequest, options: options }; }
+        function success(users: User[]): GetUsersSuccess { return { type: ActionType.getUsersSuccess, users: users }; }
+        function failure(error: ApplicationError): GetUsersFailure { return { type: ActionType.getUsersFailure, error: error }; }
     }
 }
 
-function updateUser(user: User): AppThunkAction<Promise<UpdateSuccess | UpdateFailure>> {
-    return async (dispatch) => {
-        dispatch(request(user));
+function getUser(id?: number): AppThunkAction<Promise<GetSuccess | GetFailure>> {
+    return async (dispatch: AppThunkDispatch<Promise<GetSuccess | GetFailure>>, getState: () => AppState) => {
+        dispatch(request(id));
+
+        if (!id && id !== 0)
+            return dispatch(success(User.initial));
+
+        const state = getState();
+        let users: User[] = [];
 
         try {
-            const result = await userService.update(user);
-            return dispatch(success(result));
+            if (state.userState.loading === true) {
+                users = await userService.get({ id });
+                if (!users) {
+                    dispatch(snackbarActions.showSnackbar('Не удалось найти пользователя', SnackbarVariant.warning));
+                }
+            } else {
+                users = state.userState.users;
+            }
+
+            let user = users.find(o => o.id === id);
+            return dispatch(success(user));
         }
         catch (error) {
             if (error instanceof ApplicationError)
-                return dispatch(failure(error));
+                dispatch(snackbarActions.showSnackbar(error.message, SnackbarVariant.error));
+            return dispatch(failure(error));
         }
 
-        function request(user: User): UpdateRequest { return { type: ActionType.updateRequest, user: user }; }
-        function success(user: User): UpdateSuccess { return { type: ActionType.updateSuccess, user: user }; }
-        function failure(error: ApplicationError): UpdateFailure { return { type: ActionType.updateFailure, error: error }; }
+        function request(id?: number): GetRequest { return { type: ActionType.getRequest, id: id }; }
+        function success(user: User): GetSuccess { return { type: ActionType.getSuccess, user: user }; }
+        function failure(error: ApplicationError): GetFailure { return { type: ActionType.getFailure, error: error }; }
     }
 }
 
@@ -219,11 +268,13 @@ function deleteUsers(ids: number[]): AppThunkAction<Promise<DeleteSuccess | Dele
 
         try {
             await userService.delete(ids);
+            dispatch(snackbarActions.showSnackbar('Пользователь успешно удален.', SnackbarVariant.success));
             return dispatch(success());
         }
         catch (error) {
             if (error instanceof ApplicationError)
-                return dispatch(failure(error));
+                dispatch(snackbarActions.showSnackbar(error.message, SnackbarVariant.error));
+            return dispatch(failure(error));
         }
 
         function request(ids: number[]): DeleteRequest { return { type: ActionType.deleteRequest, ids: ids }; }
@@ -245,9 +296,10 @@ function validateUser(user: User): Validate {
 export default {
     signin,
     signout,
-    createUser,
+    saveUser,
+    clearEditionState,
     getUsers,
-    updateUser,
+    getUser,
     deleteUsers,
     validateCredentials,
     validateUser

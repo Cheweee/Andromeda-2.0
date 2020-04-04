@@ -18,7 +18,6 @@ import {
     UserDisciplineLoad
 } from "../../models";
 import { paths } from "../../sharedConstants";
-import { useSnackbarState } from "../../hooks";
 import {
     Grid,
     Card,
@@ -38,7 +37,7 @@ import {
     Check,
     ArrowBack,
 } from "@material-ui/icons";
-import { useFilterState } from "../../hooks/filterStateHook";
+import { useFilterState } from "../../hooks";
 import clsx from "clsx";
 import { GroupDisciplineLoadDistribute, GroupsDisciplinesLoad } from "./groupDisciplineLoad";
 import { departmentService, userService } from "../../services";
@@ -96,8 +95,8 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
             setUsers(departmentUsers);
         }
         catch (error) {
-            if (error instanceof ApplicationError)
-                setSnackbar(error.message, true, SnackbarVariant.error);
+            //if (error instanceof ApplicationError)
+                //setSnackbar(error.message, true, SnackbarVariant.error);
         }
         finally {
             setLoading(false);
@@ -129,7 +128,7 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
         }
         catch (error) {
             if (error instanceof ApplicationError) {
-                setSnackbar(error.message, true, SnackbarVariant.error);
+                //setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
         finally {
@@ -157,7 +156,7 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     function handleSaveStudyLoad() {
         const timer = setTimeout(() => {
             setSaving(false);
-            setSnackbar('Учебная нагрузка кафедры успешно сохранена', true, SnackbarVariant.success);
+            //setSnackbar('Учебная нагрузка кафедры успешно сохранена', true, SnackbarVariant.success);
 
             clearTimeout(timer);
         }, 2500);
@@ -173,7 +172,7 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
         }
         catch (error) {
             if (error instanceof ApplicationError) {
-                setSnackbar(error.message, true, SnackbarVariant.error);
+                //setSnackbar(error.message, true, SnackbarVariant.error);
             }
         }
         finally {
@@ -216,8 +215,8 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
             setDepartmentUsers(users);
         }
         catch (error) {
-            if (error instanceof ApplicationError)
-                setSnackbar(error.message, true, SnackbarVariant.error);
+            //if (error instanceof ApplicationError)
+                //setSnackbar(error.message, true, SnackbarVariant.error);
         }
         finally {
             setLoading(false);
@@ -237,8 +236,6 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     const [loading, setLoading] = React.useState<boolean>(false);
     const [generating, setGenerating] = React.useState<boolean>(false);
     const [groupDisciplineLoadDetailsOpen, setGroupDisciplineLoadDetailsOpen] = React.useState<boolean>(false);
-
-    const [snackbar, setSnackbar] = useSnackbarState();
 
     const handleBackClick = () => {
         const { history } = props;
@@ -413,8 +410,8 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                 departmentLoad = await departmentLoadService.create(departmentLoad);
         }
         catch (error) {
-            if (error instanceof ApplicationError)
-                setSnackbar(error.message, true, SnackbarVariant.error);
+            //if (error instanceof ApplicationError)
+                //setSnackbar(error.message, true, SnackbarVariant.error);
         }
         finally {
             setLoading(false);
@@ -568,12 +565,6 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                     </Grid>
                 </Paper>
             </footer>
-            <MessageSnackbar
-                variant={snackbar.variant}
-                message={snackbar.message}
-                open={snackbar.open}
-                onClose={() => setSnackbar('', false, undefined)}
-            />
             <GroupDisciplineLoadDistribute
                 users={departmentUsers}
                 groupDisciplineLoad={selectedGroupDisciplineLoad}

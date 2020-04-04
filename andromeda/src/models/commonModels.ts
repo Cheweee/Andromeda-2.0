@@ -36,12 +36,6 @@ export interface SelectableValue {
     value: string;
 }
 
-export interface SnackbarState {
-    open: boolean;
-    message: string;
-    variant: SnackbarVariant;
-}
-
 export enum SnackbarVariant {
     success = 'success',
     error = 'error',

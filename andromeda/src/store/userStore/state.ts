@@ -1,4 +1,4 @@
-import { User, AuthenticatedUser, UserAuthenticateOptions } from "../../models"
+import { User, AuthenticatedUser, UserAuthenticateOptions, UserValidation } from "../../models"
 
 export type UsersLoading = {
     loading: true;
@@ -7,6 +7,15 @@ export type UsersLoading = {
 export type UsersLoaded = {
     loading: false;
     users: User[];
+}
+
+export type UserGetting = {
+    userLoading: true;
+}
+
+export type UserGetted = {
+    userLoading: boolean;
+    user?: User;
 }
 
 export type Authenticating = {
@@ -31,18 +40,12 @@ export type UsersDeleted = {
     ids?: number[];
 }
 
-export type UserEditLoading = {
-    updating: true;
-}
-
-export type UserEditLoaded = {
-    updating: false;
-    updated?: boolean;
-    user?: User;
+export type UserValidating = {
+    formErrors?: UserValidation;
 }
 
 export type AuthenticationState = Authenticating | Authenticated;
+export type UserGetState = UserGetting | UserGetted;
 export type UsersListState = UsersLoading | UsersLoaded;
 export type UsersDeleteState = UsersDeleting | UsersDeleted;
-export type UserEditState = UserEditLoading | UserEditLoaded;
-export type UserState = AuthenticationState & UsersListState & UsersDeleteState & UserEditState;
+export type UserState = AuthenticationState & UserGetState & UsersListState & UsersDeleteState & UserValidating;

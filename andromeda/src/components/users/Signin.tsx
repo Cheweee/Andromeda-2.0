@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router';
+
+import * as Redux from 'react-redux';
 
 import { Grid, Paper, Avatar, Typography, TextField, FormControlLabel, Checkbox, Button, CircularProgress, Link } from '@material-ui/core';
 import { WithStyles, withStyles } from '@material-ui/core/styles';
@@ -8,54 +9,64 @@ import { Face } from '@material-ui/icons';
 
 import { mergeStyles } from '../../utilities';
 import { commonStyles, layoutStyles, authenticateStyles } from '../../muiTheme';
-import { AuthenticatedUser, ApplicationError, UserValidation } from '../../models';
-import { sessionService, userService } from '../../services';
+import { UserValidation, SnackbarVariant } from '../../models';
 
 import clsx from "clsx";
+import { AppState } from '../../models/reduxModels';
+import { userActions } from '../../store/userStore';
+import { MessageSnackbar } from '../common';
+import { snackbarActions } from '../../store/snackbarStore';
 
 const styles = mergeStyles(layoutStyles, authenticateStyles, commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const Signin = withStyles(styles)(function (props: Props) {
-    const [loading, setLoading] = useState<boolean>(false);
-    const [message, setMessage] = useState<string>('');
-    const [username, setUsername] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-    const [rememberMe, setRememberMe] = useState<boolean>(false);
-    const [formErrors, setFormErrors] = useState<UserValidation>({ isValid: false });
+    const dispatch = Redux.useDispatch();
+    const { userState, snackbarState } = Redux.useSelector((state: AppState) => ({
+        userState: state.userState,
+        snackbarState: state.snackbarState
+    }));
 
-    useEffect(() => {
-        const formErrors = userService.validateCredentials(username, password);
-        setFormErrors(formErrors);
-    }, [username, password])
+    const [variant, setVariant] = React.useState<SnackbarVariant>(SnackbarVariant.info);
+    const [open, setOpen] = React.useState<boolean>(false);
+    const [message, setMessage] = React.useState<string>('');
 
-    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        const { history } = props;
+    const [loading, setLoading] = React.useState<boolean>(false);
+    const [username, setUsername] = React.useState<string>('');
+    const [password, setPassword] = React.useState<string>('');
+    const [rememberMe, setRememberMe] = React.useState<boolean>(false);
+    const [formErrors, setFormErrors] = React.useState<UserValidation>({ isValid: false });
 
-        setLoading(true);
+    React.useEffect(() => {
+        if (snackbarState.show !== true) {
+            setOpen(false);
+            return;
+        }
 
-        try {
-            const result: AuthenticatedUser = await userService.signin({ username, password, rememberMe });
-
-            if (result && result.token) {
-                if (sessionService.signIn(result.token) && history) {
-                    history.push('/');
-                }
-            }
-            else {
-                setLoading(false);
+        setVariant(snackbarState.variant);
+        setMessage(snackbarState.message);
+        setOpen(true);
+    }, [snackbarState]);
+    React.useEffect(() => { setFormErrors(userState.formErrors); }, [userState.formErrors]);
+    React.useEffect(() => { dispatch(userActions.validateCredentials(username, password)); }, [username, password]);
+    React.useEffect(() => {
+        setLoading(userState.authenticating);
+        if (userState.authenticating === false) {
+            if (userState.authenticated === true) {
+                const { history } = props;
+                history.push('/');
+            } else {
                 setPassword('');
-                setMessage('Неправильное имя пользователя или пароль');
             }
         }
-        catch (error) {
-            if (error instanceof ApplicationError) {
-                setLoading(false);
-                setMessage(error.message);
-            }
-        }
+    }, [userState.authenticating])
+
+    function handleSnackbarClose() { dispatch(snackbarActions.hideSnackbar()); }
+
+    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        dispatch(userActions.signin({ username, password, rememberMe }));
     }
 
     function handleUserNameChange(event: React.ChangeEvent<HTMLInputElement>) { setUsername(event.target && event.target.value); }
@@ -121,7 +132,6 @@ export const Signin = withStyles(styles)(function (props: Props) {
                                 <div>Авторизоваться</div>
                                 {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
                             </Button>
-                            {message && <Typography variant="subtitle2" component="h6" color="error" className={classes.submitMessage}>{message}</Typography>}
                         </div>
                         <Grid container>
                             <Grid item xs>
@@ -138,6 +148,12 @@ export const Signin = withStyles(styles)(function (props: Props) {
                     </form>
                 </Grid>
             </Grid>
+            <MessageSnackbar
+                variant={variant}
+                open={open}
+                message={message}
+                onClose={handleSnackbarClose}
+            />
         </Grid >
     );
 });

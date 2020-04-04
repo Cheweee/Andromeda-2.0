@@ -8,7 +8,7 @@ import { Grid, Card, CardContent, Typography, IconButton, Tooltip, CircularProgr
 import { DepartmentLoadDetails } from "./DepartmentLoadDetails";
 import { SearchInput, MessageSnackbar } from "../common";
 import { RouteComponentProps, withRouter } from "react-router-dom";
-import { useSnackbarState, useFilterState } from "../../hooks";
+import { useFilterState } from "../../hooks";
 import { paths } from "../../sharedConstants";
 import { ArrowBack, Search, Add, InsertDriveFile, Edit, Delete } from "@material-ui/icons";
 import { departmentLoadService } from "../../services/departmentLoadService";
@@ -39,8 +39,8 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
             setDepartmentLoads(loads);
         }
         catch (error) {
-            if (error instanceof ApplicationError)
-                setSnackbar(error.message, true, SnackbarVariant.error);
+            // if (error instanceof ApplicationError)
+                // setSnackbar(error.message, true, SnackbarVariant.error);
         }
         finally {
             setLoading(false);
@@ -78,8 +78,8 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
             history.push(paths.getDepartmentloadPath(`${departmentId}`, `${load.id}`));
         }
         catch (error) {
-            if (error instanceof ApplicationError)
-                setSnackbar(error.message, true, SnackbarVariant.error);
+            // if (error instanceof ApplicationError)
+            //     setSnackbar(error.message, true, SnackbarVariant.error);
         }
         finally {
             setLoading(false);
@@ -88,7 +88,6 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
     //#endregion
 
     const [filter, setFilter] = useFilterState(Filter.initial);
-    const [snackbar, setSnackbar] = useSnackbarState();
 
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -171,12 +170,6 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
                         )}
                 </Grid>
             )}
-            <MessageSnackbar
-                variant={snackbar.variant}
-                message={snackbar.message}
-                open={snackbar.open}
-                onClose={() => setSnackbar('', false, undefined)}
-            />
             <ImportLoadDetails
                 departmentId={departmentId}
                 onAccept={handleImportDetailsAccept}

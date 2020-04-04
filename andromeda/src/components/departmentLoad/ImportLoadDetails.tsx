@@ -29,7 +29,6 @@ import {
     ApplicationError,
     SnackbarVariant
 } from "../../models";
-import { useSnackbarState } from "../../hooks";
 
 const styles = mergeStyles(commonStyles);
 
@@ -46,7 +45,6 @@ export const ImportLoadDetails = withStyles(styles)(function (props: Props) {
     const [options, setOptions] = useState<DepartmentLoadImportOptions>(DepartmentLoadImportOptions.initial);
     const [formErrors, setFormErrors] = useState<DepartmentLoadImportOptionsValidation>(DepartmentLoadImportOptionsValidation.initial);
     const [loading, setLoading] = useState<boolean>(false);
-    const [snackbar, setSnackbar] = useSnackbarState();
 
     const uploader = useRef<HTMLInputElement>(null);
 
@@ -88,8 +86,6 @@ export const ImportLoadDetails = withStyles(styles)(function (props: Props) {
             setOptions({ ...options, file });
         }
         catch (error) {
-            if (error instanceof ApplicationError)
-                setSnackbar(error.message, true, SnackbarVariant.error);
         }
         finally {
             setLoading(false);

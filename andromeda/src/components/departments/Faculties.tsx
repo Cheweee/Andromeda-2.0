@@ -1,49 +1,42 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
 
 import { WithStyles, withStyles, IconButton, Grid, Typography, Paper } from "@material-ui/core";
 import { RouteComponentProps, withRouter } from "react-router";
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
-import { IFilter, Column, SnackbarVariant, Filter } from "../../models/commonModels";
-import { ApplicationError, Faculty, DepartmentType } from "../../models";
+import { Column } from "../../models/commonModels";
+import { Faculty, DepartmentType } from "../../models";
 import { paths } from "../../sharedConstants";
-import { Edit, Delete, AccountBalance, Search, Add, Apartment } from "@material-ui/icons";
-import { SearchInput, TableComponent, ConfirmationDialog, MessageSnackbar } from "../common";
+import { Edit, Delete, Search, Add, Apartment } from "@material-ui/icons";
+import { SearchInput, TableComponent, ConfirmationDialog } from "../common";
 import { departmentService } from "../../services";
-import { useFilterState } from "../../hooks";
+import useDebounce from "../../hooks/debounceHook";
 
 const styles = mergeStyles(commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const Faculties = withStyles(styles)(withRouter(function (props: Props) {
-    const [faculties, setFaculties] = useState<Faculty[]>([]);
-    const [filter, setFilter] = useFilterState(Filter.initial);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [open, setOpen] = useState<boolean>(false)
-    const [id, setId] = useState<number>(null);
+    const [faculties, setFaculties] = React.useState<Faculty[]>([]);
+    const [search, setSearch] = React.useState<string>();
+    const [loading, setLoading] = React.useState<boolean>(false);
+    const [open, setOpen] = React.useState<boolean>(false)
+    const [id, setId] = React.useState<number>(null);
 
-    useEffect(() => { getFaculties(); }, [props]);
+    const debouncedSearch = useDebounce(search, 500);
 
-    async function getFaculties() {
-        try {
-            setLoading(true);
-            const faculties = await departmentService.getFaculties({
-                search: filter.search,
-                type: DepartmentType.Faculty
-            });
+    React.useEffect(() => { getFaculties(); }, []);
+    React.useEffect(() => { getFaculties(debouncedSearch) }, [debouncedSearch])
 
-            setFaculties(faculties);
-        }
-        catch (error) {
-            if (error instanceof ApplicationError) {
-                //setSnackbar(error.message, true, SnackbarVariant.error)
-            }
-        }
-        finally {
-            setLoading(false);
-        }
+    async function getFaculties(search?: string) {
+        setLoading(true);
+        const faculties = await departmentService.getFaculties({
+            search: search,
+            type: DepartmentType.Faculty
+        });
+
+        setFaculties(faculties);
+        setLoading(false);
     }
 
     function handleAdd() {
@@ -62,27 +55,18 @@ export const Faculties = withStyles(styles)(withRouter(function (props: Props) {
     }
 
     async function handleConfirmationClose(result: boolean) {
-        try {
-            setOpen(false);
-            if (result) {
-                const ids = [id];
-                await departmentService.delete(ids);
-                //setSnackbar('Факультет успешно удален.', true, SnackbarVariant.success);
-                await getFaculties();
-            }
-        }
-        catch (error) {
-            if (error instanceof ApplicationError) {
-                //setSnackbar(error.message, true, SnackbarVariant.error);
-            }
-        }
-        finally {
+        setOpen(false);
+        if (result) {
+            const ids = [id];
+            await departmentService.delete(ids);
+            //setSnackbar('Факультет успешно удален.', true, SnackbarVariant.success);
+            await getFaculties();
             setId(null);
         }
     }
 
     async function handleSearchChange(value: string) {
-        setFilter(value);
+        setSearch(value);
     }
 
     const { classes } = props;
@@ -114,10 +98,8 @@ export const Faculties = withStyles(styles)(withRouter(function (props: Props) {
                 <Grid item xs />
                 <Search className={classes.searchIcon} />
                 <SearchInput
-                    debounce={filter.debounce}
-                    search={filter.search}
+                    search={search}
                     onSearchChange={handleSearchChange}
-                    onSearch={getFaculties}
                 />
                 <IconButton onClick={handleAdd}>
                     <Add />

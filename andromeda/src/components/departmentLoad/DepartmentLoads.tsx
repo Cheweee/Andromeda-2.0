@@ -8,7 +8,6 @@ import { Grid, Card, CardContent, Typography, IconButton, Tooltip, CircularProgr
 import { DepartmentLoadDetails } from "./DepartmentLoadDetails";
 import { SearchInput, MessageSnackbar } from "../common";
 import { RouteComponentProps, withRouter } from "react-router-dom";
-import { useFilterState } from "../../hooks";
 import { paths } from "../../sharedConstants";
 import { ArrowBack, Search, Add, InsertDriveFile, Edit, Delete } from "@material-ui/icons";
 import { departmentLoadService } from "../../services/departmentLoadService";
@@ -87,12 +86,12 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
     }
     //#endregion
 
-    const [filter, setFilter] = useFilterState(Filter.initial);
+    const [search, setSearch] = useState<string>();
 
     const [loading, setLoading] = useState<boolean>(false);
 
     function handleSearchChange(value: string) {
-        setFilter(value);
+        setSearch(value);
     }
 
     function handleBackClick() {
@@ -117,10 +116,8 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
                 <Grid item xs />
                 <Search className={classes.searchIcon} />
                 <SearchInput
-                    debounce={filter.debounce}
-                    search={filter.search}
+                    search={search}
                     onSearchChange={handleSearchChange}
-                    onSearch={getDepartmentLoads}
                 />
                 <Tooltip title={"Создать учебную нагрузку"}>
                     <span>

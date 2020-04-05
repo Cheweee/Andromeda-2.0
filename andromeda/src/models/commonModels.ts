@@ -1,14 +1,5 @@
 import { Padding } from "@material-ui/core/TableCell";
 
-export interface IFilter {
-    debounce?: number;
-    search?: string;
-}
-
-export namespace Filter {
-    export const initial: IFilter = { debounce: 500, search: '' };
-}
-
 export interface Column {
     name: string;
     displayName: string;
@@ -28,12 +19,6 @@ export interface GetOptions {
     id?: number;
     ids?: number[];
     search?: string;
-}
-
-export interface SelectableValue {
-    selected?: boolean;
-    id?: number;
-    value: string;
 }
 
 export enum SnackbarVariant {

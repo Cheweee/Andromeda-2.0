@@ -37,7 +37,6 @@ import {
     Check,
     ArrowBack,
 } from "@material-ui/icons";
-import { useFilterState } from "../../hooks";
 import clsx from "clsx";
 import { GroupDisciplineLoadDistribute, GroupsDisciplinesLoad } from "./groupDisciplineLoad";
 import { departmentService, userService } from "../../services";
@@ -225,10 +224,10 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     //#endregion
 
     //#region Filter state
-    const [unallocatedLoadFilter, setunallocatedLoadFilter] = useFilterState(Filter.initial);
+    const [unallocatedLoadSearch, setunallocatedLoadSearch] = React.useState<string>();
 
     function handleUnallocatedLoadSearchChange(newValue: string) {
-        setunallocatedLoadFilter(newValue);
+        setunallocatedLoadSearch(newValue);
     }
     //#endregion
 
@@ -454,8 +453,7 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                         <Grid item xs />
                         <Search className={classes.searchIcon} />
                         <SearchInput
-                            debounce={unallocatedLoadFilter.debounce}
-                            search={unallocatedLoadFilter.search}
+                            search={unallocatedLoadSearch}
                             onSearchChange={handleUnallocatedLoadSearchChange}
                         />
                         <Tooltip title="Добавить учебную нагрузку">
@@ -468,7 +466,7 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                     </Grid>
                     <Paper className={classes.margin1Y}>
                         <GroupsDisciplinesLoad
-                            search={unallocatedLoadFilter.search}
+                            search={unallocatedLoadSearch}
                             openedIndex={openedGroupDisciplineLoadIndex}
                             groupsDisciplinesLoad={groupsDisciplinesLoad}
                             onEditClick={handleGroupDisciplineLoadEdit}
@@ -508,9 +506,8 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                         <Grid item xs />
                         <Search className={classes.searchIcon} />
                         <SearchInput
+                            search={unallocatedLoadSearch}
                             onSearchChange={handleUnallocatedLoadSearchChange}
-                            debounce={unallocatedLoadFilter.debounce}
-                            search={unallocatedLoadFilter.search}
                         />
                     </Grid>
                     <Grid className={classes.margin1Y} container direction="row" spacing={3}>

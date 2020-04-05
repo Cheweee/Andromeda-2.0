@@ -9,35 +9,30 @@ import { paths } from "../../sharedConstants";
 import { Edit, Delete, Search, Add, Apartment, AssignmentInd } from "@material-ui/icons";
 import { SearchInput, TableComponent, ConfirmationDialog, MessageSnackbar } from "../common";
 import { roleService } from "../../services";
-import { useState, useEffect } from "react";
-import { useFilterState } from "../../hooks";
+import useDebounce from "../../hooks/debounceHook";
 
 const styles = mergeStyles(commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const Roles = withStyles(styles)(withRouter(function (props: Props) {
-    const [roles, setRoles] = useState<Role[]>([]);
-    const [filter, setFilter] = useFilterState(Filter.initial);
-    const [id, setId] = useState<number>(null);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [open, setOpen] = useState<boolean>(false);
+    const [roles, setRoles] = React.useState<Role[]>([]);
+    const [search, setSearch] = React.useState<string>();
+    const [id, setId] = React.useState<number>(null);
+    const [loading, setLoading] = React.useState<boolean>(false);
+    const [open, setOpen] = React.useState<boolean>(false);
 
-    useEffect(() => { getRoles(); }, [props]);
+    const debouncedSearch = useDebounce(search, 500);
 
-    async function getRoles() {
-        try {
-            setLoading(true);
-            const roles = await roleService.getRoles({ search: filter.search });
+    React.useEffect(() => { getRoles(); }, []);
+    React.useEffect(() => { getRoles(debouncedSearch) }, [debouncedSearch]);
 
-            setRoles(roles);
-        }
-        catch (error) {
-            if (error instanceof ApplicationError) {
-                //setSnackbar(error.message, true, SnackbarVariant.error);
-            }
-        }
-        finally { setLoading(false); }
+    async function getRoles(search?: string) {
+        setLoading(true);
+        const roles = await roleService.getRoles({ search: search });
+
+        setRoles(roles);
+        setLoading(false);
     }
 
     function handleAdd() {
@@ -76,7 +71,7 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
     }
 
     async function handleSearchChange(value: string) {
-        setFilter(value);
+        setSearch(value);
     }
 
     const { classes } = props;
@@ -106,10 +101,8 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
                 <Grid item xs />
                 <Search className={classes.searchIcon} />
                 <SearchInput
-                    debounce={filter.debounce}
-                    search={filter.search}
+                    search={search}
                     onSearchChange={handleSearchChange}
-                    onSearch={getRoles}
                 />
                 <IconButton onClick={handleAdd}>
                     <Add />

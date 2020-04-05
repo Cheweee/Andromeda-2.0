@@ -16,9 +16,9 @@ import { User } from '../../models';
 import { Column, Filter } from '../../models/commonModels';
 import { TableComponent, ConfirmationDialog, SearchInput } from '../common';
 import { paths } from '../../sharedConstants';
-import { useFilterState } from '../../hooks';
 import { AppState } from '../../models/reduxModels';
 import { userActions } from '../../store/userStore';
+import { useDebounce } from '../../hooks';
 
 const styles = mergeStyles(commonStyles);
 
@@ -30,13 +30,18 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
     const { userState } = Redux.useSelector((state: AppState) => ({ userState: state.userState }));
 
     const [users, setUsers] = React.useState<User[]>([]);
-    //FIXME: Issue with filter timeoute
-    const [filter, setFilter] = useFilterState(Filter.initial);
+    const [search, setSearch] = React.useState<string>();
     const [id, setId] = React.useState<number>(null);
     const [loading, setLoading] = React.useState<boolean>(false);
     const [open, setOpen] = React.useState<boolean>(false);
 
-    React.useEffect(getUsers, []);
+    const debouncedSearch = useDebounce(search, 500);
+
+    React.useEffect(() => {
+        getUsers(debouncedSearch);
+    }, [debouncedSearch]);
+
+    React.useEffect(() => getUsers(), []);
 
     React.useEffect(() => {
         if (userState.loading === true) {
@@ -48,10 +53,10 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
         setUsers(userState.users);
     }, [userState]);
 
-    function getUsers() {
-        dispatch(userActions.getUsers({ search: filter.search }));
+    function getUsers(search?: string) {
+        dispatch(userActions.getUsers({ search: search }));
     }
-    
+
     function handleAdd() {
         const { history } = props;
         history.push(paths.getUserPath('create'));
@@ -76,8 +81,8 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
         setId(null);
     }
 
-    async function handleSearchChange(value: string) {
-        setFilter(value);
+    function handleSearchChange(value: string) {
+        setSearch(value);
     }
 
     const { classes } = props;
@@ -112,10 +117,8 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
                 <Grid item xs />
                 <Search className={classes.searchIcon} />
                 <SearchInput
-                    debounce={filter.debounce}
-                    search={filter.search}
+                    search={search}
                     onSearchChange={handleSearchChange}
-                    onSearch={getUsers}
                 />
                 <IconButton onClick={handleAdd}>
                     <Add />

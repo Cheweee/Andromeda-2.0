@@ -4,11 +4,14 @@ import thunkMiddleware from 'redux-thunk';
 
 import { userReducer } from './userStore/reducers'
 import { snackbarReducer } from "./snackbarStore/reducers";
+import { disciplineTitleReducer } from "./disciplineTitleStore/reducers";
+
 import { AppState } from "../models/reduxModels";
 
 const rootReducer = combineReducers({
     userState: userReducer,
-    snackbarState: snackbarReducer
+    snackbarState: snackbarReducer,
+    disciplineTitleState: disciplineTitleReducer
 });
 
 export default function configureStore(): Store<AppState> {

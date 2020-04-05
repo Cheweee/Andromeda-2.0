@@ -13,16 +13,16 @@ import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { paths } from "../../sharedConstants";
 
-import { User, UserValidation, ApplicationError, DisciplineTitle, PinnedDiscipline } from '../../models';
+import { User, UserValidation, DisciplineTitle, PinnedDiscipline } from '../../models';
 import { AppState } from "../../models/reduxModels";
 import { ProjectType } from "../../models/commonModels";
-import { userService } from "../../services";
-import { disciplinetitleService } from "../../services/disciplineTitleService";
 
 import { UserDetails } from "./UserDetails";
 import { PinnedDisciplineDetails, PinnedDisciplines } from "./PinnedDisciplines";
 
 import { userActions } from "../../store/userStore";
+import { disciplineTitleActions } from "../../store/disciplineTitleStore";
+import { DisciplinesTitles } from "../departments/DisciplinesTitles";
 
 const styles = mergeStyles(commonStyles);
 
@@ -30,17 +30,13 @@ interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const UserComponent = withStyles(styles)(function (props: Props) {
     const dispatch = Redux.useDispatch();
-    const { userState } = Redux.useSelector((state: AppState) => ({ userState: state.userState }));
+    const { userState, disciplineTitleState } = Redux.useSelector((state: AppState) => ({
+        userState: state.userState,
+        disciplineTitleState: state.disciplineTitleState
+    }));
 
     //#region User state
     const [user, setUser] = React.useState<User>(User.initial);
-
-    function loadUser() {
-        const { match } = props;
-        const tempId = match.params && match.params[paths.idParameterName];
-        const id = parseInt(tempId, null);
-        dispatch(userActions.getUser(id));
-    }
 
     function handleFirstnameChange(event: React.ChangeEvent<HTMLInputElement>) {
         setUser({ ...user, firstname: event.target && event.target.value });
@@ -72,11 +68,6 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
     const [selectedProjectTypes, setSelectedProjectTypes] = React.useState<ProjectType[]>([]);
     const [pinnedDisciplineDetailsOpen, setPinnedDisciplineDetailsOpen] = React.useState<boolean>(false);
     const [disciplinesTitles, setDisciplinesTitles] = React.useState<DisciplineTitle[]>([]);
-
-    async function loadNotPinnedDiscilines() {
-        const titles = await disciplinetitleService.getTitles({});
-        setDisciplinesTitles(titles);
-    }
 
     function handlePinnedDisciplineAdd(event: React.MouseEvent<Element, MouseEvent>) {
         event.stopPropagation();
@@ -130,20 +121,40 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
 
     const [formErrors, setFormErrors] = React.useState<UserValidation>(UserValidation.initial);
     const [loading, setLoading] = React.useState<boolean>(true);
+    const [disciplinesTitlesLoading, setDisciplinesTitlesLoading] = React.useState<boolean>(true);
 
     React.useEffect(() => { initialize(); }, [props.match.params]);
+
     React.useEffect(() => {
+        setLoading(userState.userLoading);
         if (userState.userLoading === false) {
             setUser(userState.user);
-            setLoading(false);
         }
     }, [userState.userLoading]);
+    React.useEffect(() => {
+        setDisciplinesTitlesLoading(disciplineTitleState.loading);
+        if (disciplineTitleState.loading === false) {
+            const pinnedDisciplines = user && user.pinnedDisciplines || [];
+            let disciplinesTitles: DisciplineTitle[];
+            if (!selectedTitle) {
+                disciplinesTitles = disciplineTitleState.disciplinesTitles.filter(o => !pinnedDisciplines.map(o => o.disciplineTitleId).includes(o.id));
+            } else {
+                const userDisciplinesWithoutSelectedDiscipline = pinnedDisciplines.filter(o => o.disciplineTitleId !== selectedTitle.id).map(o => o.disciplineTitleId);
+                disciplinesTitles = disciplineTitleState.disciplinesTitles.filter(o => !userDisciplinesWithoutSelectedDiscipline.includes(o.id));
+            }
+            setDisciplinesTitles(disciplinesTitles);
+        }
+    }, [disciplineTitleState.disciplineTitleLoading, selectedTitle]);
     React.useEffect(() => { dispatch(userActions.validateUser(user)); }, [user])
     React.useEffect(() => { setFormErrors(userState.formErrors) }, [userState.formErrors]);
 
     function initialize() {
-        loadUser();
-        loadNotPinnedDiscilines();
+        const { match } = props;
+        const tempId = match.params && match.params[paths.idParameterName];
+        const id = parseInt(tempId, null);
+        dispatch(userActions.getUser(id));
+        //TODO: Разобраться с выборкой наименований дисциплин
+        dispatch(disciplineTitleActions.getDisciplinesTitles({}));
     }
 
     function handleBackClick() {
@@ -157,21 +168,12 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
     }
 
     function handleCancelClick() {
-        initialize();
+        if (userState.userLoading === false) {
+            setUser(userState.user);
+        }
     }
 
     const { classes } = props;
-
-    let disciplinesForDialog: DisciplineTitle[] = [];
-
-    const pinnedDisciplines: PinnedDiscipline[] = user && user.pinnedDisciplines || [];
-
-    if (!selectedTitle) {
-        disciplinesForDialog = disciplinesTitles.filter(o => !pinnedDisciplines.map(o => o.disciplineTitleId).includes(o.id));
-    } else {
-        const userDisciplinesWithoutSelectedDiscipline = pinnedDisciplines.filter(o => o.disciplineTitleId !== selectedTitle.id).map(o => o.disciplineTitleId);
-        disciplinesForDialog = disciplinesTitles.filter(o => !userDisciplinesWithoutSelectedDiscipline.includes(o.id));
-    }
 
     return (
         <form autoComplete="off" noValidate>
@@ -203,9 +205,7 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
                         </Tooltip>
                     </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        <CardHeader
-                            title="Пользователь"
-                        />
+                        <CardHeader title="Пользователь" />
                         {loading && <LinearProgress variant="query" />}
                         <CardContent>
                             <UserDetails
@@ -233,10 +233,11 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
                                         </IconButton>
                                     </Tooltip>
                                 </Grid>
+                                {disciplinesTitlesLoading && <LinearProgress variant="query" />}
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails>
                                 <PinnedDisciplines
-                                    pinnedDisciplines={pinnedDisciplines}
+                                    pinnedDisciplines={user && user.pinnedDisciplines || []}
                                     handleDelete={handlePinnedDisciplineDelete}
                                     handleEdit={handlePinnedDisciplineEdit}
                                 />
@@ -249,7 +250,7 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
                     open={pinnedDisciplineDetailsOpen}
                     disciplineTitle={selectedTitle}
                     projectTypes={selectedProjectTypes}
-                    disciplinesTitles={disciplinesForDialog}
+                    disciplinesTitles={disciplinesTitles}
                     onAccept={handlePinnedDisciplineDetailsAccept}
                     onCancel={handlePinnedDisciplineDetailsCancel}
                 />

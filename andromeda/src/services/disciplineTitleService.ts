@@ -23,4 +23,4 @@ class DisciplineTitleService {
     }
 }
 
-export const disciplinetitleService = new DisciplineTitleService();
+export const disciplineTitleService = new DisciplineTitleService();

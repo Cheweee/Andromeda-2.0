@@ -13,8 +13,8 @@ import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { paths } from "../../sharedConstants";
 
-import { User, UserValidation, DisciplineTitle, PinnedDiscipline } from '../../models';
-import { AppState } from "../../models/reduxModels";
+import { User, UserValidation, DisciplineTitle, AppState } from '../../models';
+import {  } from "../../models/reduxModels";
 import { ProjectType } from "../../models/commonModels";
 
 import { UserDetails } from "./UserDetails";
@@ -22,7 +22,6 @@ import { PinnedDisciplineDetails, PinnedDisciplines } from "./PinnedDisciplines"
 
 import { userActions } from "../../store/userStore";
 import { disciplineTitleActions } from "../../store/disciplineTitleStore";
-import { DisciplinesTitles } from "../departments/DisciplinesTitles";
 
 const styles = mergeStyles(commonStyles);
 

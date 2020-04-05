@@ -1,21 +1,27 @@
 import * as React from "react";
+import * as Redux from 'react-redux';
+
 import { WithStyles, withStyles, IconButton, Grid, Typography, Paper } from "@material-ui/core";
 import { RouteComponentProps, withRouter } from "react-router";
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
-import { IFilter, Column, SnackbarVariant, Filter } from "../../models/commonModels";
-import { ApplicationError, Role, DepartmentType } from "../../models";
+import { Column } from "../../models/commonModels";
+import { ApplicationError, Role, AppState } from "../../models";
 import { paths } from "../../sharedConstants";
-import { Edit, Delete, Search, Add, Apartment, AssignmentInd } from "@material-ui/icons";
-import { SearchInput, TableComponent, ConfirmationDialog, MessageSnackbar } from "../common";
+import { Edit, Delete, Search, Add, AssignmentInd } from "@material-ui/icons";
+import { SearchInput, TableComponent, ConfirmationDialog } from "../common";
 import { roleService } from "../../services";
-import useDebounce from "../../hooks/debounceHook";
+import { useDebounce } from "../../hooks";
+import { roleActions } from "../../store/roleStore";
 
 const styles = mergeStyles(commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const Roles = withStyles(styles)(withRouter(function (props: Props) {
+    const dispatch = Redux.useDispatch();
+    const { roleState } = Redux.useSelector((state: AppState) => ({ roleState: state.roleState }));
+
     const [roles, setRoles] = React.useState<Role[]>([]);
     const [search, setSearch] = React.useState<string>();
     const [id, setId] = React.useState<number>(null);
@@ -27,12 +33,18 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
     React.useEffect(() => { getRoles(); }, []);
     React.useEffect(() => { getRoles(debouncedSearch) }, [debouncedSearch]);
 
-    async function getRoles(search?: string) {
-        setLoading(true);
-        const roles = await roleService.getRoles({ search: search });
+    React.useEffect(() => {
+        if (roleState.loading === true) {
+            setLoading(true);
+            return;
+        }
 
-        setRoles(roles);
         setLoading(false);
+        setRoles(roleState.roles);
+    }, [roleState]);
+
+    async function getRoles(search?: string) {
+        dispatch(roleActions.getRoles({ search: search }));
     }
 
     function handleAdd() {
@@ -51,23 +63,12 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
     }
 
     async function handleConfirmationClose(result: boolean) {
-        try {
-            setOpen(false);
-            if (result) {
-                const ids = [id];
-                await roleService.delete(ids);
-                //setSnackbar('Роль успешно удалена', false, undefined);
-                await getRoles();
-            }
+        setOpen(false);
+        if (result) {
+            const ids = [id];
+            await dispatch(roleService.delete(ids));
         }
-        catch (error) {
-            if (error instanceof ApplicationError) {
-                //setSnackbar(error.message, true, SnackbarVariant.error);
-            }
-        }
-        finally {
-            setId(null);
-        }
+        setId(null);
     }
 
     async function handleSearchChange(value: string) {

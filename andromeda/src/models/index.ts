@@ -11,3 +11,4 @@ export * from './pinnedDisciplinesModels';
 export * from './studyLoadModels';
 export * from './commonModels';
 export * from './departmentLoadModels';
+export * from './reduxModels';

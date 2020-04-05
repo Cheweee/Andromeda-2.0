@@ -1,24 +1,22 @@
 import * as React from 'react';
+
 import * as Redux from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router';
+
 import { WithStyles, withStyles } from '@material-ui/core/styles';
 import { Search, Edit, Delete, Add, SupervisorAccount } from '@material-ui/icons';
-import {
-    Paper,
-    Grid,
-    Typography,
-    IconButton,
-} from '@material-ui/core';
+import { Paper, Grid, Typography, IconButton } from '@material-ui/core';
 
-import { mergeStyles } from '../../utilities';
-import { commonStyles } from '../../muiTheme';
-import { User } from '../../models';
-import { Column, Filter } from '../../models/commonModels';
 import { TableComponent, ConfirmationDialog, SearchInput } from '../common';
-import { paths } from '../../sharedConstants';
-import { AppState } from '../../models/reduxModels';
+
+import { commonStyles } from '../../muiTheme';
+import { User, Column, AppState } from '../../models';
+
 import { userActions } from '../../store/userStore';
+
 import { useDebounce } from '../../hooks';
+import { paths } from '../../sharedConstants';
+import { mergeStyles } from '../../utilities';
 
 const styles = mergeStyles(commonStyles);
 
@@ -37,11 +35,8 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
 
     const debouncedSearch = useDebounce(search, 500);
 
-    React.useEffect(() => {
-        getUsers(debouncedSearch);
-    }, [debouncedSearch]);
-
     React.useEffect(() => getUsers(), []);
+    React.useEffect(() => { getUsers(debouncedSearch); }, [debouncedSearch]);
 
     React.useEffect(() => {
         if (userState.loading === true) {
@@ -62,9 +57,9 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
         history.push(paths.getUserPath('create'));
     }
 
-    function handleEdit(user: User) {
+    function handleEdit(model: User) {
         const { history } = props;
-        history.push(paths.getUserPath(`${user.id}`));
+        history.push(paths.getUserPath(`${model.id}`));
     }
 
     function handleDelete(id: number) {

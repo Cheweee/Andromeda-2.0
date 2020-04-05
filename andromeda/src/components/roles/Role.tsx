@@ -1,44 +1,37 @@
 import * as React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
+
+import * as Redux from "react-redux";
+
 import { WithStyles, withStyles } from "@material-ui/core/styles";
-import { commonStyles } from "../../muiTheme";
-import { mergeStyles } from "../../utilities";
-import { Role, RoleValidation, ApplicationError, DepartmentType, Department, RoleInDepartment } from "../../models";
-import { paths } from "../../sharedConstants";
-import { roleService, departmentService } from "../../services";
-import {
-    Grid,
-    Tooltip,
-    IconButton,
-    Card,
-    CardHeader,
-    LinearProgress,
-    CardContent,
-    TextField,
-    Typography,
-    List,
-    ListItem,
-    ListItemText,
-    ExpansionPanel,
-    ExpansionPanelSummary,
-    ExpansionPanelDetails,
-    ListSubheader
-} from "@material-ui/core";
+import { Grid, Tooltip, IconButton, Card, CardHeader, LinearProgress, CardContent, Typography, ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails } from "@material-ui/core";
 import { ArrowBack, Close, Check, ExpandMore, Edit } from "@material-ui/icons";
+
 import clsx from "clsx";
-import { MessageSnackbar } from "../common";
-import { useState, useEffect } from "react";
-import { SnackbarVariant } from "../../models/commonModels";
+
+import { mergeStyles } from "../../utilities";
+import { commonStyles } from "../../muiTheme";
+import { paths } from "../../sharedConstants";
+
+import { Role, RoleValidation, Department, RoleInDepartment, AppState } from "../../models";
+import { departmentService } from "../../services";
+
 import { RoleDetails } from "./RoleDetails";
 import { RoleDepartments, RoleDepartmentsDetails } from "./RoleDepartments";
+
+import { roleActions } from "../../store/roleStore";
 
 const styles = mergeStyles(commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const RoleComponent = withStyles(styles)(withRouter(function (props: Props) {
+    const dispatch = Redux.useDispatch();
+    const { roleState } = Redux.useSelector((state: AppState) => ({
+        roleState: state.roleState
+    }));
     //#region Role state
-    const [role, setRole] = useState<Role>(Role.initial);
+    const [role, setRole] = React.useState<Role>(Role.initial);
 
     function handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
         const name = event.target && event.target.value;
@@ -47,8 +40,8 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
     }
     //#endregion
     //#region Departments state
-    const [allDepartments, setAllDepartments] = useState<Department[]>([]);
-    const [roleDepartmentsDetailsOpen, setRoleDepartmentsDetailsOpen] = useState<boolean>(false);
+    const [allDepartments, setAllDepartments] = React.useState<Department[]>([]);
+    const [roleDepartmentsDetailsOpen, setRoleDepartmentsDetailsOpen] = React.useState<boolean>(false);
 
     function handleAddDepartment(event: React.MouseEvent<Element, MouseEvent>) {
         event.stopPropagation();
@@ -60,40 +53,20 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
         setRole({ ...role, roleDepartments: selected });
     }
     //#endregion
-    const [formErrors, setFormErrors] = useState<RoleValidation>(RoleValidation.initial);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [formErrors, setFormErrors] = React.useState<RoleValidation>(RoleValidation.initial);
+    const [loading, setLoading] = React.useState<boolean>(true);
+    const [] = React.useState<boolean>(true);
 
-    useEffect(() => { initialize(); }, [props.match.params]);
+    React.useEffect(() => { initialize(); }, [props.match.params]);
 
-    useEffect(() => {
-        const formErrors = roleService.validateRole(role);
-        setFormErrors(formErrors);
-    }, [role]);
-
-    async function loadRole() {
-        const { match } = props;
-
-        const tempId = match.params && match.params[paths.idParameterName];
-        let role: Role = Role.initial;
-        try {
-            setLoading(true);
-            const id = parseInt(tempId, 0);
-            if (id) {
-                const models = await roleService.getRoles({ id });
-                role = models[0];
-            }
+    React.useEffect(() => {
+        setLoading(roleState.roleLoading);
+        if (roleState.roleLoading === false) {
+            setRole(roleState.role);
         }
-        catch (error) {
-            if (error instanceof ApplicationError) {
-                setLoading(false);
-                //setSnackbar(error.message, true, SnackbarVariant.error);
-            }
-        }
-        finally {
-            setLoading(false);
-            setRole(role);
-        }
-    }
+    }, [roleState.roleLoading]);
+    React.useEffect(() => { dispatch(roleActions.validateRole(role)); }, [role])
+    React.useEffect(() => { setFormErrors(roleState.formErrors) }, [roleState.formErrors]);
 
     async function loadAllDepartments() {
         setLoading(true);
@@ -103,7 +76,11 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
     }
 
     async function initialize() {
-        await loadRole();
+        const { match } = props;
+        const tempId = match.params && match.params[paths.idParameterName];
+        const id = parseInt(tempId, null);
+        dispatch(roleActions.getRole(id));
+
         await loadAllDepartments();
     }
 
@@ -113,25 +90,13 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
     }
 
     async function handleSaveClick() {
-        try {
-            setLoading(true);
-            if (role.id)
-                await roleService.update(role);
-            else
-                await roleService.create(role);
-            setLoading(false);
-            //setSnackbar('Роль успешно сохранена', true, SnackbarVariant.success);
-        }
-        catch (error) {
-            if (error instanceof ApplicationError) {
-                setLoading(false);
-                //setSnackbar(error.message, true, SnackbarVariant.error);
-            }
-        }
+        dispatch(roleActions.saveRole(role));
     }
 
     async function handleCancelClick() {
-        await loadRole();
+        if (roleState.roleLoading === false) {
+            setRole(roleState.role);
+        }
     }
 
     const { classes } = props;
@@ -188,7 +153,7 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
                                     </Grid>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
-                                    <RoleDepartments departments={role.roleDepartments}/>
+                                    <RoleDepartments departments={role.roleDepartments} />
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
                         </Card>

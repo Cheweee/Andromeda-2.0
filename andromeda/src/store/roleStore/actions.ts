@@ -120,11 +120,11 @@ function saveRole(role: Role): AppThunkAction<Promise<CreateSuccess | UpdateSucc
         try {
             if (role.id) {
                 const result = await roleService.update(role);
-                dispatch(snackbarActions.showSnackbar('Пользователь успешно сохранен', SnackbarVariant.success));
+                dispatch(snackbarActions.showSnackbar('Роль успешно сохранена', SnackbarVariant.success));
                 return dispatch(updateSuccess(result));
             } else {
                 const result = await roleService.create(role);
-                dispatch(snackbarActions.showSnackbar('Пользователь успешно сохранен', SnackbarVariant.success));
+                dispatch(snackbarActions.showSnackbar('Роль успешно сохранена', SnackbarVariant.success));
                 return dispatch(createSuccess(result));
             }
         }
@@ -179,7 +179,7 @@ function getRole(id?: number): AppThunkAction<Promise<GetSuccess | GetFailure>> 
             if (state.roleState.loading === true) {
                 roles = await roleService.getRoles({ id });
                 if (!roles) {
-                    dispatch(snackbarActions.showSnackbar('Не удалось найти пользователя', SnackbarVariant.warning));
+                    dispatch(snackbarActions.showSnackbar('Не удалось найти роли', SnackbarVariant.warning));
                 }
             } else {
                 roles = state.roleState.roles;
@@ -206,7 +206,7 @@ function deleteRoles(ids: number[]): AppThunkAction<Promise<DeleteSuccess | Dele
 
         try {
             await roleService.delete(ids);
-            dispatch(snackbarActions.showSnackbar('Пользователь успешно удален.', SnackbarVariant.success));
+            dispatch(snackbarActions.showSnackbar('Роль успешно удалена.', SnackbarVariant.success));
             return dispatch(success());
         }
         catch (error) {

@@ -10,8 +10,8 @@ const styles = mergeStyles(commonStyles);
 
 interface Props extends WithStyles<typeof styles> {
     studyDirections: StudyDirection[];
-    handleStudyDirectionEdit: (id: number) => void;
-    handleStudyDirectionDelete: (id: number) => void;
+    handleStudyDirectionEdit: (name: string) => void;
+    handleStudyDirectionDelete: (name: string) => void;
 }
 
 export const StudyDirections = withStyles(styles)(function (props: Props) {
@@ -31,10 +31,10 @@ export const StudyDirections = withStyles(styles)(function (props: Props) {
                 <ListItemText primary={`${direction.code} ${direction.shortName}`} secondary={direction.name} />
                 <ListItemSecondaryAction>
                     <Grid container direction="row">
-                        <IconButton onClick={() => handleStudyDirectionEdit(direction.id)}>
+                        <IconButton onClick={() => handleStudyDirectionEdit(direction.name)}>
                             <Edit />
                         </IconButton>
-                        <IconButton onClick={() => handleStudyDirectionDelete(direction.id)}>
+                        <IconButton onClick={() => handleStudyDirectionDelete(direction.name)}>
                             <Delete />
                         </IconButton>
                     </Grid>

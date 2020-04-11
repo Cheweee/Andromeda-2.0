@@ -1,11 +1,10 @@
 import * as React from "react";
+import { WithStyles, withStyles } from "@material-ui/core/styles";
+import { Autocomplete } from "@material-ui/lab";
+import { Dialog, DialogTitle, DialogContent, Grid, InputBase, List, ListSubheader, ListItem, ListItemIcon, Checkbox, ListItemText, DialogActions, Button, TextField, CircularProgress } from "@material-ui/core";
 import { mergeStyles } from "../../../utilities";
 import { commonStyles } from "../../../muiTheme";
 import { Department, RoleInDepartment, UserRoleInDepartment, User, Role } from "../../../models";
-import { Dialog, DialogTitle, DialogContent, Grid, InputBase, List, ListSubheader, ListItem, ListItemIcon, Checkbox, ListItemText, DialogActions, Button, TextField, CircularProgress } from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
-import { WithStyles, withStyles } from "@material-ui/core/styles";
-import { useState, useEffect } from "react";
 
 const styles = mergeStyles(commonStyles);
 
@@ -21,22 +20,18 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 export const UserRolesInDepartmentDetails = withStyles(styles)(function (props: Props) {
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [selectedRoles, setSelectedRoles] = useState([]);
+    const [user, setUser] = React.useState<User>(User.initial);
+    const [roles, setRoles] = React.useState<RoleInDepartment[]>([]);
 
-    useEffect(() => {
-        const { selectedUser, selectedRoles } = props;
+    React.useEffect(() => { setUser(props.selectedUser); }, [props.selectedUser]);
+    React.useEffect(() => { setRoles(props.selectedRoles); }, [props.selectedRoles]);
 
-        setSelectedUser(selectedUser);
-        setSelectedRoles(selectedRoles);
-    }, [props.selectedUser]);
-
-    const handleUserChange = (event: React.ChangeEvent, value: User) => {
-        setSelectedUser(value);
+    function handleUserChange(event: React.ChangeEvent, value: User) {
+        setUser(value);
     }
 
-    const handleRoleChange = (event: React.ChangeEvent, values: RoleInDepartment[]) => {
-        setSelectedRoles(values);
+    function handleRoleChange(event: React.ChangeEvent, values: RoleInDepartment[]) {
+        setRoles(values);
     }
 
     const {
@@ -59,7 +54,7 @@ export const UserRolesInDepartmentDetails = withStyles(styles)(function (props: 
                         noOptionsText={"Пользователь не найден"}
                         getOptionLabel={(option: User) => `${option.firstname}${(option.secondname ? (' ' + option.secondname) : '')} ${option.lastname}`}
                         options={users}
-                        value={selectedUser}
+                        value={user}
                         onChange={handleUserChange}
                         renderOption={(option: User) => `${option.firstname}${(option.secondname ? (' ' + option.secondname) : '')} ${option.lastname}`}
                         renderInput={params => (
@@ -70,7 +65,7 @@ export const UserRolesInDepartmentDetails = withStyles(styles)(function (props: 
                                 variant="outlined"
                                 label="Сотрудник"
                                 placeholder="Сотрудник кафедры"
-                                value={selectedUser ? `${selectedUser.firstname}${(selectedUser.secondname ? ' ' + selectedUser.secondname : '')} ${selectedUser.lastname}` : ''}
+                                value={user ? `${user.firstname}${(user.secondname ? ' ' + user.secondname : '')} ${user.lastname}` : ''}
                             />
                         )}
                     />
@@ -78,7 +73,7 @@ export const UserRolesInDepartmentDetails = withStyles(styles)(function (props: 
                         className={classes.w100}
                         multiple
                         options={rolesInDepartment}
-                        value={selectedRoles}
+                        value={roles}
                         onChange={handleRoleChange}
                         noOptionsText={"Должность не найдена"}
                         renderOption={(option: RoleInDepartment) => option.roleName}
@@ -101,7 +96,7 @@ export const UserRolesInDepartmentDetails = withStyles(styles)(function (props: 
                 <Button onClick={onCancel} color="primary">
                     Отмена
                     </Button>
-                <Button onClick={() => onClose(selectedUser, selectedRoles)} color="primary" autoFocus>
+                <Button onClick={() => onClose(user, roles)} color="primary" autoFocus>
                     Принять
                     </Button>
             </DialogActions>

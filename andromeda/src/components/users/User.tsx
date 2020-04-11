@@ -13,8 +13,7 @@ import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { paths } from "../../sharedConstants";
 
-import { User, UserValidation, DisciplineTitle, AppState } from '../../models';
-import {  } from "../../models/reduxModels";
+import { User, DisciplineTitle, AppState } from '../../models';
 import { ProjectType } from "../../models/commonModels";
 
 import { UserDetails } from "./UserDetails";
@@ -33,32 +32,11 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
         userState: state.userState,
         disciplineTitleState: state.disciplineTitleState
     }));
-
     //#region User state
-    const [user, setUser] = React.useState<User>(User.initial);
+    const [isUserExist, setIsUserExist] = React.useState<boolean>(false);
 
-    function handleFirstnameChange(event: React.ChangeEvent<HTMLInputElement>) {
-        setUser({ ...user, firstname: event.target && event.target.value });
-    }
-
-    function handleSecondnameChange(event: React.ChangeEvent<HTMLInputElement>) {
-        setUser({ ...user, secondname: event.target && event.target.value });
-    }
-
-    function handleLastnameChange(event: React.ChangeEvent<HTMLInputElement>) {
-        setUser({ ...user, lastname: event.target && event.target.value });
-    }
-
-    function handleEmailChange(event: React.ChangeEvent<HTMLInputElement>) {
-        setUser({ ...user, email: event.target && event.target.value });
-    }
-
-    function handleUsernameChange(event: React.ChangeEvent<HTMLInputElement>) {
-        setUser({ ...user, username: event.target && event.target.value });
-    }
-
-    function handlePasswordChange(event: React.ChangeEvent<HTMLInputElement>) {
-        setUser({ ...user, password: event.target && event.target.value });
+    function handleUserDetailsChange(model: User) {
+        dispatch(userActions.updateUserDetails(model));
     }
     //#endregion
 
@@ -75,37 +53,24 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
         setSelectedProjectTypes([]);
     }
 
-    function handlePinnedDisciplineDelete(id: number) {
-        const pinnedDisciplines = user.pinnedDisciplines.filter(o => o.id !== id);
-        setUser({ ...user, pinnedDisciplines });
-    }
-
-    function handlePinnedDisciplineEdit(id: number) {
+    function handlePinnedDisciplineEdit(disciplineTitleId: number) {
         const discipline: DisciplineTitle = {
-            name: user.pinnedDisciplines.find(o => o.id === id).disciplineTitle,
-            id: user.pinnedDisciplines.find(o => o.id === id).disciplineTitleId
+            name: user.pinnedDisciplines.find(o => o.disciplineTitleId === disciplineTitleId).disciplineTitle,
+            id: user.pinnedDisciplines.find(o => o.disciplineTitleId === disciplineTitleId).disciplineTitleId
         };
-        const projectTypes = user.pinnedDisciplines.filter(o => o.id === id).map(o => o.projectType);
+        const projectTypes = user.pinnedDisciplines.filter(o => o.disciplineTitleId === disciplineTitleId).map(o => o.projectType);
 
         setPinnedDisciplineDetailsOpen(true);
         setSelectedTitle(discipline);
         setSelectedProjectTypes(projectTypes);
     }
 
+    function handlePinnedDisciplineDelete(disciplineTitleId: number) {
+        dispatch(userActions.deleteUserPinnedDiscipline(disciplineTitleId));
+    }
+
     function handlePinnedDisciplineDetailsAccept(title: DisciplineTitle, projectTypes: ProjectType[]) {
-        const pinnedDisciplines = user.pinnedDisciplines.filter(o => o.disciplineTitleId !== title.id);
-
-        for (const projectType of projectTypes) {
-            pinnedDisciplines.push({
-                disciplineTitleId: title.id,
-                userId: user.id,
-                projectType: projectType,
-                disciplineTitle: title.name,
-                title: title
-            });
-        }
-
-        setUser({ ...user, pinnedDisciplines });
+        dispatch(userActions.updateUserPinnedDisciplines(title, projectTypes));
         setPinnedDisciplineDetailsOpen(false);
         setSelectedTitle(null);
         setSelectedProjectTypes([]);
@@ -118,20 +83,9 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
     }
     //#endregion
 
-    const [formErrors, setFormErrors] = React.useState<UserValidation>(UserValidation.initial);
-    const [loading, setLoading] = React.useState<boolean>(true);
-    const [disciplinesTitlesLoading, setDisciplinesTitlesLoading] = React.useState<boolean>(true);
-
     React.useEffect(() => { initialize(); }, [props.match.params]);
 
     React.useEffect(() => {
-        setLoading(userState.userLoading);
-        if (userState.userLoading === false) {
-            setUser(userState.user);
-        }
-    }, [userState.userLoading]);
-    React.useEffect(() => {
-        setDisciplinesTitlesLoading(disciplineTitleState.loading);
         if (disciplineTitleState.loading === false) {
             const pinnedDisciplines = user && user.pinnedDisciplines || [];
             let disciplinesTitles: DisciplineTitle[];
@@ -143,14 +97,13 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
             }
             setDisciplinesTitles(disciplinesTitles);
         }
-    }, [disciplineTitleState.disciplineTitleLoading, selectedTitle]);
-    React.useEffect(() => { dispatch(userActions.validateUser(user)); }, [user])
-    React.useEffect(() => { setFormErrors(userState.formErrors) }, [userState.formErrors]);
+    }, [disciplineTitleState.loading, selectedTitle]);
 
     function initialize() {
         const { match } = props;
         const tempId = match.params && match.params[paths.idParameterName];
         const id = parseInt(tempId, null);
+        setIsUserExist(Boolean(id));
         dispatch(userActions.getUser(id));
         //TODO: Разобраться с выборкой наименований дисциплин
         dispatch(disciplineTitleActions.getDisciplinesTitles({}));
@@ -167,12 +120,19 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
     }
 
     function handleCancelClick() {
-        if (userState.userLoading === false) {
-            setUser(userState.user);
-        }
+        const { match } = props;
+        const tempId = match.params && match.params[paths.idParameterName];
+        const id = parseInt(tempId, null);
+        dispatch(userActions.getUser(id));
     }
 
     const { classes } = props;
+
+    const userDetailsDisabled = userState.userLoading || disciplineTitleState.loading;
+    let user: User = null;
+    if (userState.userLoading === false) {
+        user = userState.user;
+    }
 
     return (
         <form autoComplete="off" noValidate>
@@ -182,7 +142,7 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
                     <Grid container direction="row">
                         <Tooltip title="Вернуться назад">
                             <span>
-                                <IconButton disabled={loading} onClick={handleBackClick}>
+                                <IconButton disabled={userDetailsDisabled} onClick={handleBackClick}>
                                     <ArrowBack />
                                 </IconButton>
                             </span>
@@ -190,14 +150,14 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
                         <Grid item xs />
                         <Tooltip title="Отменить">
                             <span>
-                                <IconButton disabled={loading} onClick={handleCancelClick}>
+                                <IconButton disabled={userDetailsDisabled} onClick={handleCancelClick}>
                                     <Close />
                                 </IconButton>
                             </span>
                         </Tooltip>
                         <Tooltip title="Сохранить">
                             <span>
-                                <IconButton color="primary" disabled={loading || !formErrors.isValid} onClick={handleSaveClick}>
+                                <IconButton color="primary" disabled={userDetailsDisabled || !userState.formErrors.isValid} onClick={handleSaveClick}>
                                     <Check />
                                 </IconButton>
                             </span>
@@ -205,18 +165,14 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
                     </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
                         <CardHeader title="Пользователь" />
-                        {loading && <LinearProgress variant="query" />}
+                        {userState.userLoading && <LinearProgress variant="query" />}
                         <CardContent>
                             <UserDetails
                                 user={user}
-                                disabled={loading}
-                                formErrors={formErrors}
-                                handleEmailChange={handleEmailChange}
-                                handleFirstnameChange={handleFirstnameChange}
-                                handleLastnameChange={handleLastnameChange}
-                                handlePasswordChange={handlePasswordChange}
-                                handleSecondnameChange={handleSecondnameChange}
-                                handleUsernameChange={handleUsernameChange}
+                                isUserExist={isUserExist}
+                                disabled={userDetailsDisabled}
+                                formErrors={userState.formErrors}
+                                onUserDetailsChange={handleUserDetailsChange}
                             />
                         </CardContent>
                     </Card>
@@ -232,10 +188,11 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
                                         </IconButton>
                                     </Tooltip>
                                 </Grid>
-                                {disciplinesTitlesLoading && <LinearProgress variant="query" />}
+                                {disciplineTitleState.loading && <LinearProgress variant="query" />}
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails>
                                 <PinnedDisciplines
+                                    disabled={userDetailsDisabled}
                                     pinnedDisciplines={user && user.pinnedDisciplines || []}
                                     handleDelete={handlePinnedDisciplineDelete}
                                     handleEdit={handlePinnedDisciplineEdit}

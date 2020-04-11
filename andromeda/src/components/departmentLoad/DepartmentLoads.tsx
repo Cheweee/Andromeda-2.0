@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { WithStyles, withStyles } from "@material-ui/core/styles";
-import { DepartmentLoad, Filter, ApplicationError, SnackbarVariant, DepartmentLoadImportOptions } from "../../models";
+import { DepartmentLoad, ApplicationError, SnackbarVariant, DepartmentLoadImportOptions } from "../../models";
 import { Grid, Card, CardContent, Typography, IconButton, Tooltip, CircularProgress, CardActions } from "@material-ui/core";
 import { DepartmentLoadDetails } from "./DepartmentLoadDetails";
 import { SearchInput, MessageSnackbar } from "../common";

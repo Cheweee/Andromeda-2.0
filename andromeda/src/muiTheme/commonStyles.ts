@@ -10,9 +10,6 @@ export const commonStyles = (theme: Theme) => ({
     margin: theme.spacing(1),
     position: 'relative',
   },
-  whiteBackground: {
-    background: '#fff'
-  },
   buttonProgress: {
     position: 'absolute',
     top: '50%',
@@ -32,9 +29,6 @@ export const commonStyles = (theme: Theme) => ({
     top: -6,
     left: -6,
     zIndex: 1,
-  },
-  fixedHeight240: {
-    height: 240
   },
   fixedHeight300: {
     height: 300
@@ -162,11 +156,5 @@ export const commonStyles = (theme: Theme) => ({
     position: 'relative',
     overflow: 'auto',
     maxHeight: 400,
-  },
-  fitContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    margin: 'auto',
-    width: 'fit-content',
-  },
+  }
 });

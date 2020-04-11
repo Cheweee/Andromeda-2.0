@@ -1,6 +1,6 @@
 import { Action } from "redux";
 
-import { User, ApplicationError, AuthenticatedUser, UserGetOptions, UserAuthenticateOptions, UserValidation, SnackbarVariant } from "../../models";
+import { User, ApplicationError, AuthenticatedUser, UserGetOptions, UserAuthenticateOptions, UserValidation, SnackbarVariant, PinnedDiscipline, ProjectType, DisciplineTitle } from "../../models";
 import { userService, sessionService } from "../../services";
 import { AppThunkAction, AppState, AppThunkDispatch } from "../../models/reduxModels";
 import { snackbarActions } from "../snackbarStore";
@@ -17,9 +17,13 @@ export enum ActionType {
     getUsersSuccess = 'GET_USERS_SUCCESS',
     getUsersFailure = 'GET_USERS_FAILURE',
 
-    getRequest = 'GET_REQUEST',
-    getSuccess = 'GET_SUCCESS',
-    getFailure = 'GET_FAILURE',
+    getUserRequest = 'GET_USER_REQUEST',
+    getUserSuccess = 'GET_USER_SUCCESS',
+    getUserFailure = 'GET_USER_FAILURE',
+
+    updateUserDetails = 'UPDATE_USER_DETAILS',
+    updateUserPinnedDisciplines = 'UPDATE_USER_PINNED_DISCIPLINES',
+    deleteUserPinnedDiscipline = 'DELETE_USER_PINNED_DISCIPLINE',
 
     saveRequest = 'SAVE_USER_REQUEST',
     createSuccess = 'CREATE_USER_SUCCESS',
@@ -73,18 +77,35 @@ export interface GetUsersFailure extends Action<ActionType> {
 }
 
 export interface GetRequest extends Action<ActionType> {
-    type: ActionType.getRequest;
+    type: ActionType.getUserRequest;
     id?: number;
 }
 
 export interface GetSuccess extends Action<ActionType> {
-    type: ActionType.getSuccess;
+    type: ActionType.getUserSuccess;
     user: User;
 }
 
 export interface GetFailure extends Action<ActionType> {
-    type: ActionType.getFailure;
+    type: ActionType.getUserFailure;
     error: ApplicationError;
+}
+
+export interface UpdateUserDetails extends Action<ActionType> {
+    type: ActionType.updateUserDetails;
+    user: User;
+    formErrors: UserValidation;
+}
+
+export interface UpdateUserPinnedDisciplines extends Action<ActionType> {
+    type: ActionType.updateUserPinnedDisciplines;
+    disciplineTitle: DisciplineTitle;
+    projectTypes: ProjectType[];
+}
+
+export interface DeleteUserPinnedDisciplines extends Action<ActionType> {
+    type: ActionType.deleteUserPinnedDiscipline;
+    id: number;
 }
 
 export interface SaveRequest extends Action<ActionType> {
@@ -139,9 +160,19 @@ export type Signin = SigninRequest | SigninSuccess | SigninFailure;
 export type GetUsers = GetUsersRequest | GetUsersSuccess | GetUsersFailure;
 export type GetUser = GetRequest | GetSuccess | GetFailure
 export type SaveUser = SaveRequest | CreateSuccess | UpdateSuccess | SaveFailure;
+export type UpdateSelectedUser = UpdateUserDetails | UpdateUserPinnedDisciplines | DeleteUserPinnedDisciplines;
 export type DeleteUser = DeleteRequest | DeleteSuccess | DeleteFailure;
 
-export type UserActions = Signin | Signout | GetUsers | GetUser | ClearEditionState | SaveUser | DeleteUser | ValidateCredentials | Validate;
+export type UserActions = Signin |
+    Signout |
+    GetUsers |
+    GetUser |
+    ClearEditionState |
+    SaveUser |
+    DeleteUser |
+    UpdateSelectedUser |
+    ValidateCredentials |
+    Validate;
 //#endregion
 
 //#region Actions
@@ -228,17 +259,17 @@ function getUsers(options: UserGetOptions): AppThunkAction<Promise<GetUsersSucce
 }
 
 function getUser(id?: number): AppThunkAction<Promise<GetSuccess | GetFailure>> {
-    return async (dispatch: AppThunkDispatch<Promise<GetSuccess | GetFailure>>, getState: () => AppState) => {
+    return async (dispatch: AppThunkDispatch, getState: () => AppState) => {
         dispatch(request(id));
 
-        if (!id && id !== 0)
+        if (!id || id === NaN)
             return dispatch(success(User.initial));
 
         const state = getState();
         let users: User[] = [];
 
         try {
-            if (state.userState.loading === true) {
+            if (state.userState.usersLoading === true) {
                 users = await userService.get({ id });
                 if (!users) {
                     dispatch(snackbarActions.showSnackbar('Не удалось найти пользователя', SnackbarVariant.warning));
@@ -248,6 +279,7 @@ function getUser(id?: number): AppThunkAction<Promise<GetSuccess | GetFailure>> 
             }
 
             let user = users.find(o => o.id === id);
+            dispatch(validateUser(user));
             return dispatch(success(user));
         }
         catch (error) {
@@ -256,10 +288,24 @@ function getUser(id?: number): AppThunkAction<Promise<GetSuccess | GetFailure>> 
             return dispatch(failure(error));
         }
 
-        function request(id?: number): GetRequest { return { type: ActionType.getRequest, id: id }; }
-        function success(user: User): GetSuccess { return { type: ActionType.getSuccess, user: user }; }
-        function failure(error: ApplicationError): GetFailure { return { type: ActionType.getFailure, error: error }; }
+        function request(id?: number): GetRequest { return { type: ActionType.getUserRequest, id: id }; }
+        function success(user: User): GetSuccess { return { type: ActionType.getUserSuccess, user: user }; }
+        function failure(error: ApplicationError): GetFailure { return { type: ActionType.getUserFailure, error: error }; }
     }
+}
+
+function updateUserDetails(user: User): UpdateUserDetails {
+        const formErrors = userService.validateUser(user);
+
+        return { type: ActionType.updateUserDetails, user: user, formErrors: formErrors };
+}
+
+function updateUserPinnedDisciplines(disciplineTitle: DisciplineTitle, projectTypes: ProjectType[]): UpdateUserPinnedDisciplines {
+    return { type: ActionType.updateUserPinnedDisciplines, disciplineTitle: disciplineTitle, projectTypes: projectTypes };
+}
+
+function deleteUserPinnedDiscipline(id: number): DeleteUserPinnedDisciplines {
+    return { type: ActionType.deleteUserPinnedDiscipline, id: id };
 }
 
 function deleteUsers(ids: number[]): AppThunkAction<Promise<DeleteSuccess | DeleteFailure>> {
@@ -297,6 +343,9 @@ export default {
     signin,
     signout,
     saveUser,
+    updateUserDetails,
+    updateUserPinnedDisciplines,
+    deleteUserPinnedDiscipline,
     clearEditionState,
     getUsers,
     getUser,

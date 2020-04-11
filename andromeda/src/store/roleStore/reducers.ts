@@ -1,6 +1,6 @@
 import { RoleState, RoleGetState, RolesListState, RolesDeleteState, RoleValidating } from "./state";
 import { RoleActions, ActionType } from "./actions";
-import { RoleValidation } from "../../models";
+import { RoleValidation, Role } from "../../models";
 
 const initialState: RoleState = {
     loading: true,
@@ -58,6 +58,34 @@ export function roleReducer(prevState: RoleState = initialState, action: RoleAct
         }
         case ActionType.saveFailure: return prevState;
 
+        case ActionType.updateRoleDetails: {
+            if (prevState.roleLoading === true) {
+                return prevState;
+            }
+
+            const role = { ...prevState.role, ...action.role };
+            const formErrors = { ...prevState.formErrors, ...action.formErrors };
+
+            return {
+                ...prevState,
+                role: role,
+                formErrors: formErrors
+            }
+        }
+
+        case ActionType.updateRoleDepartments: {
+            if (prevState.roleLoading === true) {
+                return prevState;
+            }
+
+            const model: Role = {
+                ...prevState.role,
+                roleDepartments: action.departments
+            }
+            const state: RoleGetState = { roleLoading: false, role: model };
+
+            return { ...prevState, ...state };
+        }
 
         case ActionType.deleteRequest: {
             const deleteState: RolesDeleteState = { deleting: true, ids: action.ids };

@@ -76,10 +76,10 @@ function getDisciplinesTitles(options: DisciplineTitleGetOptions): AppThunkActio
 }
 
 function getDisciplineTitle(id?: number): AppThunkAction<Promise<GetSuccess | GetFailure>> {
-    return async (dispatch: AppThunkDispatch<Promise<GetSuccess | GetFailure>>, getState: () => AppState) => {
+    return async (dispatch: AppThunkDispatch, getState: () => AppState) => {
         dispatch(request(id));
 
-        if (!id && id !== 0)
+        if (!id || id === NaN)
             return dispatch(success(DisciplineTitle.initial));
 
         const state = getState();

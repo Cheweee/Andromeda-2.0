@@ -27,26 +27,14 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
     const dispatch = Redux.useDispatch();
     const { userState } = Redux.useSelector((state: AppState) => ({ userState: state.userState }));
 
-    const [users, setUsers] = React.useState<User[]>([]);
     const [search, setSearch] = React.useState<string>();
     const [id, setId] = React.useState<number>(null);
-    const [loading, setLoading] = React.useState<boolean>(false);
     const [open, setOpen] = React.useState<boolean>(false);
 
     const debouncedSearch = useDebounce(search, 500);
 
     React.useEffect(() => getUsers(), []);
     React.useEffect(() => { getUsers(debouncedSearch); }, [debouncedSearch]);
-
-    React.useEffect(() => {
-        if (userState.loading === true) {
-            setLoading(true);
-            return;
-        }
-
-        setLoading(false);
-        setUsers(userState.users);
-    }, [userState]);
 
     function getUsers(search?: string) {
         dispatch(userActions.getUsers({ search: search }));
@@ -104,6 +92,12 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
         },
     ]
 
+    let users: User[] = [];
+
+    if(userState.usersLoading === false) {
+        users = userState.users;
+    }
+
     return (
         <Grid container direction="column" >
             <Grid container direction="row" alignItems="center">
@@ -120,7 +114,7 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
                 </IconButton>
             </Grid>
             <Paper className={classes.margin1Y}>
-                <TableComponent columns={columns} data={users} loading={loading} />
+                <TableComponent columns={columns} data={users} loading={userState.usersLoading} />
             </Paper>
             <ConfirmationDialog
                 open={open}

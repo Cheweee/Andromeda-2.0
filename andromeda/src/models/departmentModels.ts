@@ -9,6 +9,16 @@ export enum DepartmentType {
     TrainingDepartment
 }
 
+export namespace DepartmentType {
+    export function getProjectTypeDescription(value: DepartmentType) {
+        switch (value) {
+            case DepartmentType.Faculty: return 'Факультет';
+            case DepartmentType.TrainingDepartment: return 'Кафедры';
+            default: return 'Департамент';
+        }
+    }
+}
+
 export interface Department {
     id?: number;
     name: string;
@@ -46,6 +56,8 @@ export interface UserRoleInDepartment {
 
 export interface Faculty extends Department {
     readonly type: DepartmentType.Faculty
+    
+    departments: TrainingDepartment[];
 }
 
 export namespace Faculty {
@@ -54,7 +66,9 @@ export namespace Faculty {
         name: '',
         roles: [],
         type: DepartmentType.Faculty,
-        users: []
+        users: [],
+
+        departments: []
     };
 }
 

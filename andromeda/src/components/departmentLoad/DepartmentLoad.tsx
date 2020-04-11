@@ -6,8 +6,6 @@ import { mergeStyles } from "../../utilities";
 import {
     DepartmentLoad,
     ApplicationError,
-    SnackbarVariant,
-    Filter,
     StudyLoad,
     User,
     GroupDisciplineLoad,

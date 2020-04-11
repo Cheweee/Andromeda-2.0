@@ -6,11 +6,10 @@ import { RouteComponentProps, withRouter } from "react-router";
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { Column } from "../../models/commonModels";
-import { ApplicationError, Role, AppState } from "../../models";
+import { Role, AppState } from "../../models";
 import { paths } from "../../sharedConstants";
 import { Edit, Delete, Search, Add, AssignmentInd } from "@material-ui/icons";
 import { SearchInput, TableComponent, ConfirmationDialog } from "../common";
-import { roleService } from "../../services";
 import { useDebounce } from "../../hooks";
 import { roleActions } from "../../store/roleStore";
 
@@ -22,10 +21,8 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
     const dispatch = Redux.useDispatch();
     const { roleState } = Redux.useSelector((state: AppState) => ({ roleState: state.roleState }));
 
-    const [roles, setRoles] = React.useState<Role[]>([]);
     const [search, setSearch] = React.useState<string>();
     const [id, setId] = React.useState<number>(null);
-    const [loading, setLoading] = React.useState<boolean>(false);
     const [open, setOpen] = React.useState<boolean>(false);
 
     const debouncedSearch = useDebounce(search, 500);
@@ -33,17 +30,7 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
     React.useEffect(() => { getRoles(); }, []);
     React.useEffect(() => { getRoles(debouncedSearch) }, [debouncedSearch]);
 
-    React.useEffect(() => {
-        if (roleState.loading === true) {
-            setLoading(true);
-            return;
-        }
-
-        setLoading(false);
-        setRoles(roleState.roles);
-    }, [roleState]);
-
-    async function getRoles(search?: string) {
+    function getRoles(search?: string) {
         dispatch(roleActions.getRoles({ search: search }));
     }
 
@@ -66,7 +53,7 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
         setOpen(false);
         if (result) {
             const ids = [id];
-            await dispatch(roleService.delete(ids));
+            await dispatch(roleActions.deleteRoles(ids));
         }
         setId(null);
     }
@@ -94,6 +81,11 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
         },
     ]
 
+    let roles: Role[] = [];
+    if(roleState.loading === false) {
+        roles = roleState.roles;
+    }
+
     return (
         <Grid container direction="column" >
             <Grid container direction="row" alignItems="center">
@@ -110,7 +102,7 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
                 </IconButton>
             </Grid>
             <Paper className={classes.margin1Y}>
-                <TableComponent columns={columns} data={roles} loading={loading} />
+                <TableComponent columns={columns} data={roles} loading={roleState.loading} />
             </Paper>
             <ConfirmationDialog
                 open={open}

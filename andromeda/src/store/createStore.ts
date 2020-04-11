@@ -2,18 +2,24 @@ import { combineReducers, createStore, applyMiddleware, Store } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
 import thunkMiddleware from 'redux-thunk';
 
+import { AppState } from "../models/reduxModels";
+
+import { facultyReducer } from "./facultyStore/reducers";
 import { userReducer } from './userStore/reducers'
 import { snackbarReducer } from "./snackbarStore/reducers";
 import { disciplineTitleReducer } from "./disciplineTitleStore/reducers";
 import { roleReducer } from './roleStore/reducers';
-
-import { AppState } from "../models/reduxModels";
+import { departmentReducer } from "./departmentStore/reducers";
+import { trainingDepartmentReducer } from "./trainingDepartmentStore/reducers";
 
 const rootReducer = combineReducers({
+    facultyState: facultyReducer,
+    departmentState: departmentReducer,
     userState: userReducer,
     snackbarState: snackbarReducer,
     disciplineTitleState: disciplineTitleReducer,
-    roleState: roleReducer
+    roleState: roleReducer,
+    trainingDepartmentState: trainingDepartmentReducer
 });
 
 export default function configureStore(): Store<AppState> {

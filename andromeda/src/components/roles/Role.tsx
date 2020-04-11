@@ -14,12 +14,12 @@ import { commonStyles } from "../../muiTheme";
 import { paths } from "../../sharedConstants";
 
 import { Role, RoleValidation, Department, RoleInDepartment, AppState } from "../../models";
-import { departmentService } from "../../services";
 
 import { RoleDetails } from "./RoleDetails";
 import { RoleDepartments, RoleDepartmentsDetails } from "./RoleDepartments";
 
 import { roleActions } from "../../store/roleStore";
+import { departmentActions } from "../../store/departmentStore";
 
 const styles = mergeStyles(commonStyles);
 
@@ -27,20 +27,20 @@ interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const RoleComponent = withStyles(styles)(withRouter(function (props: Props) {
     const dispatch = Redux.useDispatch();
-    const { roleState } = Redux.useSelector((state: AppState) => ({
-        roleState: state.roleState
+    const {
+        roleState,
+        departmentState
+    } = Redux.useSelector((state: AppState) => ({
+        roleState: state.roleState,
+        departmentState: state.departmentState
     }));
+    
     //#region Role state
-    const [role, setRole] = React.useState<Role>(Role.initial);
-
-    function handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
-        const name = event.target && event.target.value;
-
-        setRole({ ...role, name });
+    function handleRoleDetailsChange(model: Role) {
+        dispatch(roleActions.updateRoleDetails(model));
     }
     //#endregion
     //#region Departments state
-    const [allDepartments, setAllDepartments] = React.useState<Department[]>([]);
     const [roleDepartmentsDetailsOpen, setRoleDepartmentsDetailsOpen] = React.useState<boolean>(false);
 
     function handleAddDepartment(event: React.MouseEvent<Element, MouseEvent>) {
@@ -50,30 +50,11 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
 
     function handleDepartmentsSelected(selected: RoleInDepartment[]) {
         setRoleDepartmentsDetailsOpen(false);
-        setRole({ ...role, roleDepartments: selected });
+        dispatch(roleActions.updateRoleDepartments(selected));
     }
     //#endregion
-    const [formErrors, setFormErrors] = React.useState<RoleValidation>(RoleValidation.initial);
-    const [loading, setLoading] = React.useState<boolean>(true);
-    const [] = React.useState<boolean>(true);
 
     React.useEffect(() => { initialize(); }, [props.match.params]);
-
-    React.useEffect(() => {
-        setLoading(roleState.roleLoading);
-        if (roleState.roleLoading === false) {
-            setRole(roleState.role);
-        }
-    }, [roleState.roleLoading]);
-    React.useEffect(() => { dispatch(roleActions.validateRole(role)); }, [role])
-    React.useEffect(() => { setFormErrors(roleState.formErrors) }, [roleState.formErrors]);
-
-    async function loadAllDepartments() {
-        setLoading(true);
-        const allDepartments = await departmentService.getDepartments({});
-        setAllDepartments(allDepartments);
-        setLoading(false);
-    }
 
     async function initialize() {
         const { match } = props;
@@ -81,11 +62,12 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
         const id = parseInt(tempId, null);
         dispatch(roleActions.getRole(id));
 
-        await loadAllDepartments();
+        dispatch(departmentActions.getDepartments({}));
     }
 
     function handleBackClick() {
         const { history } = props;
+        dispatch(roleActions.clearEditionState());
         history.push(paths.rolesPath);
     }
 
@@ -94,12 +76,24 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
     }
 
     async function handleCancelClick() {
-        if (roleState.roleLoading === false) {
-            setRole(roleState.role);
-        }
+        const { match } = props;
+        const tempId = match.params && match.params[paths.idParameterName];
+        const id = parseInt(tempId, null);
+        dispatch(roleActions.getRole(id));
     }
 
     const { classes } = props;
+
+    const disabled = roleState.roleLoading || departmentState.loading;
+
+    let role: Role = null;
+    if(roleState.roleLoading === false) {
+        role = roleState.role;
+    }
+    let departments: Department[] = [];
+    if(departmentState.loading === false) {
+        departments = departmentState.departments;
+    }    
 
     return (
         <div>
@@ -109,33 +103,37 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
                     <Grid item xs container direction="column">
                         <Grid container direction="row">
                             <Tooltip title="Вернуться назад">
-                                <IconButton disabled={loading} onClick={handleBackClick}>
-                                    <ArrowBack />
-                                </IconButton>
+                                <span>
+                                    <IconButton disabled={disabled} onClick={handleBackClick}>
+                                        <ArrowBack />
+                                    </IconButton>
+                                </span>
                             </Tooltip>
                             <Grid item xs />
                             <Tooltip title="Отменить">
-                                <IconButton disabled={loading} onClick={handleCancelClick}>
-                                    <Close />
-                                </IconButton>
+                                <span>
+                                    <IconButton disabled={disabled} onClick={handleCancelClick}>
+                                        <Close />
+                                    </IconButton>
+                                </span>
                             </Tooltip>
                             <Tooltip title="Сохранить">
-                                <IconButton color="primary" disabled={loading || !formErrors.isValid} onClick={handleSaveClick}>
-                                    <Check />
-                                </IconButton>
+                                <span>
+                                    <IconButton color="primary" disabled={disabled || !roleState.formErrors.isValid} onClick={handleSaveClick}>
+                                        <Check />
+                                    </IconButton>
+                                </span>
                             </Tooltip>
                         </Grid>
                         <Card className={clsx(classes.margin1Y, classes.w100)}>
-                            <CardHeader
-                                title="Роль"
-                            />
-                            {loading && <LinearProgress variant="query" />}
+                            <CardHeader title="Роль" />
+                            {roleState.roleLoading && <LinearProgress variant="query" />}
                             <CardContent>
                                 <RoleDetails
-                                    disabled={loading}
-                                    formErrors={formErrors}
+                                    disabled={disabled}
+                                    formErrors={roleState.formErrors}
                                     role={role}
-                                    handleNameChange={handleNameChange}
+                                    onRoleDetailsChange={handleRoleDetailsChange}
                                 />
                             </CardContent>
                         </Card>
@@ -146,14 +144,17 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
                                         <Typography className={classes.heading}>Подразделения и департаменты</Typography>
                                         <Grid item xs />
                                         <Tooltip title="Редактировать подразделения роли">
-                                            <IconButton onClick={handleAddDepartment}>
-                                                <Edit />
-                                            </IconButton>
+                                            <span>
+                                                <IconButton onClick={handleAddDepartment}>
+                                                    <Edit />
+                                                </IconButton>
+                                            </span>
                                         </Tooltip>
                                     </Grid>
+                                    {departmentState.loading && <LinearProgress variant="query" />}
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
-                                    <RoleDepartments departments={role.roleDepartments} />
+                                    <RoleDepartments departments={role && role.roleDepartments || []} />
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
                         </Card>
@@ -162,8 +163,8 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
                 </Grid>
             </form>
             <RoleDepartmentsDetails
-                departments={allDepartments}
-                previousSelected={role.roleDepartments}
+                departments={departments}
+                previousSelected={role && role.roleDepartments || []}
                 open={roleDepartmentsDetailsOpen}
                 onClose={handleDepartmentsSelected}
             />

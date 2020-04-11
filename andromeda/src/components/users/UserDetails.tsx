@@ -9,33 +9,76 @@ const styles = mergeStyles(commonStyles);
 
 interface Props extends WithStyles<typeof styles> {
     disabled: boolean;
+    isUserExist: boolean;
     user: User;
     formErrors: UserValidation;
 
-    handleFirstnameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handleSecondnameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handleLastnameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handleEmailChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handleUsernameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handlePasswordChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    onUserDetailsChange: (model: User) => void;
 }
 
 export const UserDetails = withStyles(styles)(function (props: Props) {
     const {
         classes,
         disabled,
+        isUserExist,
         user,
-        formErrors,
-
-        handleFirstnameChange,
-        handleSecondnameChange,
-        handleLastnameChange,
-        handleEmailChange,
-        handleUsernameChange,
-        handlePasswordChange
+        formErrors
     } = props;
 
-    const isUserExist = user && Boolean(user.id);
+    function handleFirstnameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const { onUserDetailsChange } = props;
+
+        const changedUser: User = {
+            ...user,
+            firstname: event && event.target.value
+        }
+        onUserDetailsChange(changedUser);
+    }
+    function handleSecondnameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const { onUserDetailsChange } = props;
+
+        const changedUser: User = {
+            ...user,
+            secondname: event && event.target.value
+        }
+        onUserDetailsChange(changedUser);
+    }
+    function handleLastnameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const { onUserDetailsChange } = props;
+
+        const changedUser: User = {
+            ...user,
+            lastname: event && event.target.value
+        }
+        onUserDetailsChange(changedUser);
+    }
+    function handleEmailChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const { onUserDetailsChange } = props;
+
+        const changedUser: User = {
+            ...user,
+            email: event && event.target.value
+        }
+        onUserDetailsChange(changedUser);
+    }
+    function handleUsernameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const { onUserDetailsChange } = props;
+
+        const changedUser: User = {
+            ...user,
+            username: event && event.target.value
+        }
+        onUserDetailsChange(changedUser);
+    }
+    function handlePasswordChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const { onUserDetailsChange } = props;
+
+        const changedUser: User = {
+            ...user,
+            password: event && event.target.value
+        }
+        onUserDetailsChange(changedUser);
+    }
 
     return (
         <Grid container direction="column">
@@ -54,7 +97,7 @@ export const UserDetails = withStyles(styles)(function (props: Props) {
                         disabled={disabled}
                         error={Boolean(formErrors.firstnameError)}
                         helperText={formErrors.firstnameError}
-                        value={user && user.firstname}
+                        value={user && user.firstname || ''}
                         onChange={handleFirstnameChange}
                     />
                 </Grid>
@@ -85,7 +128,7 @@ export const UserDetails = withStyles(styles)(function (props: Props) {
                         required
                         autoComplete="familyname"
                         disabled={disabled}
-                        value={user && user.lastname}
+                        value={user && user.lastname || ''}
                         onChange={handleLastnameChange}
                         error={Boolean(formErrors.lastnameError)}
                         helperText={formErrors.lastnameError}
@@ -107,7 +150,7 @@ export const UserDetails = withStyles(styles)(function (props: Props) {
                         disabled={disabled}
                         error={Boolean(formErrors.emailError)}
                         helperText={formErrors.emailError}
-                        value={user && user.email}
+                        value={user && user.email || ''}
                         onChange={handleEmailChange}
                     />
                 </Grid>
@@ -128,7 +171,7 @@ export const UserDetails = withStyles(styles)(function (props: Props) {
                         }}
                         error={Boolean(formErrors.usernameError)}
                         helperText={formErrors.usernameError}
-                        value={user && user.username}
+                        value={user && user.username || ''}
                         onChange={handleUsernameChange}
                     />
                 </Grid>
@@ -147,7 +190,7 @@ export const UserDetails = withStyles(styles)(function (props: Props) {
                             disabled={disabled}
                             error={Boolean(formErrors.passwordError)}
                             helperText={formErrors.passwordError}
-                            value={user && user.password}
+                            value={user && user.password || ''}
                             onChange={handlePasswordChange}
                         />
                     </Grid>

@@ -14,11 +14,11 @@ interface Props extends WithStyles<typeof styles> {
     disabled: boolean;
     department: Department;
     formErrors: DepartmentValidation;
-    handleNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handleFullNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handleParentChange?: (event: React.ChangeEvent, value: Department) => void;
+    
     parentDepartment?: Department; 
     parentDepartments?: Department[];
+
+    onDepartmentDetailsChange: (model: Department) => void;
 }
 
 export const DepartmentDetails = withStyles(styles)(function (props: Props) {
@@ -34,17 +34,15 @@ export const DepartmentDetails = withStyles(styles)(function (props: Props) {
         disabled,
         department,
         formErrors,
-        parentDepartments,
-
-        handleNameChange,
-        handleParentChange,
-        handleFullNameChange
+        parentDepartments
     } = props;
 
     let placeholder = "";
     let parentPlaceholder = "";
 
-    switch (department.type) {
+    const type = department && department.type || DepartmentType.Faculty;
+
+    switch (type) {
         case DepartmentType.Faculty: {
             placeholder = "факультета";
             break;
@@ -58,6 +56,27 @@ export const DepartmentDetails = withStyles(styles)(function (props: Props) {
             placeholder = "департамента";
             break;
         }
+    }
+
+    function handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const { onDepartmentDetailsChange } = props;
+
+        const changedDepartment: Department = { ...department, name: event && event.target.value };
+        onDepartmentDetailsChange(changedDepartment);
+    }
+
+    function handleFullNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const { onDepartmentDetailsChange } = props;
+
+        const changedDepartment: Department = { ...department, fullName: event && event.target.value };
+        onDepartmentDetailsChange(changedDepartment);
+    }
+
+    function handleParentChange(event: React.ChangeEvent<HTMLSelectElement>, value: Department) {
+        const { onDepartmentDetailsChange } = props;
+
+        const changedDepartment: Department = { ...department, parent: value, parentId: value && value.id };
+        onDepartmentDetailsChange(changedDepartment);
     }
 
     return (
@@ -75,7 +94,7 @@ export const DepartmentDetails = withStyles(styles)(function (props: Props) {
                         required
                         autoComplete="firstname"
                         disabled={disabled}
-                        value={department.name}
+                        value={department && department.name || ''}
                         error={Boolean(formErrors.nameError)}
                         helperText={formErrors.nameError}
                         onChange={handleNameChange}
@@ -92,7 +111,7 @@ export const DepartmentDetails = withStyles(styles)(function (props: Props) {
                         autoComplete="fullname"
                         fullWidth
                         disabled={disabled}
-                        value={department.fullName}
+                        value={department && department.fullName || ''}
                         error={Boolean(formErrors.fullNameError)}
                         helperText={formErrors.fullNameError}
                         onChange={handleFullNameChange}

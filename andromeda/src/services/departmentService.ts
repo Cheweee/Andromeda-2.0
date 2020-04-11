@@ -110,31 +110,32 @@ class DepartmentService {
         return parentIdValid ? '' : 'Факультет обязателен';
     }
 
-    public validateFaculty(faculty: Faculty) {
-        const nameError = this.validateName(faculty.name);
-        const fullNameError = this.validateFullName(faculty.fullName);
+    public validateDepartment(model: Department): DepartmentValidation {
+        const nameError = this.validateName(model.name);
+        const fullNameError = this.validateFullName(model.fullName);
         const isValid = !nameError
             && !fullNameError
 
-        const facultyErrors: DepartmentValidation = {
-            nameError: nameError,
-            fullNameError: fullNameError,
-            isValid: isValid
-        };
-        return facultyErrors;
+            const facultyErrors: DepartmentValidation = {
+                nameError: nameError,
+                fullNameError: fullNameError,
+                isValid: isValid
+            };
+            return facultyErrors;
     }
 
-    public validateTrainingDepartment(department: TrainingDepartment) {
-        const nameError = this.validateName(department.name);
-        const fullNameError = this.validateFullName(department.fullName);
-        const parentIdError = this.validateParentId(department.parentId);
-        const isValid = !nameError
-            && !fullNameError
-            && !parentIdError
+    public validateFaculty(model: Faculty): DepartmentValidation {
+        const departmentErrors = this.validateDepartment(model);
+        return departmentErrors;
+    }
+
+    public validateTrainingDepartment(model: TrainingDepartment): DepartmentValidation {
+        const departmentErrors = this.validateDepartment(model);
+        const parentIdError = this.validateParentId(model.parentId);
+        const isValid = departmentErrors.isValid && !parentIdError
 
         const facultyErrors: DepartmentValidation = {
-            nameError: nameError,
-            fullNameError: fullNameError,
+            ...departmentErrors,
             parentIdError: parentIdError,
             isValid: isValid
         };

@@ -1,6 +1,15 @@
 import { Action } from "redux";
-import { RoleGetOptions, Role, ApplicationError, RoleValidation, SnackbarVariant } from "../../models";
-import { AppThunkAction, AppThunkDispatch, AppState } from "../../models/reduxModels";
+import {
+    RoleGetOptions,
+    Role,
+    RoleValidation,
+    ApplicationError,
+    AppThunkAction,
+    SnackbarVariant,
+    AppThunkDispatch,
+    AppState,
+    RoleInDepartment
+} from "../../models";
 import { roleService } from "../../services";
 import { snackbarActions } from "../snackbarStore";
 
@@ -13,6 +22,9 @@ export enum ActionType {
     getRequest = 'GET_REQUEST',
     getSuccess = 'GET_SUCCESS',
     getFailure = 'GET_FAILURE',
+
+    updateRoleDetails = 'UPDATE_ROLE_DETAILS',
+    updateRoleDepartments = 'UPDATE_ROLE_DEPARTMENTS',
 
     saveRequest = 'SAVE_ROLE_REQUEST',
     createSuccess = 'CREATE_ROLE_SUCCESS',
@@ -28,7 +40,6 @@ export enum ActionType {
     validate = 'VALIDATE_ROLE'
 }
 //#endregion
-
 
 //#region Actions types interfaces
 export interface GetRolesRequest extends Action<ActionType> {
@@ -59,6 +70,17 @@ export interface GetSuccess extends Action<ActionType> {
 export interface GetFailure extends Action<ActionType> {
     type: ActionType.getFailure;
     error: ApplicationError;
+}
+
+export interface UpdateRoleDetails extends Action<ActionType> {
+    type: ActionType.updateRoleDetails;
+    role: Role;
+    formErrors: RoleValidation;
+}
+
+export interface UpdateRoleDepartments extends Action<ActionType> {
+    type: ActionType.updateRoleDepartments;
+    departments: RoleInDepartment[];
 }
 
 export interface SaveRequest extends Action<ActionType> {
@@ -105,11 +127,12 @@ export interface Validate extends Action<ActionType> {
 }
 
 export type GetRoles = GetRolesRequest | GetRolesSuccess | GetRolesFailure;
-export type GetRole = GetRequest | GetSuccess | GetFailure
+export type GetRole = GetRequest | GetSuccess | GetFailure;
+export type UpdateRole = UpdateRoleDetails | UpdateRoleDepartments;
 export type SaveRole = SaveRequest | CreateSuccess | UpdateSuccess | SaveFailure;
 export type DeleteRole = DeleteRequest | DeleteSuccess | DeleteFailure;
 
-export type RoleActions = GetRoles | GetRole | ClearEditionState | SaveRole | DeleteRole | Validate;
+export type RoleActions = GetRoles | GetRole | UpdateRole | ClearEditionState | SaveRole | DeleteRole | Validate;
 //#endregion
 
 //#region Actions
@@ -166,10 +189,10 @@ function getRoles(options: RoleGetOptions): AppThunkAction<Promise<GetRolesSucce
 }
 
 function getRole(id?: number): AppThunkAction<Promise<GetSuccess | GetFailure>> {
-    return async (dispatch: AppThunkDispatch<Promise<GetSuccess | GetFailure>>, getState: () => AppState) => {
+    return async (dispatch: AppThunkDispatch, getState: () => AppState) => {
         dispatch(request(id));
 
-        if (!id && id !== 0)
+        if (!id || id === NaN)
             return dispatch(success(Role.initial));
 
         const state = getState();
@@ -186,6 +209,7 @@ function getRole(id?: number): AppThunkAction<Promise<GetSuccess | GetFailure>> 
             }
 
             let role = roles.find(o => o.id === id);
+            dispatch(validateRole(role));
             return dispatch(success(role));
         }
         catch (error) {
@@ -198,6 +222,15 @@ function getRole(id?: number): AppThunkAction<Promise<GetSuccess | GetFailure>> 
         function success(role: Role): GetSuccess { return { type: ActionType.getSuccess, role: role }; }
         function failure(error: ApplicationError): GetFailure { return { type: ActionType.getFailure, error: error }; }
     }
+}
+
+function updateRoleDetails(model: Role): UpdateRoleDetails {
+    const formErrors = roleService.validateRole(model);
+    return { type: ActionType.updateRoleDetails, role: model, formErrors: formErrors };
+}
+
+function updateRoleDepartments(departments: RoleInDepartment[]): UpdateRoleDepartments {
+    return { type: ActionType.updateRoleDepartments, departments: departments };
 }
 
 function deleteRoles(ids: number[]): AppThunkAction<Promise<DeleteSuccess | DeleteFailure>> {
@@ -231,6 +264,8 @@ export default {
     clearEditionState,
     getRoles,
     getRole,
+    updateRoleDetails,
+    updateRoleDepartments,
     deleteRoles,
     validateRole
 }

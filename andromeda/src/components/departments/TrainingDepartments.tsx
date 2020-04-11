@@ -1,24 +1,27 @@
 import * as React from "react";
+import * as Redux from "react-redux";
+
 import { WithStyles, withStyles, IconButton, Grid, Typography, Paper } from "@material-ui/core";
 import { RouteComponentProps, withRouter } from "react-router";
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { Column } from "../../models/commonModels";
-import { TrainingDepartment, DepartmentType } from "../../models";
+import { TrainingDepartment, AppState, DepartmentType } from "../../models";
 import { paths } from "../../sharedConstants";
 import { Edit, Delete, AccountBalance, Search, Add, BarChart } from "@material-ui/icons";
 import { SearchInput, TableComponent, ConfirmationDialog } from "../common";
-import { departmentService } from "../../services";
-import useDebounce from "../../hooks/debounceHook";
+import { useDebounce } from "../../hooks";
+import { trainingDepartmentActions } from "../../store/trainingDepartmentStore";
 
 const styles = mergeStyles(commonStyles);
 
 interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const TrainingDepartments = withStyles(styles)(withRouter(function (props: Props) {
-    const [departments, setDepartments] = React.useState<TrainingDepartment[]>([]);
+    const dispatch = Redux.useDispatch();
+    const { trainingDepartmentState } = Redux.useSelector((state: AppState) => ({ trainingDepartmentState: state.trainingDepartmentState }));
+
     const [search, setSearch] = React.useState<string>();
-    const [loading, setLoading] = React.useState<boolean>(false);
     const [open, setOpen] = React.useState<boolean>(false);
     const [id, setId] = React.useState<number>(null);
 
@@ -27,15 +30,8 @@ export const TrainingDepartments = withStyles(styles)(withRouter(function (props
     React.useEffect(() => { getTrainingDepartments(); }, []);
     React.useEffect(() => { getTrainingDepartments(debouncedSearch) }, [debouncedSearch]);
 
-    async function getTrainingDepartments(search?: string) {
-        setLoading(true);
-        const departments = await departmentService.getTrainingDepartments({
-            search: search,
-            type: DepartmentType.TrainingDepartment
-        });
-
-        setDepartments(departments);
-        setLoading(false);
+    function getTrainingDepartments(search?: string) {
+        dispatch(trainingDepartmentActions.getTrainingDepartments({ search: search, type: DepartmentType.TrainingDepartment }));
     }
 
     function handleAdd() {
@@ -62,11 +58,9 @@ export const TrainingDepartments = withStyles(styles)(withRouter(function (props
         setOpen(false);
         if (result) {
             const ids = [id];
-            await departmentService.delete(ids);
-            //setSnackbar("Кафедра успешно удалена.", true, SnackbarVariant.success);
-            await getTrainingDepartments();
-            setId(null);
+            await dispatch(trainingDepartmentActions.deleteTrainingDepartments(ids));
         }
+        setId(null);
     }
 
     async function handleSearchChange(value: string) {
@@ -102,6 +96,10 @@ export const TrainingDepartments = withStyles(styles)(withRouter(function (props
         },
     ]
 
+    let departments: TrainingDepartment[] = [];
+    if(trainingDepartmentState.trainingDepartmentsLoading === false) 
+        departments = trainingDepartmentState.trainingDepartments;
+
     return (
         <Grid container direction="column" >
             <Grid container direction="row" alignItems="center">
@@ -118,7 +116,7 @@ export const TrainingDepartments = withStyles(styles)(withRouter(function (props
                 </IconButton>
             </Grid>
             <Paper className={classes.margin1Y}>
-                <TableComponent columns={columns} data={departments} loading={loading} />
+                <TableComponent columns={columns} data={departments} loading={trainingDepartmentState.trainingDepartmentsLoading} />
             </Paper>
             <ConfirmationDialog
                 open={open}

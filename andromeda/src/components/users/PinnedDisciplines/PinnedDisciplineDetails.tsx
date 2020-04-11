@@ -4,7 +4,6 @@ import { mergeStyles } from "../../../utilities";
 import { commonStyles } from "../../../muiTheme";
 import { Dialog, DialogTitle, DialogContent, Grid, TextField, InputAdornment, DialogActions, Button, FormControl, FormHelperText } from "@material-ui/core";
 import { PinnedDisciplineValidation, DisciplineTitle, DisciplineTitleValidation, PinnedDiscipline } from "../../../models";
-import { useState, useEffect } from "react";
 import { Autocomplete } from "@material-ui/lab";
 import { ProjectTypes, ProjectType } from "../../../models/commonModels";
 
@@ -15,22 +14,23 @@ interface Props extends WithStyles<typeof styles> {
     projectTypes: ProjectType[];
     disciplineTitle: DisciplineTitle;
     open: boolean;
-    onCancel: () => void;
+
     onAccept: (disciplinesTitle: DisciplineTitle, projectTypes: ProjectType[]) => void;
+    onCancel: () => void;
 }
 
 export const PinnedDisciplineDetails = withStyles(styles)(function (props: Props) {
-    const [disciplineTitle, setDisciplineTitle] = useState<DisciplineTitle>(DisciplineTitle.initial);
-    const [projectTypes, setProjectTypes] = useState<ProjectType[]>([]);
-    const [formErrors, setFormErrors] = useState<PinnedDisciplineValidation>(PinnedDisciplineValidation.initial);
+    const [disciplineTitle, setDisciplineTitle] = React.useState<DisciplineTitle>(DisciplineTitle.initial);
+    const [projectTypes, setProjectTypes] = React.useState<ProjectType[]>([]);
+    const [formErrors, setFormErrors] = React.useState<PinnedDisciplineValidation>(PinnedDisciplineValidation.initial);
 
-    useEffect(() => {
+    React.useEffect(() => {
         setDisciplineTitle(props.disciplineTitle);
     }, [props.disciplineTitle]);
 
-    useEffect(() => { setProjectTypes(props.projectTypes); }, [props.projectTypes]);
+    React.useEffect(() => { setProjectTypes(props.projectTypes); }, [props.projectTypes]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         const disciplineTitleError = disciplineTitle && disciplineTitle.name ? '' : 'Выберите дисциплину.';
         const projectsTypesError = projectTypes && projectTypes.length ? '' : 'Выберите типы работ.';
         const isValid = !disciplineTitleError && !projectsTypesError;
@@ -50,15 +50,15 @@ export const PinnedDisciplineDetails = withStyles(styles)(function (props: Props
         onAccept
     } = props;
 
-    const handleStudyDirectionChange = (event: React.ChangeEvent, value: DisciplineTitle) => {
+    function handleStudyDirectionChange (event: React.ChangeEvent, value: DisciplineTitle) {
         setDisciplineTitle(value);
     }
 
-    const handleProjectTypeChange = (event: React.ChangeEvent, values: ProjectType[]) => {
+    function handleProjectTypeChange (event: React.ChangeEvent, values: ProjectType[]) {
         setProjectTypes(values);
     }
 
-    const handleAccept = () => {
+    function handleAccept() {
         onAccept(disciplineTitle, projectTypes);
         setDisciplineTitle(DisciplineTitle.initial);
         setProjectTypes([]);

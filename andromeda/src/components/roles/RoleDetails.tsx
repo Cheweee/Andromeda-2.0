@@ -14,7 +14,7 @@ interface Props extends WithStyles<typeof styles> {
     role: Role;
     formErrors: RoleValidation;
     
-    handleNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    onRoleDetailsChange: (model: Role) => void;
 }
 
 export const RoleDetails = withStyles(styles)(function (props: Props) {
@@ -22,10 +22,19 @@ export const RoleDetails = withStyles(styles)(function (props: Props) {
         classes,
         disabled,
         role,
-        formErrors,
-
-        handleNameChange
+        formErrors
     } = props;
+
+    function handleRoleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const { onRoleDetailsChange } = props;
+
+        const newRole: Role = {
+            ...role,
+            name: event && event.target.value
+        };
+
+        onRoleDetailsChange(newRole);
+    }
     
     return (
         <Grid container direction="column">
@@ -42,8 +51,8 @@ export const RoleDetails = withStyles(styles)(function (props: Props) {
                         required
                         autoComplete="firstname"
                         disabled={disabled}
-                        value={role.name}
-                        onChange={handleNameChange}
+                        value={role && role.name || ''}
+                        onChange={handleRoleNameChange}
                         error={Boolean(formErrors.nameError)}
                         helperText={formErrors.nameError}
                     />

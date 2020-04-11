@@ -10,13 +10,12 @@ const styles = mergeStyles(commonStyles);
 
 interface Props extends WithStyles<typeof styles> {
     studentGroups: StudentGroup[];
-    handleEdit: (id: number) => void;
-    handleDelete: (id: number) => void;
+    handleEdit: (name: string) => void;
+    handleDelete: (name: string) => void;
 }
 
 export const StudentGroups = withStyles(styles)(function (props: Props) {
     const {
-        classes,
         studentGroups,
         handleDelete,
         handleEdit
@@ -28,10 +27,10 @@ export const StudentGroups = withStyles(styles)(function (props: Props) {
             secondary={`Год начала обучения: ${group.startYear}`} />
             <ListItemSecondaryAction>
                 <Grid container direction="row">
-                    <IconButton onClick={() => handleEdit(group.id)}>
+                    <IconButton onClick={() => handleEdit(group.name)}>
                         <Edit />
                     </IconButton>
-                    <IconButton onClick={() => handleDelete(group.id)}>
+                    <IconButton onClick={() => handleDelete(group.name)}>
                         <Delete />
                     </IconButton>
                 </Grid>

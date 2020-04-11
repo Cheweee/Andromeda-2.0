@@ -37,15 +37,15 @@ export const RoleDepartments = withStyles(styles)(function (props: Props) {
 
     return (
         <Grid container direction="column">
-            {departments.length ? (
-                <List >
-                    {faculties.length && (
+            {Boolean(departments.length) ? (
+                <List subheader={<li/>}>
+                    {Boolean(faculties.length) && (
                         <div>
                             <ListSubheader>Факультеты и институты</ListSubheader>
                             {facultiesListItems}
                         </div>
                     )}
-                    {trainingDepartments.length && (
+                    {Boolean(trainingDepartments.length) && (
                         <div>
                             <ListSubheader>Кафедры</ListSubheader>
                             {trainingDepartmentListItems}

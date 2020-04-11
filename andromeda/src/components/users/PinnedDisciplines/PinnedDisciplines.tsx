@@ -10,13 +10,15 @@ import { ProjectType } from "../../../models/commonModels";
 const styles = mergeStyles(commonStyles);
 
 interface Props extends WithStyles<typeof styles> {
+    disabled: boolean;
     pinnedDisciplines: PinnedDiscipline[];
-    handleDelete: (id: number) => void;
-    handleEdit: (id: number) => void;
+    handleDelete: (disciplineTitleId: number) => void;
+    handleEdit: (disciplineTitleId: number) => void;
 }
 
 export const PinnedDisciplines = withStyles(styles)(function (props: Props) {
     const {
+        disabled,
         pinnedDisciplines,
         handleDelete,
         handleEdit
@@ -48,10 +50,10 @@ export const PinnedDisciplines = withStyles(styles)(function (props: Props) {
             />
             <ListItemSecondaryAction>
                 <Grid container direction="row">
-                    <IconButton onClick={() => handleEdit(discipline.id)}>
+                    <IconButton disabled={disabled} onClick={() => handleEdit(discipline.disciplineTitleId)}>
                         <Edit />
                     </IconButton>
-                    <IconButton onClick={() => handleDelete(discipline.id)}>
+                    <IconButton disabled={disabled} onClick={() => handleDelete(discipline.disciplineTitleId)}>
                         <Delete />
                     </IconButton>
                 </Grid>

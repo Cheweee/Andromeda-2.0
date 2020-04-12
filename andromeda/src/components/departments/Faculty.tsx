@@ -41,11 +41,6 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
     }
     //#endregion
 
-    //#region Faculty departments state
-    // TODO: Create faculty departments loading from server;
-    const [facultyDepartments] = React.useState<TrainingDepartment[]>([]);
-    //#endregion
-
     //#region Users roles in department state
     const [selectedUser, setSelectedUser] = React.useState<User>(null);
     const [selectedRoles, setSelectedRoles] = React.useState<RoleInDepartment[]>([]);
@@ -110,7 +105,7 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
         const tempId = match.params && match.params[paths.idParameterName];
         const id = parseInt(tempId, null);
         dispatch(facultyActions.getFaculty(id));
-        dispatch(trainingDepartmentActions.getTrainingDepartments({ parentId: id, type: DepartmentType.TrainingDepartment }));
+        dispatch(trainingDepartmentActions.getTrainingDepartments({ type: DepartmentType.TrainingDepartment }));
         dispatch(userActions.getUsers({}));
     }
 
@@ -134,8 +129,12 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
     const { classes } = props;
 
     let department: Faculty = null;
+    let facultyDepartments: TrainingDepartment[] = [];
     if (facultyState.facultyLoading === false) {
         department = facultyState.faculty;
+    }
+    if(trainingDepartmentState.trainingDepartmentsLoading === false) {
+        facultyDepartments = trainingDepartmentState.trainingDepartments.filter(o => department && o.parentId === department.id);
     }
 
     const disabled = facultyState.facultyLoading || userState.usersLoading || trainingDepartmentState.trainingDepartmentsLoading;
@@ -187,7 +186,7 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
                                 <Typography className={classes.heading}>Кафедры</Typography>
                                 {trainingDepartmentState.trainingDepartmentsLoading && <LinearProgress variant="query" />}
                             </ExpansionPanelSummary>
-                            <ExpansionPanelDetails>
+                            <ExpansionPanelDetails className={classes.overflowContainer}>
                                 <ChildDepartments
                                     childDepartments={facultyDepartments}
                                     departmentType={department && department.type || DepartmentType.Faculty}
@@ -211,7 +210,7 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
                                 </Grid>
                                 {userState.usersLoading && <LinearProgress variant="query" />}
                             </ExpansionPanelSummary>
-                            <ExpansionPanelDetails>
+                            <ExpansionPanelDetails className={classes.overflowContainer}>
                                 <UsersRolesInDepartment
                                     departmentRoles={department && department.roles || []}
                                     departmentUsers={department && department.users || []}

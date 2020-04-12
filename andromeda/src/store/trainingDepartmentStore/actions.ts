@@ -213,7 +213,7 @@ function getTrainingDepartment(id?: number): AppThunkAction<Promise<GetTrainingD
     return async (dispatch: AppThunkDispatch, getState: () => AppState) => {
         dispatch(request(id));
 
-        if (!id && id !== 0)
+        if (!id && id === NaN)
             return dispatch(success(TrainingDepartment.initial));
 
         const state = getState();
@@ -230,6 +230,7 @@ function getTrainingDepartment(id?: number): AppThunkAction<Promise<GetTrainingD
             }
 
             let trainingdepartment = trainingdepartments.find(o => o.id === id);
+            dispatch(validateTrainingDepartment(trainingdepartment));
             return dispatch(success(trainingdepartment));
         }
         catch (error) {

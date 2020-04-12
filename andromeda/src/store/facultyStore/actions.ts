@@ -177,7 +177,7 @@ function getFaculty(id?: number): AppThunkAction<Promise<GetFacultySuccess | Get
     return async (dispatch: AppThunkDispatch, getState: () => AppState) => {
         dispatch(request(id));
 
-        if (!id && id !== 0)
+        if (!id && id === NaN)
             return dispatch(success(Faculty.initial));
 
         const state = getState();
@@ -194,6 +194,7 @@ function getFaculty(id?: number): AppThunkAction<Promise<GetFacultySuccess | Get
             }
 
             let faculty = facultys.find(o => o.id === id);
+            dispatch(validateFaculty(faculty));
             return dispatch(success(faculty));
         }
         catch (error) {
@@ -207,7 +208,7 @@ function getFaculty(id?: number): AppThunkAction<Promise<GetFacultySuccess | Get
         function failure(error: ApplicationError): GetFacultyFailure { return { type: ActionType.getFacultyFailure, error: error }; }
     }
 }
-function updateFacultyDetails(model: Faculty) : UpdateFacultyDetails {
+function updateFacultyDetails(model: Faculty): UpdateFacultyDetails {
     const formErrors = departmentService.validateDepartment(model);
 
     return { type: ActionType.updateFacultyDetails, faculty: model, formErrors: formErrors };
@@ -232,7 +233,6 @@ function saveFaculty(model: Faculty): AppThunkAction<Promise<CreateFacultySucces
                 dispatch(snackbarActions.showSnackbar('Факультет успешно сохранен', SnackbarVariant.success));
                 return dispatch(createSuccess(result));
             }
-                //case DepartmentType.TrainingDepartment: message = 'Кафедра успешно сохранена';
         }
         catch (error) {
             if (error instanceof ApplicationError)
@@ -259,8 +259,7 @@ function deleteFaculties(ids: number[]): AppThunkAction<Promise<DeleteFacultiesS
         try {
             await departmentService.delete(ids);
 
-            dispatch(snackbarActions.showSnackbar('Факультет успешно сохранен', SnackbarVariant.success));
-            dispatch(snackbarActions.showSnackbar('Роль успешно удалена.', SnackbarVariant.success));
+            dispatch(snackbarActions.showSnackbar('Факультет успешно удален.', SnackbarVariant.success));
             return dispatch(success());
         }
         catch (error) {
@@ -283,7 +282,7 @@ function validateFaculty(model: Faculty): ValidateFaculty {
 }
 
 export default {
-    getFaculties, 
+    getFaculties,
     getFaculty,
     updateFacultyDetails,
     updateFacultyUsers,

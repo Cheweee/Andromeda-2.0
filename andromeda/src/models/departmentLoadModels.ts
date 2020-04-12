@@ -26,6 +26,7 @@ export namespace DepartmentLoad {
 export interface DepartmentLoadGetOptions extends GetOptions {
     departmentId?: number;
     departmentIds?: number[];
+    search?: string;
 }
 
 export interface DepartmentLoadImportOptions {

@@ -96,47 +96,43 @@ export const RoleDepartmentsDetails = withStyles(styles)(function (props: Props)
                         </Grid>
                     </Grid>
                     <List className={classes.overflowContainer} subheader={<li />}>
-                        {faculties.length ?
-                            <li key={`section-${DepartmentType.Faculty}`} className={classes.listSection}>
-                                <ul className={classes.ul}>
-                                    <ListSubheader>{"Факультеты и институты"}</ListSubheader>
-                                    {faculties.map(department =>
-                                        <ListItem key={department.id} button onClick={() => handleSelect(department)}>
-                                            <ListItemIcon>
-                                                <Checkbox
-                                                    edge="start"
-                                                    checked={Boolean(selected.find(o => o.departmentId === department.id))}
-                                                    tabIndex={-1}
-                                                    disableRipple
-                                                />
-                                            </ListItemIcon>
-                                            <ListItemText key={department.id} primary={department.fullName} />
-                                        </ListItem>
-                                    )}
-                                </ul>
-                            </li>
-                            : null
+                        {Boolean(faculties.length) && <li key={`section-${DepartmentType.Faculty}`} className={classes.listSection}>
+                            <ul className={classes.ul}>
+                                <ListSubheader>{"Факультеты и институты"}</ListSubheader>
+                                {faculties.map(department =>
+                                    <ListItem key={department.id} button onClick={() => handleSelect(department)}>
+                                        <ListItemIcon>
+                                            <Checkbox
+                                                edge="start"
+                                                checked={Boolean(selected.find(o => o.departmentId === department.id))}
+                                                tabIndex={-1}
+                                                disableRipple
+                                            />
+                                        </ListItemIcon>
+                                        <ListItemText key={department.id} primary={department.fullName} />
+                                    </ListItem>
+                                )}
+                            </ul>
+                        </li>
                         }
-                        {trainingDepartments.length ?
-                            <li key={`section-${DepartmentType.TrainingDepartment}`} className={classes.listSection}>
-                                <ul className={classes.ul}>
-                                    <ListSubheader>{"Кафедры"}</ListSubheader>
-                                    {trainingDepartments.map(department =>
-                                        <ListItem button onClick={() => handleSelect(department)}>
-                                            <ListItemIcon>
-                                                <Checkbox
-                                                    edge="start"
-                                                    checked={Boolean(selected.find(o => o.departmentId === department.id))}
-                                                    tabIndex={-1}
-                                                    disableRipple
-                                                />
-                                            </ListItemIcon>
-                                            <ListItemText key={department.id} primary={department.fullName} />
-                                        </ListItem>
-                                    )}
-                                </ul>
-                            </li>
-                            : null
+                        {Boolean(trainingDepartments.length) && <li key={`section-${DepartmentType.TrainingDepartment}`} className={classes.listSection}>
+                            <ul className={classes.ul}>
+                                <ListSubheader>{"Кафедры"}</ListSubheader>
+                                {trainingDepartments.map(department =>
+                                    <ListItem button onClick={() => handleSelect(department)}>
+                                        <ListItemIcon>
+                                            <Checkbox
+                                                edge="start"
+                                                checked={Boolean(selected.find(o => o.departmentId === department.id))}
+                                                tabIndex={-1}
+                                                disableRipple
+                                            />
+                                        </ListItemIcon>
+                                        <ListItemText key={department.id} primary={department.fullName} />
+                                    </ListItem>
+                                )}
+                            </ul>
+                        </li>
                         }
                     </List>
                 </Grid>

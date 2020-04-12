@@ -320,7 +320,7 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                                     </Tooltip>
                                 </Grid>
                             </ExpansionPanelSummary>
-                            <ExpansionPanelDetails>
+                            <ExpansionPanelDetails className={classes.overflowContainer}>
                                 <DisciplinesTitles
                                     disciplinesTitles={department && department.titles || []}
                                     handleDelete={handleDiciplineTitleDelete}
@@ -344,7 +344,7 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                                     </Tooltip>
                                 </Grid>
                             </ExpansionPanelSummary>
-                            <ExpansionPanelDetails>
+                            <ExpansionPanelDetails className={classes.overflowContainer}>
                                 <UsersRolesInDepartment
                                     departmentType={department && department.type || DepartmentType.TrainingDepartment}
                                     departmentRoles={department && department.roles || []}
@@ -370,7 +370,7 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                                     </Tooltip>
                                 </Grid>
                             </ExpansionPanelSummary>
-                            <ExpansionPanelDetails>
+                            <ExpansionPanelDetails className={classes.overflowContainer}>
                                 <StudyDirections
                                     studyDirections={department && department.studyDirections || []}
                                     handleStudyDirectionDelete={handleStudyDirectionDelete}
@@ -394,7 +394,7 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                                     </Tooltip>
                                 </Grid>
                             </ExpansionPanelSummary>
-                            <ExpansionPanelDetails>
+                            <ExpansionPanelDetails className={classes.overflowContainer}>
                                 <StudentGroups
                                     studentGroups={department && department.groups || []}
                                     handleDelete={handleGroupDelete}

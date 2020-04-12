@@ -11,6 +11,7 @@ import { disciplineTitleReducer } from "./disciplineTitleStore/reducers";
 import { roleReducer } from './roleStore/reducers';
 import { departmentReducer } from "./departmentStore/reducers";
 import { trainingDepartmentReducer } from "./trainingDepartmentStore/reducers";
+import { departmentLoadReducer } from "./departmentLoadStore/reducers";
 
 const rootReducer = combineReducers({
     facultyState: facultyReducer,
@@ -19,7 +20,8 @@ const rootReducer = combineReducers({
     snackbarState: snackbarReducer,
     disciplineTitleState: disciplineTitleReducer,
     roleState: roleReducer,
-    trainingDepartmentState: trainingDepartmentReducer
+    trainingDepartmentState: trainingDepartmentReducer,
+    departmentLoadState: departmentLoadReducer
 });
 
 export default function configureStore(): Store<AppState> {

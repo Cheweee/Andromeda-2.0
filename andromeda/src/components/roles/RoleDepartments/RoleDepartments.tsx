@@ -14,6 +14,7 @@ interface Props extends WithStyles<typeof styles> {
 export const RoleDepartments = withStyles(styles)(function (props: Props) {
     const {
         departments,
+        classes
     } = props;
 
     const emptyRoleDepartmentsMessage = "Данная роль еще не используется подразделениями";
@@ -38,19 +39,22 @@ export const RoleDepartments = withStyles(styles)(function (props: Props) {
     return (
         <Grid container direction="column">
             {Boolean(departments.length) ? (
-                <List subheader={<li/>}>
-                    {Boolean(faculties.length) && (
-                        <div>
+                <List className={classes.overflowContainer} subheader={<li />}>
+
+                    {Boolean(faculties.length) && <li key={`section-${DepartmentType.Faculty}`} className={classes.listSection}>
+                        <ul className={classes.ul}>
                             <ListSubheader>Факультеты и институты</ListSubheader>
                             {facultiesListItems}
-                        </div>
-                    )}
-                    {Boolean(trainingDepartments.length) && (
-                        <div>
+                        </ul>
+                    </li>
+                    }
+                    {Boolean(trainingDepartments.length) && <li key={`section-${DepartmentType.TrainingDepartment}`} className={classes.listSection}>
+                        <ul className={classes.ul}>
                             <ListSubheader>Кафедры</ListSubheader>
                             {trainingDepartmentListItems}
-                        </div>
-                    )}
+                        </ul>
+                    </li>
+                    }
                 </List>
             ) : (
                     <Grid container direction="row" justify="center">

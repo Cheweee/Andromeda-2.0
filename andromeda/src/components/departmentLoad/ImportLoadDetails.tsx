@@ -12,7 +12,6 @@ import {
     DialogActions,
     Button,
     FormControl,
-    InputLabel,
     OutlinedInput,
     IconButton,
     CircularProgress,
@@ -25,21 +24,17 @@ import { commonStyles } from "../../muiTheme";
 import { mergeStyles } from "../../utilities";
 import {
     DepartmentLoadImportOptions,
-    DepartmentLoadImportOptionsValidation,
-    ApplicationError,
-    SnackbarVariant
+    DepartmentLoadImportOptionsValidation
 } from "../../models";
 
 const styles = mergeStyles(commonStyles);
 
 interface Props extends WithStyles<typeof styles> {
-    departmentId: number;
     open: boolean;
     onAccept: (options: DepartmentLoadImportOptions) => void;
     onCancel: () => void;
 }
 
-const initalFormErrors: DepartmentLoadImportOptionsValidation = { isValid: false };
 
 export const ImportLoadDetails = withStyles(styles)(function (props: Props) {
     const [options, setOptions] = useState<DepartmentLoadImportOptions>(DepartmentLoadImportOptions.initial);

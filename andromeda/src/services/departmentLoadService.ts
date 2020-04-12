@@ -60,7 +60,9 @@ class DepartmentLoadService {
         if (options.ids)
             url += `${conditionIndex++ === 0 ? '?' : '&'}ids=${options.ids}`;
         if (options.departmentId)
-            url += `${conditionIndex++ === 0 ? '?' : '&'}departmentId=${options.departmentId}`
+            url += `${conditionIndex++ === 0 ? '?' : '&'}departmentId=${options.departmentId}`;
+        if(options.search)
+            url += `${conditionIndex++ === 0 ? '?' : '&'}search=${options.search}`;
 
         return fetch(url, {
             credentials: 'include',

@@ -1,17 +1,25 @@
 import * as React from "react";
-import { useState, useRef, useEffect } from "react";
-import { mergeStyles } from "../../utilities";
-import { commonStyles } from "../../muiTheme";
+
+import * as Redux from 'react-redux';
+import { RouteComponentProps, withRouter } from "react-router";
+
 import { WithStyles, withStyles } from "@material-ui/core/styles";
-import { DepartmentLoad, ApplicationError, SnackbarVariant, DepartmentLoadImportOptions } from "../../models";
-import { Grid, Card, CardContent, Typography, IconButton, Tooltip, CircularProgress, CardActions } from "@material-ui/core";
-import { DepartmentLoadDetails } from "./DepartmentLoadDetails";
-import { SearchInput, MessageSnackbar } from "../common";
-import { RouteComponentProps, withRouter } from "react-router-dom";
-import { paths } from "../../sharedConstants";
 import { ArrowBack, Search, Add, InsertDriveFile, Edit, Delete } from "@material-ui/icons";
-import { departmentLoadService } from "../../services/departmentLoadService";
+import { Grid, Card, CardContent, Typography, IconButton, Tooltip, CircularProgress, CardActions } from "@material-ui/core";
+
+import { SearchInput, ConfirmationDialog } from "../common";
+
+import { commonStyles } from "../../muiTheme";
+import { DepartmentLoad, DepartmentLoadImportOptions, AppState } from "../../models";
+
+import { departmentLoadActions } from "../../store/departmentLoadStore";
+
+import { DepartmentLoadDetails } from "./DepartmentLoadDetails";
 import { ImportLoadDetails } from "./ImportLoadDetails";
+
+import { useDebounce } from '../../hooks';
+import { paths } from "../../sharedConstants";
+import { mergeStyles } from "../../utilities";
 
 const styles = mergeStyles(commonStyles);
 
@@ -19,31 +27,33 @@ interface Props extends RouteComponentProps, WithStyles<typeof styles> {
 }
 
 export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Props) {
+    const dispatch = Redux.useDispatch();
+    const { departmentLoadState } = Redux.useSelector((state: AppState) => ({ departmentLoadState: state.departmentLoadState }));
+
+    const [search, setSearch] = React.useState<string>();
+    const [id, setId] = React.useState<number>(null);
+    const [open, setOpen] = React.useState<boolean>(false);
+
+    const debouncedSearch = useDebounce(search, 500);
+
+    React.useEffect(() => { getDepartmentLoads(); }, []);
+    React.useEffect(() => { getDepartmentLoads(debouncedSearch); }, [debouncedSearch]);
+    React.useEffect(() => { 
+        if(departmentLoadState.modelLoading === true) return;
+
+        const { history, match } = props;
+        const tempId = match.params && match.params[paths.idParameterName];
+        const departmentId = parseInt(tempId, null);
+        history.push(paths.getDepartmentloadPath(`${departmentId}`, `${departmentLoadState.model.id}`));
+    }, [departmentLoadState.modelLoading]);
+
     //#region Department loads state
-    const [departmentLoads, setDepartmentLoads] = useState<DepartmentLoad[]>([]);
-    const [deparmtnetId, setDepartmentId] = useState<number>(0);
 
-    useEffect(() => { getDepartmentLoads(); }, [props.match.params]);
-
-    async function getDepartmentLoads() {
-        try {
-            setLoading(true);
-            const departmentId = props.match.params[paths.idParameterName];
-
-            const loads = await departmentLoadService.getDepartmentLoads({
-                departmentId: departmentId
-            });
-
-            setDepartmentId(departmentId);
-            setDepartmentLoads(loads);
-        }
-        catch (error) {
-            // if (error instanceof ApplicationError)
-                // setSnackbar(error.message, true, SnackbarVariant.error);
-        }
-        finally {
-            setLoading(false);
-        }
+    function getDepartmentLoads(search?: string) {
+        const { match } = props;
+        const tempId = match.params && match.params[paths.idParameterName];
+        const departmentId = parseInt(tempId, null);
+        dispatch(departmentLoadActions.getModels({ departmentId: departmentId, search: search }));
     }
 
     function handleAdd() {
@@ -56,58 +66,57 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
         history.push(paths.getDepartmentloadPath(props.match.params[paths.idParameterName], `${data.id}`));
     }
 
-    async function handleDelete(id: number) {
-        await departmentLoadService.delete([id]);
-        await getDepartmentLoads();
+    function handleDelete(id: number) {
+        setId(id);
+        setOpen(true);
     }
-    //#endregion
 
-    //#region Import load state
-    const [importDetailsOpen, setImportDetailsOpen] = useState<boolean>(false);
-
-    async function handleImportDetailsAccept(options: DepartmentLoadImportOptions) {
-        try {
-            setLoading(true);
-            setImportDetailsOpen(false);
-            const departmentId: number = props.match.params[paths.idParameterName];
-
-            options.departmentId = departmentId;
-            const load = await departmentLoadService.import(options);
-            const { history } = props;
-            history.push(paths.getDepartmentloadPath(`${departmentId}`, `${load.id}`));
-        }
-        catch (error) {
-            // if (error instanceof ApplicationError)
-            //     setSnackbar(error.message, true, SnackbarVariant.error);
-        }
-        finally {
-            setLoading(false);
+    function handleConfirmationClose(result: boolean) {
+        setOpen(false);
+        setId(null);
+        if (result) {
+            const ids = [id];
+            dispatch(departmentLoadActions.deleteModels(ids));
         }
     }
-    //#endregion
-
-    const [search, setSearch] = useState<string>();
-
-    const [loading, setLoading] = useState<boolean>(false);
 
     function handleSearchChange(value: string) {
         setSearch(value);
     }
+    //#endregion
+
+    //#region Import load state
+    const [importDetailsOpen, setImportDetailsOpen] = React.useState<boolean>(false);
+
+    function handleImportDetailsAccept(options: DepartmentLoadImportOptions) {
+        setImportDetailsOpen(false);
+
+        const departmentId: number = props.match.params[paths.idParameterName];
+        options.departmentId = departmentId;
+
+        dispatch(departmentLoadActions.importDepartmentLoad(options));
+    }
+    //#endregion
+
 
     function handleBackClick() {
         const { history } = props;
-        history.push(paths.getTrainingDepartmentPath(departmentId));
+        history.push(paths.getTrainingDepartmentPath(props.match.params[paths.idParameterName]));
     }
 
     const { classes } = props;
-    const departmentId = props.match.params[paths.idParameterName];
+
+    let departmentLoads: DepartmentLoad[] = [];
+    if (departmentLoadState.modelsLoading === false) {
+        departmentLoads = departmentLoadState.models;
+    }
 
     return (
         <Grid container direction="column">
             <Grid container direction="row" alignItems="center">
                 <Tooltip title="Вернуться назад">
                     <span>
-                        <IconButton disabled={loading} onClick={handleBackClick}>
+                        <IconButton disabled={departmentLoadState.modelsLoading} onClick={handleBackClick}>
                             <ArrowBack />
                         </IconButton>
                     </span>
@@ -121,27 +130,27 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
                 />
                 <Tooltip title={"Создать учебную нагрузку"}>
                     <span>
-                        <IconButton disabled={loading} onClick={handleAdd}>
+                        <IconButton disabled={departmentLoadState.modelsLoading} onClick={handleAdd}>
                             <Add />
                         </IconButton>
                     </span>
                 </Tooltip>
                 <Tooltip title={"Экспортировать из Excel"}>
                     <span>
-                        <IconButton disabled={loading} onClick={() => setImportDetailsOpen(true)}>
+                        <IconButton disabled={departmentLoadState.modelsLoading} onClick={() => setImportDetailsOpen(true)}>
                             <InsertDriveFile />
                         </IconButton>
                     </span>
                 </Tooltip>
             </Grid>
-            {loading && (
+            {departmentLoadState.modelsLoading && (
                 <Grid container direction="row" justify="center">
                     <CircularProgress />
                 </Grid>
             )}
-            {!loading && (
+            {!departmentLoadState.modelsLoading && (
                 <Grid container direction="row" wrap="wrap">
-                    {departmentLoads.length ? departmentLoads.map(o =>
+                    {Boolean(departmentLoads.length) ? departmentLoads.map(o =>
                         <Grid item xs={3} className={classes.margin1}>
                             <Card>
                                 <CardContent>
@@ -168,10 +177,14 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
                 </Grid>
             )}
             <ImportLoadDetails
-                departmentId={departmentId}
                 onAccept={handleImportDetailsAccept}
                 onCancel={() => setImportDetailsOpen(false)}
                 open={importDetailsOpen}
+            />
+            <ConfirmationDialog
+                open={open}
+                message={'Вы уверены, что хотите удалить нагрузку?'}
+                onClose={handleConfirmationClose}
             />
         </Grid >
     );

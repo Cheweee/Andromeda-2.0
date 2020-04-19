@@ -55,12 +55,34 @@ class RoleService {
         return nameValid ? '' : 'Наименование обязательно';
     }
 
-    public validateRole(faculty: Role) {
-        const nameError = this.validateName(faculty.name);
-        const isValid = !nameError;
+    private validateMinLoad(canTeach: boolean, minLoad: number) {
+        if(!canTeach) return '';
+
+        if(!minLoad || minLoad <= 0) return 'Минимальная нагрузка должна быть больше 0';
+
+        return '';
+    }
+
+    private validateMaxLoad(canTeach: boolean, minLoad: number, maxLoad: number) {
+        if(!canTeach) return '';
+
+        if(!maxLoad || maxLoad <= 0) return 'Максимальная нагрузка должна быть больше 0';
+        
+        if(maxLoad <= minLoad) return 'Максимальная нагрузка должна быть больше минимальной';
+
+        return '';
+    }
+
+    public validateRole(model: Role) {
+        const nameError = this.validateName(model.name);
+        const minLoadError = this.validateMinLoad(model.canTeach, model.minLoad);
+        const maxLoadError = this.validateMaxLoad(model.canTeach, model.minLoad, model.maxLoad);
+        const isValid = !nameError && !minLoadError && !maxLoadError;
 
         const facultyErrors: RoleValidation = {
             nameError: nameError,
+            minLoadError: minLoadError,
+            maxLoadError: maxLoadError,
             isValid: isValid
         };
         return facultyErrors;

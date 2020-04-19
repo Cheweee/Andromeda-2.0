@@ -89,7 +89,6 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
     return (
         <Grid container direction="column" >
             <Grid container direction="row" alignItems="center">
-                <AssignmentInd color="primary" />
                 <Typography>Роли и должности</Typography>
                 <Grid item xs />
                 <Search className={classes.searchIcon} />

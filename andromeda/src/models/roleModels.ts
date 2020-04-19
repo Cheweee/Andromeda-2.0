@@ -4,6 +4,9 @@ import { DepartmentType } from "./departmentModels";
 export interface Role {
     id?: number;
     name: string;
+    canTeach: boolean;
+    minLoad?: number;
+    maxLoad?: number;
 
     roleDepartments: RoleInDepartment[];
 }
@@ -11,7 +14,10 @@ export interface Role {
 export namespace Role {
     export const initial: Role = {
         name: '',
-        roleDepartments: []
+        roleDepartments: [],
+        canTeach: false,
+        minLoad: null,
+        maxLoad: null
     }
 }
 
@@ -30,6 +36,8 @@ export interface RoleGetOptions extends GetOptions {
 
 export interface RoleValidation extends Validation {
     nameError?: string;
+    minLoadError?: string;
+    maxLoadError?: string;
 }
 
 export namespace RoleValidation {

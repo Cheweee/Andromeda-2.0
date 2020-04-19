@@ -39,8 +39,7 @@ export const RoleDepartments = withStyles(styles)(function (props: Props) {
     return (
         <Grid container direction="column">
             {Boolean(departments.length) ? (
-                <List className={classes.overflowContainer} subheader={<li />}>
-
+                <List className={classes.backgroundPaper} subheader={<li />}>
                     {Boolean(faculties.length) && <li key={`section-${DepartmentType.Faculty}`} className={classes.listSection}>
                         <ul className={classes.ul}>
                             <ListSubheader>Факультеты и институты</ListSubheader>

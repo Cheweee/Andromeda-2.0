@@ -20,9 +20,15 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 _logger.LogInformation("Trying to execute sql create role query");
                 model.Id = await QuerySingleOrDefaultAsync<int>(@"
                         insert into Role (
-                            Name
+                            Name,
+                            CanTeach,
+                            MinLoad,
+                            MaxLoad
                         ) values (
-                            @name
+                            @Name,
+                            @CanTeach,
+                            @MinLoad,
+                            @MaxLoad
                         );
                         select SCOPE_IDENTITY();
                 ", model);
@@ -64,7 +70,10 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 sql.AppendLine(@"
                     select 
                         Id,
-                        Name
+                        Name,
+                        CanTeach,
+                        MinLoad,
+                        MaxLoad
                     from Role
                 ");
 
@@ -110,7 +119,10 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 _logger.LogInformation("Trying to execute sql update role query");
                 await ExecuteAsync(@"
                     update Role set
-                        Name = @Name
+                        Name = @Name,
+                        CanTeach = @CanTeach,
+                        MinLoad = @MinLoad,
+                        MaxLoad = @MaxLoad
                     where Id = @Id
                 ", model);
                 _logger.LogInformation("Sql update role query successfully executed");

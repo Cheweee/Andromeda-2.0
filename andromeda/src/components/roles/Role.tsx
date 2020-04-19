@@ -4,8 +4,8 @@ import { RouteComponentProps, withRouter } from "react-router";
 import * as Redux from "react-redux";
 
 import { WithStyles, withStyles } from "@material-ui/core/styles";
-import { Grid, Tooltip, IconButton, Card, CardHeader, LinearProgress, CardContent, Typography, ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails } from "@material-ui/core";
-import { ArrowBack, Close, Check, ExpandMore, Edit } from "@material-ui/icons";
+import { Grid, Tooltip, IconButton, Card, LinearProgress, CardContent, Typography, Breadcrumbs, Link } from "@material-ui/core";
+import { ArrowBack, Close, Check, Edit } from "@material-ui/icons";
 
 import clsx from "clsx";
 
@@ -13,7 +13,7 @@ import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { paths } from "../../sharedConstants";
 
-import { Role, RoleValidation, Department, RoleInDepartment, AppState } from "../../models";
+import { Role, Department, RoleInDepartment, AppState } from "../../models";
 
 import { RoleDetails } from "./RoleDetails";
 import { RoleDepartments, RoleDepartmentsDetails } from "./RoleDepartments";
@@ -34,7 +34,7 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
         roleState: state.roleState,
         departmentState: state.departmentState
     }));
-    
+
     //#region Role state
     function handleRoleDetailsChange(model: Role) {
         dispatch(roleActions.updateRoleDetails(model));
@@ -43,7 +43,7 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
     //#region Departments state
     const [roleDepartmentsDetailsOpen, setRoleDepartmentsDetailsOpen] = React.useState<boolean>(false);
 
-    function handleAddDepartment(event: React.MouseEvent<Element, MouseEvent>) {
+    function handleEditRoleDepartments(event: React.MouseEvent<Element, MouseEvent>) {
         event.stopPropagation();
         setRoleDepartmentsDetailsOpen(true);
     }
@@ -87,13 +87,13 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
     const disabled = roleState.roleLoading || departmentState.loading;
 
     let role: Role = null;
-    if(roleState.roleLoading === false) {
+    if (roleState.roleLoading === false) {
         role = roleState.role;
     }
     let departments: Department[] = [];
-    if(departmentState.loading === false) {
+    if (departmentState.loading === false) {
         departments = departmentState.departments;
-    }    
+    }
 
     return (
         <div>
@@ -101,14 +101,11 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
                 <Grid container direction="row">
                     <Grid item xs={2} />
                     <Grid item xs container direction="column">
-                        <Grid container direction="row">
-                            <Tooltip title="Вернуться назад">
-                                <span>
-                                    <IconButton disabled={disabled} onClick={handleBackClick}>
-                                        <ArrowBack />
-                                    </IconButton>
-                                </span>
-                            </Tooltip>
+                        <Grid container direction="row" alignItems="center">
+                            <Breadcrumbs>
+                                <Link color="inherit" onClick={handleBackClick}>Роли и должности</Link>
+                                <Typography color="textPrimary">{role && role.name || 'Новая роль'}</Typography>
+                            </Breadcrumbs>
                             <Grid item xs />
                             <Tooltip title="Отменить">
                                 <span>
@@ -126,7 +123,6 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
                             </Tooltip>
                         </Grid>
                         <Card className={clsx(classes.margin1Y, classes.w100)}>
-                            <CardHeader title="Роль" />
                             {roleState.roleLoading && <LinearProgress variant="query" />}
                             <CardContent>
                                 <RoleDetails
@@ -137,26 +133,24 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
                                 />
                             </CardContent>
                         </Card>
+                        <Grid container direction="row" alignItems="center">
+                            <Typography>Подразделения и департаменты</Typography>
+                            <Grid item xs />
+                            <Tooltip title="Редактировать подразделения роли">
+                                <span>
+                                    <IconButton onClick={handleEditRoleDepartments}>
+                                        <Edit />
+                                    </IconButton>
+                                </span>
+                            </Tooltip>
+                        </Grid>
                         <Card className={clsx(classes.margin1Y, classes.w100)}>
-                            <ExpansionPanel>
-                                <ExpansionPanelSummary expandIcon={<ExpandMore />}>
-                                    <Grid container direction="row" alignItems="center">
-                                        <Typography className={classes.heading}>Подразделения и департаменты</Typography>
-                                        <Grid item xs />
-                                        <Tooltip title="Редактировать подразделения роли">
-                                            <span>
-                                                <IconButton onClick={handleAddDepartment}>
-                                                    <Edit />
-                                                </IconButton>
-                                            </span>
-                                        </Tooltip>
-                                    </Grid>
-                                    {departmentState.loading && <LinearProgress variant="query" />}
-                                </ExpansionPanelSummary>
-                                <ExpansionPanelDetails>
+                            {departmentState.loading && <LinearProgress variant="query" />}
+                            <CardContent>
+                                <Grid className={clsx(classes.overflowContainer, classes.fixedHeight300)}>
                                     <RoleDepartments departments={role && role.roleDepartments || []} />
-                                </ExpansionPanelDetails>
-                            </ExpansionPanel>
+                                </Grid>
+                            </CardContent>
                         </Card>
                     </Grid>
                     <Grid item xs={2} />

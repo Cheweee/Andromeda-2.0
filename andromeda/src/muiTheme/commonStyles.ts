@@ -143,7 +143,7 @@ export const commonStyles = (theme: Theme) => ({
   },
   warning: {
     backgroundColor: amber[700],
-  },  
+  },
   listSection: {
     backgroundColor: 'inherit',
   },
@@ -151,10 +151,10 @@ export const commonStyles = (theme: Theme) => ({
     backgroundColor: 'inherit',
     padding: 0,
   },
+  backgroundPaper: {
+    backgroundColor: theme.palette.background.paper
+  },
   overflowContainer: {
-    backgroundColor: theme.palette.background.paper,
-    position: 'relative',
-    overflow: 'auto',
-    maxHeight: 400,
+    overflow: 'auto'
   }
 });

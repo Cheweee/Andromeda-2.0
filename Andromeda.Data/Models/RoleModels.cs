@@ -7,6 +7,9 @@ namespace Andromeda.Data.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public bool CanTeach { get; set; }
+        public double? MinLoad { get; set; }
+        public double? MaxLoad { get; set; }
 
         public List<RoleInDepartment> RoleDepartments { get; set; }
     }

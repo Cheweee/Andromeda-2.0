@@ -1,6 +1,6 @@
 import * as React from "react";
 import { commonStyles, chartStyles } from "../../../muiTheme";
-import { WithStyles, withStyles, Grid, Card, CardHeader, Typography, CardContent, CardActions, IconButton, Tooltip } from "@material-ui/core";
+import { WithStyles, withStyles, Grid, Card, CardHeader, Typography, CardContent, CardActions, IconButton, Tooltip, Button } from "@material-ui/core";
 import { mergeStyles } from "../../../utilities";
 import { UserDisciplineLoad, User, ProjectType } from "../../../models";
 import { Visibility, Edit, Delete, PermContactCalendar } from "@material-ui/icons";
@@ -12,7 +12,7 @@ interface Props extends WithStyles<typeof styles> {
     readonly index?: number;
 
     onEdit: (index: number) => void;
-    onDelete: (index: number) => void;
+    onDelete: (userId: number) => void;
 }
 
 export const UserDisciplineLoadCard = withStyles(styles)(function (props: Props) {
@@ -77,17 +77,7 @@ export const UserDisciplineLoadCard = withStyles(styles)(function (props: Props)
     } = props;
     return (
         <Card key={index}>
-            <CardHeader
-                title={<Typography variant="subtitle1">{user && User.getFullInitials(user)}</Typography>}
-                action={
-                    <Tooltip title="Детализация нагрузки">
-                        <span>
-                            <IconButton>
-                                <PermContactCalendar />
-                            </IconButton>
-                        </span>
-                    </Tooltip>
-                } />
+            <CardHeader title={user && User.getFullInitials(user)} />
             <CardContent>
                 <Grid container direction="column">
                     {lections > 0 && <Typography variant="caption" className={classes.lections}>Лекции: {lections.toFixed(2)} ч.</Typography>}
@@ -114,20 +104,7 @@ export const UserDisciplineLoadCard = withStyles(styles)(function (props: Props)
             <CardActions>
                 <Grid container direction="row">
                     <Grid item xs/>
-                    <Tooltip title="Редактировать нагрузку">
-                        <span>
-                            <IconButton onClick={() => onEdit(index)}>
-                                <Edit />
-                            </IconButton>
-                        </span>
-                    </Tooltip>
-                    <Tooltip title="Удалить нагрузку">
-                        <span>
-                            <IconButton onClick={() => onDelete(index)}>
-                                <Delete/>
-                            </IconButton>
-                        </span>
-                    </Tooltip>
+                    <Button>Детали</Button>
                 </Grid>
             </CardActions>
         </Card>

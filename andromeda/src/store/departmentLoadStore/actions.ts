@@ -38,7 +38,7 @@ export enum ActionType {
     updateGroupDisciplineLoad = 'UPDATE_GROUP_DISCIPLINE_LOAD',
     deleteGroupDisciplineLoad = 'DELETE_GROUP_DISCIPLINE_LOAD',
     updateUserDiscplineLoad = 'UPDATE_USER_DISCIPLINE_LOAD',
-
+    deleteUserDisciplineLoad = 'DELETE_USER_DISCIPLINE_LOAD'
 }
 //#endregion
 
@@ -164,6 +164,10 @@ export interface UpdateUserDisciplineLoad extends Action<ActionType> {
     groupDisciplineLoadIndex: number;
     userDisciplineLoad: UserDisciplineLoad;
 }
+export interface DeleteUserDisciplineLoad extends Action<ActionType> {
+    type: ActionType.deleteUserDisciplineLoad;
+    userId: number;
+}
 
 export type GetModels = GetModelsRequest | GetModelsSuccess | GetModelsFailure;
 export type GetModel = GetModelRequest | GetModelSuccess | GetModelFailure;
@@ -172,7 +176,7 @@ export type Delete = DeleteRequest | DeleteSuccess | DeleteFailure;
 
 export type Import = ImportRequest | ImportSuccess | ImportFailure;
 export type Generate = GenerateRequest | GenerateSuccess | GenerateFailure;
-export type Update = UpdateDetails | UpdateGroupDisciplineLoad | DeleteGroupDisciplineLoad | UpdateUserDisciplineLoad;
+export type Update = UpdateDetails | UpdateGroupDisciplineLoad | DeleteGroupDisciplineLoad | UpdateUserDisciplineLoad | DeleteUserDisciplineLoad;
 
 export type DepartmentLoadActions = GetModels | GetModel | Save | Delete | ClearEditionState | Import | Generate | Update;
 //#endregion
@@ -332,6 +336,9 @@ function deleteGroupDisciplineLoad(index: number): DeleteGroupDisciplineLoad {
 function updateUserDisciplineLoad(groupDisciplineLoadIndex: number, userDisciplineLoad: UserDisciplineLoad): UpdateUserDisciplineLoad {
     return { type: ActionType.updateUserDiscplineLoad, groupDisciplineLoadIndex: groupDisciplineLoadIndex, userDisciplineLoad: userDisciplineLoad };
 }
+function deleteUserDisciplineLoad(userId: number): DeleteUserDisciplineLoad {
+    return { type: ActionType.deleteUserDisciplineLoad, userId: userId };
+}
 
 export default {
     getModels,
@@ -344,5 +351,6 @@ export default {
     updateDetails,
     updateGroupDisciplineLoad,
     deleteGroupDisciplineLoad,
-    updateUserDisciplineLoad
+    updateUserDisciplineLoad,
+    deleteUserDisciplineLoad
 }

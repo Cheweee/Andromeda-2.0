@@ -1,6 +1,6 @@
 import { DepartmentLoadState, ModelsState, ModelState, DeleteState } from "./state";
 import { DepartmentLoadActions, ActionType } from "./actions";
-import { StudyLoad, DepartmentLoad } from "../../models";
+import { StudyLoad, DepartmentLoad, UserDisciplineLoad } from "../../models";
 
 const initialState: DepartmentLoadState = {
     deleting: false,
@@ -126,6 +126,7 @@ export function departmentLoadReducer(prevState: DepartmentLoadState = initialSt
             const state: ModelState = { modelLoading: false, model: updated };
             return { ...prevState, ...state };
         }
+
         case ActionType.deleteGroupDisciplineLoad: {
             if (prevState.modelLoading === true) return;
 
@@ -143,10 +144,9 @@ export function departmentLoadReducer(prevState: DepartmentLoadState = initialSt
 
             const groupsDisciplinesLoad = prevState.model.groupDisciplineLoad;
 
-            //const load = usersDisciplinesLoad.find(o => o.user.id === value.user.id);
             const groupDisciplineLoad = groupsDisciplinesLoad[action.groupDisciplineLoadIndex];
-            const studyLoadInStream = groupDisciplineLoad.studyLoad.filter(o => StudyLoad.getGroupsInStream(o.shownValue) > 1);
             const selectedStudyLoad = groupDisciplineLoad.studyLoad.filter(o => action.userDisciplineLoad.studyLoad.some(vsl => vsl.projectType === o.projectType));
+            const studyLoadInStream = selectedStudyLoad.filter(o => StudyLoad.getGroupsInStream(o.shownValue) > 1);
             for (let studyLoad of selectedStudyLoad) {
                 if (!studyLoad.userLoad) {
                     studyLoad.userLoad = [];
@@ -181,14 +181,31 @@ export function departmentLoadReducer(prevState: DepartmentLoadState = initialSt
                 });
             }
 
-            action.userDisciplineLoad.studyLoad = action.userDisciplineLoad.studyLoad.concat(additionalStudyLoad);
+            const model: DepartmentLoad = { ...prevState.model, groupDisciplineLoad: groupsDisciplinesLoad };
 
-            // if (load) {
-            //     load.amount += action.userDisciplineLoad.amount;
-            //     load.studyLoad = load.studyLoad.concat(action.userDisciplineLoad.studyLoad);
-            // } else {
-            //     usersDisciplinesLoad.push(action.userDisciplineLoad);
-            // }
+            const state: ModelState = { modelLoading: false, model: model };
+
+            return { ...prevState, ...state };
+        }
+        case ActionType.deleteUserDisciplineLoad: {
+            if (prevState.modelLoading === true) return;
+
+            const groupsDisciplinesLoad = prevState.model.groupDisciplineLoad;
+
+            const studyLoads = groupsDisciplinesLoad.filter(o => o.studyLoad.some(sl => sl.userLoad))
+                .map(o => o.studyLoad).reduce((prev, curr) => prev.concat(curr), []);
+
+            for(let studyLoad of studyLoads) {
+                if(!studyLoad.userLoad || !studyLoad.userLoad.some(o => o.userId === action.userId)) continue;
+
+                studyLoad.userLoad = studyLoad.userLoad.filter(o => o.userId !== action.userId);
+            }
+
+            const model: DepartmentLoad = { ...prevState.model, groupDisciplineLoad: groupsDisciplinesLoad };
+
+            const state: ModelState = { modelLoading: false, model: model };
+
+            return { ...prevState, ...state };
         }
 
         default: return prevState;

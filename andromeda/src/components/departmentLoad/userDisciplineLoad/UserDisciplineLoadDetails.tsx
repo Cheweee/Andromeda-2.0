@@ -19,7 +19,7 @@ interface Props extends WithStyles<typeof styles> {
     selectedGroupDisciplineLoad: GroupDisciplineLoad;
     selectedUser: User;
 
-    onAccept: (index: number, value: UserDisciplineLoad) => void;
+    onAccept: (value: UserDisciplineLoad) => void;
     onCancel: () => void;
 }
 
@@ -116,15 +116,11 @@ export const UserDisciplineLoadDetails = withStyles(styles)(function (props: Pro
             amount: amount
         };
 
-        let index = props.groupsDisciplinesLoad.indexOf(groupDisciplineLoad);
-        if(index < 0)
-            index = props.selectedGroupDisciplineLoadIndex;
-
         setUser(null);
         setStudyLoad([]);
         setSelectedStudyLoad([]);
         setGroupDisciplineLoad(null);
-        onAccept(index, value);
+        onAccept(value);
     }
 
     function handleCancel() {

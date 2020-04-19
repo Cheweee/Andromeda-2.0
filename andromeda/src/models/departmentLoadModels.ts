@@ -12,6 +12,7 @@ export interface DepartmentLoad {
     total: number;
 
     groupDisciplineLoad?: GroupDisciplineLoad[];
+    userDisciplineLoad?: UserDisciplineLoad[];
 }
 
 export namespace DepartmentLoad {

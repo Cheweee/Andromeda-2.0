@@ -23,12 +23,11 @@ const styles = mergeStyles(commonStyles);
 interface Props extends WithStyles<typeof styles> {
     open: boolean;
     groupDisciplineLoad: GroupDisciplineLoad;
-    index: number;
 
     disciplinesTitles: DisciplineTitle[];
     groups: StudentGroup[];
 
-    onAccept: (index: number, value: GroupDisciplineLoad) => void;
+    onAccept: (value: GroupDisciplineLoad) => void;
     onCancel: () => void;
 }
 
@@ -40,11 +39,12 @@ export const GroupDisciplineLoadDetails = withStyles(styles)(function (props: Pr
     const [formErrors, setFormErrors] = React.useState<GroupDisciplineLoadValidation>(GroupDisciplineLoadValidation.initial);
 
     React.useEffect(() => {
-        const groupDisciplineLoad = props.groupDisciplineLoad || GroupDisciplineLoad.initial
-        const disciplineTitle = groupDisciplineLoad.disciplineTitle || DisciplineTitle.initial;
-        const group = groupDisciplineLoad.studentGroup || StudentGroup.initial;
-        const studyLoad = groupDisciplineLoad.studyLoad || [];
-        const semesterNumber = groupDisciplineLoad.semesterNumber || 1;
+        const { groupDisciplineLoad } = props;
+
+        const disciplineTitle = groupDisciplineLoad && groupDisciplineLoad.disciplineTitle || DisciplineTitle.initial;
+        const group = groupDisciplineLoad && groupDisciplineLoad.studentGroup || StudentGroup.initial;
+        const studyLoad = groupDisciplineLoad && groupDisciplineLoad.studyLoad || [];
+        const semesterNumber = groupDisciplineLoad && groupDisciplineLoad.semesterNumber || 1;
 
         setDisciplineTitle(disciplineTitle);
         setGroup(group);
@@ -91,7 +91,7 @@ export const GroupDisciplineLoadDetails = withStyles(styles)(function (props: Pr
         setSemesterNumber(semesterNumber || 0);
     }
 
-    function handleProjectTypeChange(index, value: ProjectType) {
+    function handleProjectTypeChange(index: number, value: ProjectType) {
         const studyLoad = studyLoads[index];
 
         studyLoad.projectType = value;
@@ -136,7 +136,7 @@ export const GroupDisciplineLoadDetails = withStyles(styles)(function (props: Pr
     }
 
     function handleAccept() {
-        const { index, onAccept } = props;
+        const { onAccept } = props;
 
         const amount = studyLoads.map(o => o.value).reduce((prev, curr) => prev + curr, 0);
 
@@ -150,7 +150,7 @@ export const GroupDisciplineLoadDetails = withStyles(styles)(function (props: Pr
             studyLoad: studyLoads
         }
 
-        onAccept(index, value);
+        onAccept(value);
     }
 
     const studyLoadsControls = studyLoads.map((o, index) => (

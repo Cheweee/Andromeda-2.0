@@ -30,7 +30,6 @@ namespace Andromeda.Services
 
         private readonly IGenerateStrategy _generateStrategy;
         private readonly ILogger<DepartmentLoadService> _logger;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public DepartmentLoadService(
             IDepartmentLoadDao dao,
@@ -42,8 +41,7 @@ namespace Andromeda.Services
             StudyDirectionService studyDirectionService,
             FileService fileService,
             IGenerateStrategy generateStrategy,
-            ILogger<DepartmentLoadService> logger,
-            IHttpContextAccessor httpContextAccessor
+            ILogger<DepartmentLoadService> logger
         )
         {
             _dao = dao ?? throw new ArgumentException(nameof(dao));
@@ -58,7 +56,6 @@ namespace Andromeda.Services
             _generateStrategy = generateStrategy ?? throw new ArgumentException(nameof(generateStrategy));
 
             _logger = logger ?? throw new ArgumentException(nameof(logger));
-            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentException(nameof(httpContextAccessor));
         }
 
         public async Task<IEnumerable<DepartmentLoad>> Get(DepartmentLoadGetOptions options)
@@ -124,9 +121,6 @@ namespace Andromeda.Services
                 if (!options.DepartmentId.HasValue)
                     throw new ApplicationException("Не удалось найти кафедру.");
 
-                Stream file = _httpContextAccessor.HttpContext.Request.Body;
-                string fileContentType = _httpContextAccessor.HttpContext.Request.ContentType;
-                long? fileContentLength = _httpContextAccessor.HttpContext.Request.ContentLength;
                 DepartmentLoad departmentLoad = new DepartmentLoad
                 {
                     DepartmentId = options.DepartmentId.Value
@@ -141,7 +135,7 @@ namespace Andromeda.Services
                     Type = DepartmentType.Faculty
                 });
 
-                using (var fileStream =  _fileService.PrepareFile(options.FileName, file, fileContentLength))
+                using (var fileStream = await _fileService.PrepareFile(options.FileName))
                 {
                     IWorkbook workbook = WorkbookFactory.Create(fileStream);
                     ISheet loadSheet = null;

@@ -57,7 +57,8 @@ export const TableComponent = withStyles(styles)(function (props: Props) {
 
     const { loading, columns, data } = props;
 
-    const rows = data.slice(rowsPerPage * page, rowsPerPage * (page + 1)).map((data, index: number) => getRow(data, index, columns));
+    const rows = data && data.slice(rowsPerPage * page, rowsPerPage * (page + 1)).map((data, index: number) => getRow(data, index, columns)) || [];
+    const rowsCount = data && data.length || 0;
 
     return (
         <Grid>
@@ -77,7 +78,7 @@ export const TableComponent = withStyles(styles)(function (props: Props) {
             <TablePagination
                 rowsPerPageOptions={[5, 10, 15]}
                 component="div"
-                count={data.length}
+                count={rowsCount}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 labelDisplayedRows={({ from, to, count }) => `${from}-${to === -1 ? count : to} из ${count}`}

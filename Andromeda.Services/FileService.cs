@@ -1,43 +1,60 @@
+using System;
 using System.IO;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
 
 namespace Andromeda.Services
 {
     public class FileService
     {
         private readonly string _contentRootPath;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public FileService(string contentRootPath)
+        public FileService(string contentRootPath,
+            IHttpContextAccessor httpContextAccessor)
         {
             _contentRootPath = contentRootPath;
+            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentException(nameof(httpContextAccessor));
         }
 
-        public FileStream PrepareFile(string fileName, Stream file, long? fileLength)
+        public async Task<FileStream> PrepareFile(string fileName)
         {
-            string folderName = "Upload";
-            string contentRootPath = _contentRootPath;
-            string newPath = Path.Combine(contentRootPath, folderName);
-            if (!Directory.Exists(newPath))
+            try
             {
-                Directory.CreateDirectory(newPath);
+                Stream file = _httpContextAccessor.HttpContext.Request.Body;
+                string fileContentType = _httpContextAccessor.HttpContext.Request.ContentType;
+                long? fileContentLength = _httpContextAccessor.HttpContext.Request.ContentLength;
+
+                string folderName = "Upload";
+                string uplodaFolderPath = Path.Combine(_contentRootPath, folderName);
+
+                if (!Directory.Exists(uplodaFolderPath))
+                {
+                    Directory.CreateDirectory(uplodaFolderPath);
+                }
+                if (fileContentLength > 0)
+                {
+                    string fullPath = Path.Combine(uplodaFolderPath, fileName);
+                    var stream = new FileStream(fullPath, FileMode.Create);
+                    await file.CopyToAsync(stream);
+                    stream.Position = 0;
+
+                    return stream;
+                }
+
+                return null;
             }
-            if (fileLength > 0)
+            catch (Exception exception)
             {
-                string fullPath = Path.Combine(newPath, fileName);
-                var stream = new FileStream(fullPath, FileMode.Create);
-                file.CopyTo(stream);
-                stream.Position = 0;
-
-                return stream;
+                throw exception;
             }
-
-            return null;
         }
 
         public void RemoveFile(string fileName)
         {
             string folderName = "Upload";
-            string contentRootPath = _contentRootPath;
-            string filePath = Path.Combine(contentRootPath, folderName, fileName);
+            string filePath = Path.Combine(_contentRootPath, folderName, fileName);
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);

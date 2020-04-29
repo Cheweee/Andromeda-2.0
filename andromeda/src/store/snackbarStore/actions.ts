@@ -18,7 +18,7 @@ export interface HideAction extends Action<ActionType> {
 export type SnackbarActions = ShowAction | HideAction;
 
 function showSnackbar(message: string, variant: SnackbarVariant = SnackbarVariant.info): SnackbarActions {
-    console.log('SUCCESS: ' + message);
+    console.log(`${variant.toString().toUpperCase()}: ${message}`);
     return { type: ActionType.show, message: message, variant: variant };
 }
 function hideSnackbar(): SnackbarActions {

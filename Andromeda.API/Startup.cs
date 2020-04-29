@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Andromeda.API.Utility;
 using Andromeda.Models.Settings;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Andromeda.API
 {
@@ -43,9 +44,9 @@ namespace Andromeda.API
                     .AllowAnyOrigin();
                 });
             });
+            services.AddControllers();
             services.AddHttpContextAccessor();
-            services.AddMvc()
-            .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             var appsettings = Configuration.Get<Appsettings>();
             var emailSettings = appsettings.EmailConnectionSettings;
@@ -53,7 +54,7 @@ namespace Andromeda.API
 
             // configure jwt authentication
             var key = Encoding.ASCII.GetBytes(appsettings.Secret);
-            services.AddAuthentication()
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(x =>
             {
                 x.RequireHttpsMetadata = false;
@@ -85,9 +86,10 @@ namespace Andromeda.API
                 return new PinnedDisciplineService(daoFactory.PinnedDisciplineDao);
             });
 
-            services.AddScoped(provider => 
+            services.AddScoped(provider =>
             {
-                return new FileService(_webHostEnvironment.ContentRootPath);
+                var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
+                return new FileService(_webHostEnvironment.ContentRootPath, httpContextAccessor);
             });
 
             services.AddScoped(provider =>
@@ -156,13 +158,13 @@ namespace Andromeda.API
                 return new StudyLoadService(daoFactory.StudyLoadDao);
             });
 
-            services.AddScoped(provider => 
+            services.AddScoped(provider =>
             {
                 var daoFactory = provider.GetService<IDaoFactory>();
                 var studyLoadService = provider.GetService<StudyLoadService>();
                 var disciplineTitleService = provider.GetService<DisciplineTitleService>();
                 var studentGroupService = provider.GetService<StudentGroupService>();
-                
+
                 return new GroupDisciplineLoadService(
                     daoFactory.GroupDisciplineLoadDao,
                     studyLoadService,
@@ -182,7 +184,6 @@ namespace Andromeda.API
                 var studyLoadService = provider.GetService<StudyLoadService>();
                 var fileService = provider.GetService<FileService>();
                 var logger = provider.GetService<ILogger<DepartmentLoadService>>();
-                var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
 
                 return new DepartmentLoadService(
                     daoFactory.DepartmentLoadDao,
@@ -194,8 +195,7 @@ namespace Andromeda.API
                     studyDirectionService,
                     fileService,
                     provider.ComposeGenerateStrategies(),
-                    logger,
-                    httpContextAccessor
+                    logger
                 );
             });
 
@@ -227,17 +227,17 @@ namespace Andromeda.API
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-                app.UseHttpsRedirection();
-            }
 
             app.UseCors();
-            app.UseAuthentication();
+            app.UseRouting();
 
-            app.UseMvc();
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

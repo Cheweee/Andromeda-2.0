@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Andromeda.Data.Models
+namespace Andromeda.Models.Entities
 {
     public abstract class BaseGetOptions
     {

@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Andromeda.Data.Interfaces;
-using Andromeda.Data.Models;
-using Andromeda.Shared;
+using Andromeda.Models.Entities;
+using Andromeda.Models.Settings;
 
 namespace Andromeda.Data.DataAccessObjects
 {

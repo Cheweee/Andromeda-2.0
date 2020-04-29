@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
-using Andromeda.Data.Enumerations;
+using Andromeda.Models.Enumerations;
 
-namespace Andromeda.Data.Models
+namespace Andromeda.Models.Entities
 {
     public class DepartmentLoad
     {

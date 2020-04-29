@@ -1,7 +1,6 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
-using Andromeda.Data.Models;
+using Andromeda.Models.Entities;
 
 namespace Andromeda.Services.GenerateLoadStrategies
 {

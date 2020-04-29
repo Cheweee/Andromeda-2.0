@@ -1,15 +1,15 @@
 using System;
 using System.IO;
-using Andromeda.Shared;
-using Andromeda.Shared.Enumerations;
+using Andromeda.Models.Settings;
+using Andromeda.Models.Settings.Enumerations;
 using CommandLine;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace Andromeda.Utilities.Actions
 {
-    [Verb("app-settings", HelpText = "Set application settings by it names")]
-    public class SolutionSettingsOptions
+    [Verb("set-settings", HelpText = "Set application settings by it names")]
+    public class SetSettingsOptions
     {
         [Option(DatabaseConnectionSettings.DatabaseHostVariableName, HelpText = "Allow to set database host")]
         public string DatabaseHost { get; set; }
@@ -44,8 +44,8 @@ namespace Andromeda.Utilities.Actions
     {
         public static int Run(
             ILogger logger,
-            Appsettings appsettings,
-            SolutionSettingsOptions options
+            DatabaseConnectionSettings appsettings,
+            SetSettingsOptions options
         )
         {
             try
@@ -60,7 +60,7 @@ namespace Andromeda.Utilities.Actions
                 }
                 logger.LogInformation("Try to update solution settings");
 
-                appsettings.DatabaseConnectionSettings = DatabaseConnectionSettings.InitializeSolutionSettings(
+                appsettings = DatabaseConnectionSettings.InitializeSolutionSettings(
                     options.DatabaseHost,
                     options.DatabaseName,
                     options.DatabasePort,

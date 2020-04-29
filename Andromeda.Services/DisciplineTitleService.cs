@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Andromeda.Data.Enumerations;
 using Andromeda.Data.Interfaces;
-using Andromeda.Data.Models;
+using Andromeda.Models.Entities;
+using Andromeda.Models.Enumerations;
 
 namespace Andromeda.Services
 {

@@ -1,4 +1,4 @@
-namespace Andromeda.Data.Enumerations
+namespace Andromeda.Models.Enumerations
 {
     ///<summary>Перечисление типов работ по учебной дисциплине.</summary>
     public enum ProjectType

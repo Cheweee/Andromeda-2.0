@@ -39,12 +39,12 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "build",
+            "label": "build_utility",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Andromeda.Utility/Andromeda.Utility.csproj",
+                "${workspaceFolder}/Andromeda.Utilities/Andromeda.Utilities.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -56,7 +56,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/Andromeda.Utility/Andromeda.Utility.csproj",
+                "${workspaceFolder}/Andromeda.Utilities/Andromeda.Utilities.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -69,44 +69,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/Andromeda.Utility/Andromeda.Utility.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "build",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/Andromeda.Utilities.Database/Andromeda.Utility.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "publish",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "publish",
-                "${workspaceFolder}/Andromeda.Utilities.Database/Andromeda.Utility.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "watch",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "watch",
-                "run",
-                "${workspaceFolder}/Andromeda.Utilities.Database/Andromeda.Utility.csproj",
+                "${workspaceFolder}/Andromeda.Utilities/Andromeda.Utilities.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

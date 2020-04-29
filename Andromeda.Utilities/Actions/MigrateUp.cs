@@ -1,5 +1,5 @@
 using System;
-using Andromeda.Shared;
+using Andromeda.Models.Settings;
 using CommandLine;
 using FluentMigrator.Runner;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Andromeda.Data.Models
+namespace Andromeda.Models.Entities
 {
     public class User
     {

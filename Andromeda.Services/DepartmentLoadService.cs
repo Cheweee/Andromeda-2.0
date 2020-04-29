@@ -2,20 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Andromeda.Data.Enumerations;
 using Andromeda.Data.Interfaces;
-using Andromeda.Data.Models;
 using Andromeda.Services.GenerateLoadStrategies;
 using Andromeda.Shared;
 using NPOI.SS.UserModel;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Linq.Expressions;
 using System.Data;
 using Microsoft.AspNetCore.Http;
 using System.Text.RegularExpressions;
+using Andromeda.Models.Entities;
+using Andromeda.Models.Enumerations;
 
 namespace Andromeda.Services
 {
@@ -28,10 +26,9 @@ namespace Andromeda.Services
         private readonly GroupDisciplineLoadService _groupDisciplineLoadService;
         private readonly StudyLoadService _studyLoadService;
         private readonly StudyDirectionService _studyDirectionService;
+        private readonly FileService _fileService;
 
         private readonly IGenerateStrategy _generateStrategy;
-
-        private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ILogger<DepartmentLoadService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
@@ -43,8 +40,8 @@ namespace Andromeda.Services
             GroupDisciplineLoadService groupDisciplineLoadService,
             StudyLoadService studyLoadService,
             StudyDirectionService studyDirectionService,
+            FileService fileService,
             IGenerateStrategy generateStrategy,
-            IHostingEnvironment hostingEnvironment,
             ILogger<DepartmentLoadService> logger,
             IHttpContextAccessor httpContextAccessor
         )
@@ -56,10 +53,10 @@ namespace Andromeda.Services
             _groupDisciplineLoadService = groupDisciplineLoadService ?? throw new ArgumentException(nameof(groupDisciplineLoadService));
             _studyLoadService = studyLoadService ?? throw new ArgumentException(nameof(studyLoadService));
             _studyDirectionService = studyDirectionService ?? throw new ArgumentException(nameof(studyDirectionService));
+            _fileService = fileService ?? throw new ArgumentException(nameof(fileService));
 
             _generateStrategy = generateStrategy ?? throw new ArgumentException(nameof(generateStrategy));
 
-            _hostingEnvironment = hostingEnvironment ?? throw new ArgumentException(nameof(hostingEnvironment));
             _logger = logger ?? throw new ArgumentException(nameof(logger));
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentException(nameof(httpContextAccessor));
         }
@@ -144,7 +141,7 @@ namespace Andromeda.Services
                     Type = DepartmentType.Faculty
                 });
 
-                using (var fileStream = PrepareFile(options.FileName, file, fileContentLength))
+                using (var fileStream =  _fileService.PrepareFile(options.FileName, file, fileContentLength))
                 {
                     IWorkbook workbook = WorkbookFactory.Create(fileStream);
                     ISheet loadSheet = null;
@@ -222,7 +219,7 @@ namespace Andromeda.Services
             }
             finally
             {
-                RemoveFile(options.FileName);
+                _fileService.RemoveFile(options.FileName);
             }
         }
 
@@ -669,40 +666,6 @@ namespace Andromeda.Services
             string cellValue = cell.StringCellValue.Replace(',', '.');
             double result = Convert.ToDouble(new DataTable().Compute(cellValue, null));
             return result;
-        }
-
-        private FileStream PrepareFile(string fileName, Stream file, long? fileLength)
-        {
-            string folderName = "Upload";
-            string contentRootPath = _hostingEnvironment.ContentRootPath;
-            string newPath = Path.Combine(contentRootPath, folderName);
-            if (!Directory.Exists(newPath))
-            {
-                Directory.CreateDirectory(newPath);
-            }
-            if (fileLength > 0)
-            {
-                string sFileExtension = Path.GetExtension(fileName).ToLower();
-                string fullPath = Path.Combine(newPath, fileName);
-                var stream = new FileStream(fullPath, FileMode.Create);
-                file.CopyTo(stream);
-                stream.Position = 0;
-
-                return stream;
-            }
-
-            return null;
-        }
-
-        private void RemoveFile(string fileName)
-        {
-            string folderName = "Upload";
-            string contentRootPath = _hostingEnvironment.ContentRootPath;
-            string filePath = Path.Combine(contentRootPath, folderName, fileName);
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-            }
         }
     }
 }

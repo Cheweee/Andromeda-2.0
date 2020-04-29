@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Andromeda.Data.Interfaces;
-using Andromeda.Data.Models;
-using Andromeda.Shared;
+using Andromeda.Models.Entities;
+using Andromeda.Models.Settings;
 using Microsoft.Extensions.Logging;
 
 namespace Andromeda.Data.DataAccessObjects.SqlServer

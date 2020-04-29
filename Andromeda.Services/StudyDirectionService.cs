@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Andromeda.Data.Interfaces;
-using Andromeda.Data.Models;
+using Andromeda.Models.Entities;
 
 namespace Andromeda.Services
 {

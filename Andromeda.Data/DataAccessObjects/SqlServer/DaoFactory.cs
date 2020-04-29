@@ -1,6 +1,6 @@
 using System;
 using Andromeda.Data.Interfaces;
-using Andromeda.Shared;
+using Andromeda.Models.Settings;
 using Microsoft.Extensions.Logging;
 
 namespace Andromeda.Data.DataAccessObjects.SqlServer

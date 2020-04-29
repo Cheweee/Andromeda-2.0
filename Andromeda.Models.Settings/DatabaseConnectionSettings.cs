@@ -1,9 +1,9 @@
 using System.Data;
 using System.Data.SqlClient;
-using Andromeda.Shared.Enumerations;
+using Andromeda.Models.Settings.Enumerations;
 using Npgsql;
 
-namespace Andromeda.Shared
+namespace Andromeda.Models.Settings
 {
     public class DatabaseConnectionSettings
     {
@@ -93,6 +93,19 @@ namespace Andromeda.Shared
                 case DatabaseProvider.SqlServer: return new SqlConnection(settings.SqlServerDatabaseConnectionString);
                 case DatabaseProvider.Postgres: return new NpgsqlConnection(settings.PostgresDatabaseConnectionString);
             }
+        }
+
+        public static DatabaseConnectionSettings InitDefaultConnectionSettings()
+        {
+            return new DatabaseConnectionSettings
+            {
+                DatabaseHost = @"localhost\sqlexpress",
+                DatabaseName = "andromeda",
+                DatabasePort = "5432",
+                DatabaseUserName = "sa",
+                DatabasePassword = "qwerty_123",
+                Provider = DatabaseProvider.SqlServer,
+            };
         }
     }
 }

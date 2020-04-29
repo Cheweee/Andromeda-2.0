@@ -1,12 +1,9 @@
 using System;
-using System.Data;
-using System.Data.SqlClient;
-using Andromeda.Shared;
-using Andromeda.Shared.Enumerations;
+using Andromeda.Models.Settings;
+using Andromeda.Models.Settings.Enumerations;
 using Andromeda.Utilities.Migrations;
 using FluentMigrator.Runner;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
 
 namespace Andromeda.Utilities.Actions
 {

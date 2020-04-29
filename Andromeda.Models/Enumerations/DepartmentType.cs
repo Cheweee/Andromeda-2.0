@@ -1,6 +1,6 @@
 using Andromeda.Shared;
 
-namespace Andromeda.Data.Enumerations
+namespace Andromeda.Models.Enumerations
 {
     public enum DepartmentType {
         [EnumerationDescription("Факультеты и институты")]

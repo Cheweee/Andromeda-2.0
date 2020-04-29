@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Andromeda.Data.Enumerations;
+using Andromeda.Models.Enumerations;
 
-namespace Andromeda.Data.Models
+namespace Andromeda.Models.Entities
 {
     public class Role
     {

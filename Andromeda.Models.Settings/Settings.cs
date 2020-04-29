@@ -1,4 +1,4 @@
-namespace Andromeda.Shared
+namespace Andromeda.Models.Settings
 {
     public class Appsettings
     {

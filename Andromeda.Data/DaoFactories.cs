@@ -1,8 +1,7 @@
 using Andromeda.Data.Interfaces;
 using Microsoft.Extensions.Logging;
-using Andromeda.Data.Enumerations;
-using Andromeda.Shared;
-using Andromeda.Shared.Enumerations;
+using Andromeda.Models.Settings.Enumerations;
+using Andromeda.Models.Settings;
 
 namespace Andromeda.Data
 {

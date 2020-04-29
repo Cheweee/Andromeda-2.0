@@ -2,12 +2,11 @@ using System;
 using CommandLine;
 using Andromeda.Services;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
-using Andromeda.Data.Models;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using Newtonsoft.Json;
+using Andromeda.Models.Entities;
 
 namespace Andromeda.Utilities.Actions
 {
@@ -17,14 +16,13 @@ namespace Andromeda.Utilities.Actions
     {
         public static int Run(
             ILogger logger,
-            IHostingEnvironment hostingEnvironment,
             DepartmentService departmentService
         )
         {
             try
             {
                 string folderName = "Seed";
-                string contentRootPath = hostingEnvironment.ContentRootPath;
+                string contentRootPath = Directory.GetCurrentDirectory();
                 string folderPath = Path.Combine(contentRootPath, folderName);
                 if (!Directory.Exists(folderPath))
                     throw new IOException("Папка с файлами инициализации базы данных не найдена.");

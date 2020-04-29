@@ -1,4 +1,4 @@
-namespace Andromeda.Shared.Enumerations
+namespace Andromeda.Models.Settings.Enumerations
 {
     public enum DatabaseProvider
     {

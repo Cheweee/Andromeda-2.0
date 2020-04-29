@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Andromeda.Data.Interfaces;
-using Andromeda.Data.Models;
+using Andromeda.Models.Entities;
 using Andromeda.Shared;
 using Microsoft.Extensions.Logging;
 

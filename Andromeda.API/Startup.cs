@@ -3,29 +3,29 @@ using Andromeda.Data;
 using Andromeda.Data.Interfaces;
 using Andromeda.Services;
 using Andromeda.Services.GenerateLoadStrategies;
-using Andromeda.Shared;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Andromeda.API.Utility;
+using Andromeda.Models.Settings;
 
 namespace Andromeda.API
 {
     public class Startup
     {
         private readonly ILogger _logger;
-        private readonly IHostingEnvironment _hostingEnvironment;
-        public Startup(ILoggerFactory loggerFactory, IConfiguration configuration, IHostingEnvironment hostingEnvironment)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public Startup(ILoggerFactory loggerFactory, IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
             Configuration = configuration;
             _logger = loggerFactory.CreateLogger<Startup>();
-            _hostingEnvironment = hostingEnvironment;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public IConfiguration Configuration { get; }
@@ -45,7 +45,7 @@ namespace Andromeda.API
             });
             services.AddHttpContextAccessor();
             services.AddMvc()
-            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             var appsettings = Configuration.Get<Appsettings>();
             var emailSettings = appsettings.EmailConnectionSettings;
@@ -53,11 +53,7 @@ namespace Andromeda.API
 
             // configure jwt authentication
             var key = Encoding.ASCII.GetBytes(appsettings.Secret);
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
+            services.AddAuthentication()
             .AddJwtBearer(x =>
             {
                 x.RequireHttpsMetadata = false;
@@ -87,6 +83,11 @@ namespace Andromeda.API
             {
                 var daoFactory = provider.GetService<IDaoFactory>();
                 return new PinnedDisciplineService(daoFactory.PinnedDisciplineDao);
+            });
+
+            services.AddScoped(provider => 
+            {
+                return new FileService(_webHostEnvironment.ContentRootPath);
             });
 
             services.AddScoped(provider =>
@@ -179,6 +180,7 @@ namespace Andromeda.API
                 var studyDirectionService = provider.GetService<StudyDirectionService>();
                 var groupDisciplineLoadService = provider.GetService<GroupDisciplineLoadService>();
                 var studyLoadService = provider.GetService<StudyLoadService>();
+                var fileService = provider.GetService<FileService>();
                 var logger = provider.GetService<ILogger<DepartmentLoadService>>();
                 var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
 
@@ -190,8 +192,8 @@ namespace Andromeda.API
                     groupDisciplineLoadService,
                     studyLoadService,
                     studyDirectionService,
+                    fileService,
                     provider.ComposeGenerateStrategies(),
-                    _hostingEnvironment,
                     logger,
                     httpContextAccessor
                 );
@@ -219,7 +221,7 @@ namespace Andromeda.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {

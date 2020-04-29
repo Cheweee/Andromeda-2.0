@@ -1,6 +1,5 @@
 using System;
-using System.Data.SqlClient;
-using Andromeda.Shared;
+using Andromeda.Models.Settings;
 using CommandLine;
 using Microsoft.Extensions.Logging;
 

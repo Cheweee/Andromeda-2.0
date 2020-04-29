@@ -12,7 +12,7 @@
             ]
         },
     ],
-    "configurations": [        
+    "configurations": [
         {
             "type": "chrome",
             "request": "launch",
@@ -26,8 +26,8 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceRoot}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
-            "args": ["api"],
+            "program": "${workspaceRoot}/Andromeda.API/bin/Debug/netcoreapp3.1/Andromeda.API.dll",
+            "args": [],
             "cwd": "${workspaceRoot}/Andromeda.API",
             "stopAtEntry": false,
             "env": {
@@ -40,12 +40,12 @@
             "name": "Andromeda (create database)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
+            "preLaunchTask": "build_utility",
+            "program": "${workspaceFolder}/Andromeda.Utilities/bin/Debug/netcoreapp3.1/Andromeda.Utilities.dll",
             "args": [
                 "create"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.API",
+            "cwd": "${workspaceFolder}/Andromeda.Utilities",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -53,12 +53,12 @@
             "name": "Andromeda (drop database)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
+            "preLaunchTask": "build_utility",
+            "program": "${workspaceFolder}/Andromeda.Utilities/bin/Debug/netcoreapp3.1/Andromeda.Utilities.dll",
             "args": [
                 "drop"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.API",
+            "cwd": "${workspaceFolder}/Andromeda.Utilities",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -66,17 +66,22 @@
             "name": "Andromeda (reset database)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
+            "preLaunchTask": "build_utility",
+            "program": "${workspaceFolder}/Andromeda.Utilities/bin/Debug/netcoreapp3.1/Andromeda.Utilities.dll",
             "args": [
                 "reset",
-                "--database-host", "localhost\\sqlexpress",
-                "--database-name", "andromeda",
-                "--database-user-name", "sa",
-                "--database-password", "qwerty_123",
-                "--database-provider", "0"
+                "--database-host",
+                "localhost\\sqlexpress",
+                "--database-name",
+                "andromeda",
+                "--database-user-name",
+                "sa",
+                "--database-password",
+                "qwerty_123",
+                "--database-provider",
+                "0"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.API",
+            "cwd": "${workspaceFolder}/Andromeda.Utilities",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -84,18 +89,24 @@
             "name": "Andromeda (reset azure database)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
+            "preLaunchTask": "build_utility",
+            "program": "${workspaceFolder}/Andromeda.Utilities/bin/Debug/netcoreapp3.1/Andromeda.Utilities.dll",
             "args": [
                 "reset",
-                "--database-host", "tcp:andromeda20.database.windows.net",
-                "--database-port", "1433",
-                "--database-name", "andromeda",
-                "--database-user-name", "chewee",
-                "--database-password", "Futureisnear1",
-                "--database-provider", "0"
+                "--database-host",
+                "tcp:andromeda20.database.windows.net",
+                "--database-port",
+                "1433",
+                "--database-name",
+                "andromeda",
+                "--database-user-name",
+                "chewee",
+                "--database-password",
+                "Futureisnear1",
+                "--database-provider",
+                "0"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.API",
+            "cwd": "${workspaceFolder}/Andromeda.Utilities",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -103,17 +114,22 @@
             "name": "Andromeda (app settings)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
+            "preLaunchTask": "build_utility",
+            "program": "${workspaceFolder}/Andromeda.Utilities/bin/Debug/netcoreapp3.1/Andromeda.Utilities.dll",
             "args": [
-                "app-settings",
-                "--database-host", "localhost\/sqlexpress",
-                "--database-name", "andromeda",
-                "--database-user-name", "sa",
-                "--database-password", "qwerty_123",
-                "--database-provider", "0"
+                "set-settings",
+                "--database-host",
+                "localhost\/sqlexpress",
+                "--database-name",
+                "andromeda",
+                "--database-user-name",
+                "sa",
+                "--database-password",
+                "qwerty_123",
+                "--database-provider",
+                "0"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.API",
+            "cwd": "${workspaceFolder}/Andromeda.Utilities",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -121,12 +137,12 @@
             "name": "Andromeda (migrate up database)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
+            "preLaunchTask": "build_utility",
+            "program": "${workspaceFolder}/Andromeda.Utilities/bin/Debug/netcoreapp3.1/Andromeda.Utilities.dll",
             "args": [
                 "migrate-up"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.API",
+            "cwd": "${workspaceFolder}/Andromeda.Utilities",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -134,12 +150,12 @@
             "name": "Andromeda (migrate down database)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
+            "preLaunchTask": "build_utility",
+            "program": "${workspaceFolder}/Andromeda.Utilities/bin/Debug/netcoreapp3.1/Andromeda.Utilities.dll",
             "args": [
                 "migrate-down"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.API",
+            "cwd": "${workspaceFolder}/Andromeda.Utilities",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -147,12 +163,12 @@
             "name": "Andromeda (utility help)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Andromeda.API/bin/Debug/netcoreapp2.2/Andromeda.API.dll",
+            "preLaunchTask": "build_utility",
+            "program": "${workspaceFolder}/Andromeda.Utilities/bin/Debug/netcoreapp3.1/Andromeda.Utilities.dll",
             "args": [
                 "--help"
             ],
-            "cwd": "${workspaceFolder}/Andromeda.API",
+            "cwd": "${workspaceFolder}/Andromeda.Utilities",
             "console": "internalConsole",
             "stopAtEntry": false
         }

@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Threading.Tasks;
-using Andromeda.Shared;
 using Dapper;
 using Dapper.Mapper;
 using Microsoft.Extensions.Logging;
+
+using Andromeda.Models.Settings;
 
 namespace Andromeda.Data.DataAccessObjects
 {

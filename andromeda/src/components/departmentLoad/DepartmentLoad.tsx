@@ -4,8 +4,8 @@ import * as Redux from "react-redux";
 import { RouteComponentProps } from "react-router-dom";
 
 import { WithStyles, withStyles } from "@material-ui/core/styles";
-import { Grid, Card, CardContent, Typography, Tooltip, IconButton, Paper } from "@material-ui/core";
-import { Search, PieChartRounded, Add, Check, ArrowBack } from "@material-ui/icons";
+import { Grid, Card, CardContent, Typography, Tooltip, IconButton, Paper, Breadcrumbs, Link, Button } from "@material-ui/core";
+import { Search, PieChartRounded, Add, Check } from "@material-ui/icons";
 
 import clsx from "clsx";
 
@@ -13,9 +13,9 @@ import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { paths } from "../../sharedConstants";
 
-import { DepartmentLoad, User, GroupDisciplineLoad, DisciplineTitle, StudentGroup, Faculty, UserDisciplineLoad, AppState, TrainingDepartment, StudyLoad } from "../../models";
+import { DepartmentLoad, User, GroupDisciplineLoad, UserDisciplineLoad, AppState, TrainingDepartment, StudyLoad, Role } from "../../models";
 
-import { SearchInput, ConfirmationDialog } from "../common";
+import { SearchInput } from "../common";
 import { GroupDisciplineLoadDistribute, GroupsDisciplinesLoad } from "./groupDisciplineLoad";
 import { DepartmentLoadPercentage } from "./DepartmentLoadPercentage";
 import { UserDisciplineLoadChart } from "./userDisciplineLoad/UserDisciplineLoadChart";
@@ -25,6 +25,7 @@ import { UserDisciplineLoadCard, UserDisciplineDataDetails } from "./userDiscipl
 import { departmentLoadActions } from "../../store/departmentLoadStore";
 import { userActions } from "../../store/userStore";
 import { trainingDepartmentActions } from "../../store/trainingDepartmentStore";
+import { roleActions } from "../../store/roleStore";
 
 const styles = mergeStyles(commonStyles);
 
@@ -32,8 +33,9 @@ interface Props extends RouteComponentProps, WithStyles<typeof styles> { }
 
 export const DepartmentLoadComponent = withStyles(styles)(function (props: Props) {
     const dispatch = Redux.useDispatch();
-    const { userState, trainingDepartmentState, departmentLoadState } = Redux.useSelector((state: AppState) => ({
+    const { userState, trainingDepartmentState, departmentLoadState, roleState } = Redux.useSelector((state: AppState) => ({
         userState: state.userState,
+        roleState: state.roleState,
         trainingDepartmentState: state.trainingDepartmentState,
         departmentLoadState: state.departmentLoadState
     }));
@@ -210,13 +212,22 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
         dispatch(departmentLoadActions.getModel(id));
         dispatch(userActions.getUsers({ departmentId: id }));
         dispatch(trainingDepartmentActions.getTrainingDepartment(departmentId));
+        dispatch(roleActions.getRoles({}));
     }
 
-    const handleBackClick = () => {
-        const { history, match } = props;
-        const tempDepartmentId = match.params && match.params[paths.departmentIdParameterName];
-        const departmentId = parseInt(tempDepartmentId, null);
-        history.push(paths.getDepartmentloadsPath(`${departmentId}`));
+    function handleToDepartmentsClick() {
+        const { history } = props;
+        history.push(paths.trainingDepartmentsPath);
+    }
+
+    function handleToDepartmentClick() {
+        const { history } = props;
+        history.push(paths.getTrainingDepartmentPath(props.match.params[paths.departmentIdParameterName]));
+    }
+
+    function handleToDepartmentLoadsClick() {
+        const { history } = props;
+        history.push(paths.getDepartmentloadsPath(props.match.params[paths.departmentIdParameterName]));
     }
 
     const { classes } = props;
@@ -257,6 +268,11 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
         department = trainingDepartmentState.trainingDepartment;
     }
 
+    let roles: Role[] = [];
+    if(roleState.loading === false) {
+        roles = roleState.roles;
+    }
+
     const groupDisciplineLoad: GroupDisciplineLoad[] = departmentLoad && departmentLoad.groupDisciplineLoad || [];
     const total: number = departmentLoad && departmentLoad.total || 0;
     const studyYear: string = departmentLoad && departmentLoad.studyYear || '';
@@ -270,26 +286,22 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
 
     return (
         <Grid container direction="column">
-            <Paper>
-                <Grid container direction="row" alignItems="center">
-                    <Tooltip title="Вернуться назад">
-                        <span>
-                            <IconButton disabled={disabled} onClick={handleBackClick}>
-                                <ArrowBack />
-                            </IconButton>
-                        </span>
-                    </Tooltip>
-                    <Typography>Нагрузка кафедры</Typography>
-                    <Grid item xs />
-                    <Tooltip title="Сохранить нагрузку кафедры">
-                        <span>
-                            <IconButton disabled={disabled} onClick={handleDepartmentLoadSave}>
-                                <Check />
-                            </IconButton>
-                        </span>
-                    </Tooltip>
-                </Grid>
-            </Paper>
+            <Grid container direction="row" alignItems="center">
+                <Breadcrumbs>
+                    <Link color="inherit" onClick={handleToDepartmentsClick}>Кафедры</Link>
+                    <Link color="inherit" onClick={handleToDepartmentClick}>{department && department.name || ''}</Link>
+                    <Link color="inherit" onClick={handleToDepartmentLoadsClick}>Нагрузка кафедры</Link>
+                    <Typography color="textPrimary">{departmentLoad && departmentLoad.studyYear || DepartmentLoad.currentStudyYear}</Typography>
+                </Breadcrumbs>
+                <Grid item xs />
+                <Tooltip title="Сохранить нагрузку кафедры">
+                    <span>
+                        <IconButton disabled={disabled} onClick={handleDepartmentLoadSave}>
+                            <Check />
+                        </IconButton>
+                    </span>
+                </Tooltip>
+            </Grid>
             <Grid container direction="row" className={classes.margin2Top}>
                 <Grid className={clsx(classes.margin1Right)} item xs>
                     <Grid container direction="row" alignItems="center">
@@ -361,13 +373,19 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                     </Grid>
                     <Grid className={classes.margin1Y} container direction="row" spacing={3}>
                         {usersDisciplinesLoad.map((o, index) => {
+                            const userRole = department.users.find(u => u.userId === o.user.id);
+                            const role = roles.find(r => r.id === userRole.roleId);
                             return (
                                 <Grid key={index} item xs={4}>
+                                    <Grid className={classes.margin1Y} container direction="row" alignItems="center">
+                                        <Typography>{User.getFullInitials(o.user)}</Typography>
+                                        <Grid item xs />
+                                        <Button onClick={() => handleUserDisciplineLoadEdit(index)}><Typography color="textSecondary">Детали</Typography></Button>
+                                    </Grid>
                                     <UserDisciplineLoadCard
                                         index={index}
+                                        role={role}
                                         userDisciplineLoad={{ ...o }}
-                                        onEdit={handleUserDisciplineLoadEdit}
-                                        onDelete={handleUserDisciplineLoadDelete}
                                     />
                                 </Grid>
                             )

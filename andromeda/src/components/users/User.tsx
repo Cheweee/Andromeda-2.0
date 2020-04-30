@@ -4,7 +4,7 @@ import { RouteComponentProps } from "react-router";
 import * as Redux from "react-redux";
 
 import { WithStyles, withStyles } from "@material-ui/core/styles";
-import { Grid, Card, CardContent, CardHeader, Tooltip, IconButton, LinearProgress, ExpansionPanel, ExpansionPanelSummary, Typography, ExpansionPanelDetails } from "@material-ui/core";
+import { Grid, Card, CardContent, CardHeader, Tooltip, IconButton, LinearProgress, ExpansionPanel, ExpansionPanelSummary, Typography, ExpansionPanelDetails, Breadcrumbs, Link } from "@material-ui/core";
 import { Check, Close, ArrowBack, ExpandMore, Add } from "@material-ui/icons";
 
 import clsx from "clsx";
@@ -139,14 +139,11 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
             <Grid container direction="row">
                 <Grid item xs={2} />
                 <Grid item xs container direction="column">
-                    <Grid container direction="row">
-                        <Tooltip title="Вернуться назад">
-                            <span>
-                                <IconButton disabled={userDetailsDisabled} onClick={handleBackClick}>
-                                    <ArrowBack />
-                                </IconButton>
-                            </span>
-                        </Tooltip>
+                    <Grid container direction="row" alignItems="center">
+                        <Breadcrumbs>
+                            <Link color="inherit" onClick={handleBackClick}>Пользователи</Link>
+                            <Typography color="textPrimary">{user && user.username || 'Новый пользователь'}</Typography>
+                        </Breadcrumbs>
                         <Grid item xs />
                         <Tooltip title="Отменить">
                             <span>
@@ -164,7 +161,6 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
                         </Tooltip>
                     </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        <CardHeader title="Пользователь" />
                         {userState.userLoading && <LinearProgress variant="query" />}
                         <CardContent>
                             <UserDetails
@@ -176,29 +172,28 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
                             />
                         </CardContent>
                     </Card>
+                    <Grid container direction="row" alignItems="center">
+                        <Typography >Прикрепленные дисциплины</Typography>
+                        <Grid item xs />
+                        <Tooltip title="Прикрепить дисциплину">
+                            <span>
+                                <IconButton onClick={handlePinnedDisciplineAdd}>
+                                    <Add />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        <ExpansionPanel>
-                            <ExpansionPanelSummary expandIcon={<ExpandMore />}>
-                                <Grid container direction="row" alignItems="center">
-                                    <Typography className={classes.heading}>Прикрепленные дисциплины</Typography>
-                                    <Grid item xs />
-                                    <Tooltip title="Прикрепить дисциплину">
-                                        <IconButton onClick={handlePinnedDisciplineAdd}>
-                                            <Add />
-                                        </IconButton>
-                                    </Tooltip>
-                                </Grid>
-                                {disciplineTitleState.loading && <LinearProgress variant="query" />}
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails>
+                        <CardContent>
+                            <Grid className={clsx(classes.overflowContainer, classes.maxHeight300)}>
                                 <PinnedDisciplines
                                     disabled={userDetailsDisabled}
                                     pinnedDisciplines={user && user.pinnedDisciplines || []}
                                     handleDelete={handlePinnedDisciplineDelete}
                                     handleEdit={handlePinnedDisciplineEdit}
                                 />
-                            </ExpansionPanelDetails>
-                        </ExpansionPanel>
+                            </Grid>
+                        </CardContent>
                     </Card>
                 </Grid>
                 <Grid item xs={2} />

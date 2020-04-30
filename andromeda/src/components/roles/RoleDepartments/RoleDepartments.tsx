@@ -56,7 +56,7 @@ export const RoleDepartments = withStyles(styles)(function (props: Props) {
                     }
                 </List>
             ) : (
-                    <Grid container direction="row" justify="center">
+                    <Grid container direction="row" alignItems="center" justify="center">
                         <Typography color="textSecondary">{emptyRoleDepartmentsMessage}</Typography>
                     </Grid>
                 )

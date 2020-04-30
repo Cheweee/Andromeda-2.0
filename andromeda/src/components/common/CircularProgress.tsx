@@ -26,16 +26,18 @@ interface Props extends WithStyles<typeof styles> {
     variant: "static" | "indeterminate" | "determinate";
     size: number;
     value: number;
-    classes: WithStyles<typeof styles>['classes']
+    classes: WithStyles<typeof styles>['classes'];
+
+    endAdornment?: string;
 }
 
 export const PercentageCircularProgress = withStyles(styles)(function (props: Props) {
-    const { classes, value, size, variant } = props;
+    const { classes, value, size, variant, endAdornment } = props;
     
     return (
         <div className={classes.centeredContainer}>
             <CircularProgress value={value} size={size} variant={variant} />
-            <Typography variant="h5" className={classes.centered}>{value.toFixed()}%</Typography>
+            <Typography variant="h5" className={classes.centered}>{`${value.toFixed()}${endAdornment || '%'}`}</Typography>
         </div>
     );
 });

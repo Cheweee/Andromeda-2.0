@@ -103,7 +103,6 @@ export const TrainingDepartments = withStyles(styles)(withRouter(function (props
     return (
         <Grid container direction="column" >
             <Grid container direction="row" alignItems="center">
-                <AccountBalance color="primary" />
                 <Typography>Кафедры</Typography>
                 <Grid item xs />
                 <Search className={classes.searchIcon} />

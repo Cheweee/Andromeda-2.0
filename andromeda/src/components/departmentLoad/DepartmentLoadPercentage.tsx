@@ -6,6 +6,7 @@ import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { PercentageCircularProgress } from "../common";
 import { Edit, Check, Close } from "@material-ui/icons";
+import { DepartmentLoad } from "../../models";
 
 const styles = mergeStyles(commonStyles);
 
@@ -21,11 +22,9 @@ interface Props extends WithStyles<typeof styles> {
     onStudyYearSave: (newValue: string) => void;
     onStudyYearCancel: () => void;
 }
-const currentYear = new Date().getFullYear();
-const nextYear = currentYear + 1;
 
 export const DepartmentLoadPercentage = withStyles(styles)(function (props: Props) {
-    const [studyYear, setStudyYear] = useState<string>(currentYear + ' - ' + nextYear);
+    const [studyYear, setStudyYear] = useState<string>(DepartmentLoad.currentStudyYear);
     const [studyYearErrors, setStudyYearErrors] = useState<string>('');
 
     useEffect(() => {

@@ -27,7 +27,7 @@ const getDepartmentloadPath = (departmentIdParameter: string, idParameter: strin
 export const paths = {
     dashboardPath: '/dashboard',
     usersPath: '/users',
-    facultiesPath: '/factulties',
+    facultiesPath: '/faculties',
     trainingDepartmentsPath: '/trainingdepartments',
     rolesPath: '/roles',
     departmentloadsPath: getDepartmentloadsPath(':' + idParameterName),

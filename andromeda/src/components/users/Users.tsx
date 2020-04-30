@@ -101,7 +101,6 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
     return (
         <Grid container direction="column" >
             <Grid container direction="row" alignItems="center">
-                <SupervisorAccount color="primary" />
                 <Typography>Пользователи</Typography>
                 <Grid item xs />
                 <Search className={classes.searchIcon} />

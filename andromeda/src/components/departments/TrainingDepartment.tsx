@@ -4,7 +4,7 @@ import { RouteComponentProps, withRouter } from "react-router";
 import * as Redux from "react-redux";
 
 import { WithStyles, withStyles } from "@material-ui/core/styles";
-import { Grid, Tooltip, IconButton, Card, CardHeader, CardContent, LinearProgress, ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Typography } from "@material-ui/core";
+import { Grid, Tooltip, IconButton, Card, CardHeader, CardContent, LinearProgress, ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Typography, Breadcrumbs, Link } from "@material-ui/core";
 import { ArrowBack, Close, Check, ExpandMore, Add, BarChart } from "@material-ui/icons";
 
 import clsx from "clsx";
@@ -254,15 +254,21 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
             <Grid container direction="row">
                 <Grid item xs={2} />
                 <Grid item xs container direction="column">
-                    <Grid container direction="row">
-                        <Tooltip title="Вернуться назад">
-                            <span>
-                                <IconButton disabled={disabled} onClick={handleBackClick}>
-                                    <ArrowBack />
-                                </IconButton>
-                            </span>
-                        </Tooltip>
+                    <Grid container direction="row" alignItems="center">
+                        <Breadcrumbs>
+                            <Link color="inherit" onClick={handleBackClick}>Кафедры</Link>
+                            <Typography color="textPrimary">{department && department.name || 'Новая кафедра'}</Typography>
+                        </Breadcrumbs>
                         <Grid item xs />
+                        {isDepartmentExists && (
+                            <Tooltip title="Нагрузка кафедры">
+                                <span>
+                                    <IconButton disabled={disabled} onClick={handleStudyload}>
+                                        <BarChart />
+                                    </IconButton>
+                                </span>
+                            </Tooltip>
+                        )}
                         <Tooltip title="Отменить">
                             <span>
                                 <IconButton disabled={disabled} onClick={handleCancelClick}>
@@ -279,20 +285,6 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                         </Tooltip>
                     </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        <CardHeader title={
-                            <Grid container direction="row" alignItems="center" justify="space-between">
-                                <Typography>Кафедра</Typography>
-                                {isDepartmentExists && (
-                                    <Tooltip title="Нагрузка кафедры">
-                                        <span>
-                                            <IconButton disabled={disabled} onClick={handleStudyload}>
-                                                <BarChart />
-                                            </IconButton>
-                                        </span>
-                                    </Tooltip>
-                                )}
-                            </Grid>
-                        } />
                         {trainingDepartmentState.trainingDepartmentLoading && <LinearProgress variant="query" />}
                         <CardContent>
                             <DepartmentDetails
@@ -305,46 +297,42 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                             />
                         </CardContent>
                     </Card>
+                    <Grid container direction="row" alignItems="center">
+                        <Typography>Названия дисциплин</Typography>
+                        <Grid item xs />
+                        <Tooltip title="Добавить наименование дисциплин">
+                            <span>
+                                <IconButton onClick={handleDisciplineTitleAdd}>
+                                    <Add />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        <ExpansionPanel>
-                            <ExpansionPanelSummary expandIcon={<ExpandMore />}>
-                                <Grid container direction="row" alignItems="center">
-                                    <Typography className={classes.heading}>Названия дисциплин</Typography>
-                                    <Grid item xs />
-                                    <Tooltip title="Добавить наименование дисциплин">
-                                        <span>
-                                            <IconButton onClick={handleDisciplineTitleAdd}>
-                                                <Add />
-                                            </IconButton>
-                                        </span>
-                                    </Tooltip>
-                                </Grid>
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails className={classes.overflowContainer}>
+                        <CardContent>
+                            <Grid className={clsx(classes.overflowContainer, classes.maxHeight300)}>
                                 <DisciplinesTitles
                                     disciplinesTitles={department && department.titles || []}
                                     handleDelete={handleDiciplineTitleDelete}
                                     handleEdit={handleDisciplineTitleEdit}
                                 />
-                            </ExpansionPanelDetails>
-                        </ExpansionPanel>
+                            </Grid>
+                        </CardContent>
                     </Card>
+                    <Grid container direction="row" alignItems="center">
+                        <Typography className={classes.heading}>Сотрудники</Typography>
+                        <Grid item xs />
+                        <Tooltip title="Редактировать сотрудников подразделения">
+                            <span>
+                                <IconButton onClick={handleUserRolesAdd}>
+                                    <Add />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        <ExpansionPanel>
-                            <ExpansionPanelSummary expandIcon={<ExpandMore />}>
-                                <Grid container direction="row" alignItems="center">
-                                    <Typography className={classes.heading}>Сотрудники</Typography>
-                                    <Grid item xs />
-                                    <Tooltip title="Редактировать сотрудников подразделения">
-                                        <span>
-                                            <IconButton onClick={handleUserRolesAdd}>
-                                                <Add />
-                                            </IconButton>
-                                        </span>
-                                    </Tooltip>
-                                </Grid>
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails className={classes.overflowContainer}>
+                        <CardContent>
+                            <Grid className={clsx(classes.overflowContainer, classes.maxHeight300)}>
                                 <UsersRolesInDepartment
                                     departmentType={department && department.type || DepartmentType.TrainingDepartment}
                                     departmentRoles={department && department.roles || []}
@@ -352,56 +340,52 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                                     handleUserRolesDelete={handleUserRolesDelete}
                                     handleUserRolesEdit={handleUserRolesEdit}
                                 />
-                            </ExpansionPanelDetails>
-                        </ExpansionPanel>
+                            </Grid>
+                        </CardContent>
                     </Card>
+                    <Grid container direction="row" alignItems="center">
+                        <Typography className={classes.heading}>Направления подготовки</Typography>
+                        <Grid item xs />
+                        <Tooltip title="Добавить направление подготовки">
+                            <span>
+                                <IconButton onClick={handleStudyDirectionAdd}>
+                                    <Add />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        <ExpansionPanel>
-                            <ExpansionPanelSummary expandIcon={<ExpandMore />}>
-                                <Grid container direction="row" alignItems="center">
-                                    <Typography className={classes.heading}>Направления подготовки</Typography>
-                                    <Grid item xs />
-                                    <Tooltip title="Добавить направление подготовки">
-                                        <span>
-                                            <IconButton onClick={handleStudyDirectionAdd}>
-                                                <Add />
-                                            </IconButton>
-                                        </span>
-                                    </Tooltip>
-                                </Grid>
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails className={classes.overflowContainer}>
+                        <CardContent>
+                            <Grid className={clsx(classes.overflowContainer, classes.maxHeight300)}>
                                 <StudyDirections
                                     studyDirections={department && department.studyDirections || []}
                                     handleStudyDirectionDelete={handleStudyDirectionDelete}
                                     handleStudyDirectionEdit={handleStudyDirectionEdit}
                                 />
-                            </ExpansionPanelDetails>
-                        </ExpansionPanel>
+                            </Grid>
+                        </CardContent>
                     </Card>
+                    <Grid container direction="row" alignItems="center">
+                        <Typography className={classes.heading}>Учебные группы</Typography>
+                        <Grid item xs />
+                        <Tooltip title="Добавить группу">
+                            <span>
+                                <IconButton onClick={handleGroupAdd}>
+                                    <Add />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        <ExpansionPanel>
-                            <ExpansionPanelSummary expandIcon={<ExpandMore />}>
-                                <Grid container direction="row" alignItems="center">
-                                    <Typography className={classes.heading}>Учебные группы</Typography>
-                                    <Grid item xs />
-                                    <Tooltip title="Добавить группу">
-                                        <span>
-                                            <IconButton onClick={handleGroupAdd}>
-                                                <Add />
-                                            </IconButton>
-                                        </span>
-                                    </Tooltip>
-                                </Grid>
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails className={classes.overflowContainer}>
+                        <CardContent>
+                            <Grid className={clsx(classes.overflowContainer, classes.maxHeight300)}>
                                 <StudentGroups
                                     studentGroups={department && department.groups || []}
                                     handleDelete={handleGroupDelete}
                                     handleEdit={handleGroupEdit}
                                 />
-                            </ExpansionPanelDetails>
-                        </ExpansionPanel>
+                            </Grid>
+                        </CardContent>
                     </Card>
                 </Grid>
                 <Grid item xs={2} />

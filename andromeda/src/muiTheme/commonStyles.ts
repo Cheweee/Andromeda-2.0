@@ -33,6 +33,9 @@ export const commonStyles = (theme: Theme) => ({
   fixedHeight300: {
     height: 300
   },
+  maxHeight300: {
+    maxHeight: 300
+  },
   margin0: {
     margin: 0
   },
@@ -101,6 +104,10 @@ export const commonStyles = (theme: Theme) => ({
   margin1Y: {
     marginTop: ".5em",
     marginBottom: ".5em"
+  },
+  margin2Y: {
+    marginTop: "1em",
+    marginBottom: "1em"
   },
   margin2Top: {
     marginTop: "1em"

@@ -4,7 +4,7 @@ import { RouteComponentProps, withRouter } from "react-router";
 import * as Redux from "react-redux";
 
 import { WithStyles, withStyles } from "@material-ui/core/styles";
-import { Grid, Tooltip, IconButton, Card, CardHeader, LinearProgress, CardContent, ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Typography } from "@material-ui/core";
+import { Grid, Tooltip, IconButton, Card, CardHeader, LinearProgress, CardContent, ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Typography, Breadcrumbs, Link } from "@material-ui/core";
 import { ArrowBack, Close, Check, ExpandMore, Add } from "@material-ui/icons";
 
 import clsx from "clsx";
@@ -133,7 +133,7 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
     if (facultyState.facultyLoading === false) {
         department = facultyState.faculty;
     }
-    if(trainingDepartmentState.trainingDepartmentsLoading === false) {
+    if (trainingDepartmentState.trainingDepartmentsLoading === false) {
         facultyDepartments = trainingDepartmentState.trainingDepartments.filter(o => department && o.parentId === department.id);
     }
 
@@ -144,14 +144,11 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
             <Grid container direction="row">
                 <Grid item xs={2} />
                 <Grid item xs container direction="column">
-                    <Grid container direction="row">
-                        <Tooltip title="Вернуться назад">
-                            <span>
-                                <IconButton disabled={disabled} onClick={handleBackClick}>
-                                    <ArrowBack />
-                                </IconButton>
-                            </span>
-                        </Tooltip>
+                    <Grid container direction="row" alignItems="center">
+                        <Breadcrumbs>
+                            <Link color="inherit" onClick={handleBackClick}>Факультеты и институты</Link>
+                            <Typography color="textPrimary">{department && department.name || 'Новый факультет'}</Typography>
+                        </Breadcrumbs>
                         <Grid item xs />
                         <Tooltip title="Отменить">
                             <span>
@@ -169,7 +166,6 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
                         </Tooltip>
                     </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        <CardHeader title="Факультет" />
                         {facultyState.facultyLoading && <LinearProgress variant="query" />}
                         <CardContent>
                             <DepartmentDetails
@@ -180,37 +176,35 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
                             />
                         </CardContent>
                     </Card>
+                    <Grid container direction="row" alignItems="center" className={classes.margin1Y}>
+                        <Typography>Кафедры</Typography>
+                    </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        <ExpansionPanel>
-                            <ExpansionPanelSummary expandIcon={<ExpandMore />} >
-                                <Typography className={classes.heading}>Кафедры</Typography>
-                                {trainingDepartmentState.trainingDepartmentsLoading && <LinearProgress variant="query" />}
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails className={classes.overflowContainer}>
+                        {trainingDepartmentState.trainingDepartmentsLoading && <LinearProgress variant="query" />}
+                        <CardContent>
+                            <Grid className={clsx(classes.overflowContainer, classes.maxHeight300)}>
                                 <ChildDepartments
                                     childDepartments={facultyDepartments}
                                     departmentType={department && department.type || DepartmentType.Faculty}
                                 />
-                            </ExpansionPanelDetails>
-                        </ExpansionPanel>
+                            </Grid>
+                        </CardContent>
                     </Card>
+                    <Grid container direction="row" alignItems="center">
+                        <Typography>Сотрудники</Typography>
+                        <Grid item xs />
+                        <Tooltip title="Редактировать подразделения роли">
+                            <span>
+                                <IconButton onClick={handleUserRolesAdd}>
+                                    <Add />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        <ExpansionPanel>
-                            <ExpansionPanelSummary expandIcon={<ExpandMore />}>
-                                <Grid container direction="row" alignItems="center">
-                                    <Typography className={classes.heading}>Сотрудники</Typography>
-                                    <Grid item xs />
-                                    <Tooltip title="Редактировать подразделения роли">
-                                        <span>
-                                            <IconButton onClick={handleUserRolesAdd}>
-                                                <Add />
-                                            </IconButton>
-                                        </span>
-                                    </Tooltip>
-                                </Grid>
-                                {userState.usersLoading && <LinearProgress variant="query" />}
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails className={classes.overflowContainer}>
+                        {userState.usersLoading && <LinearProgress variant="query" />}
+                        <CardContent>
+                            <Grid className={clsx(classes.overflowContainer, classes.maxHeight300)}>
                                 <UsersRolesInDepartment
                                     departmentRoles={department && department.roles || []}
                                     departmentUsers={department && department.users || []}
@@ -218,8 +212,8 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
                                     handleUserRolesDelete={handleUserRolesDelete}
                                     handleUserRolesEdit={handleUserRolesEdit}
                                 />
-                            </ExpansionPanelDetails>
-                        </ExpansionPanel>
+                            </Grid>
+                        </CardContent>
                     </Card>
                 </Grid>
                 <Grid item xs={2} />

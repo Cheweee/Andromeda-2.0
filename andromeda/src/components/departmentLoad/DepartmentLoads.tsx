@@ -5,12 +5,12 @@ import { RouteComponentProps, withRouter } from "react-router";
 
 import { WithStyles, withStyles } from "@material-ui/core/styles";
 import { ArrowBack, Search, Add, InsertDriveFile, Edit, Delete } from "@material-ui/icons";
-import { Grid, Card, CardContent, Typography, IconButton, Tooltip, CircularProgress, CardActions } from "@material-ui/core";
+import { Grid, Card, CardContent, Typography, IconButton, Tooltip, CircularProgress, CardActions, Breadcrumbs, Link } from "@material-ui/core";
 
 import { SearchInput, ConfirmationDialog } from "../common";
 
 import { commonStyles } from "../../muiTheme";
-import { DepartmentLoad, DepartmentLoadImportOptions, AppState } from "../../models";
+import { DepartmentLoad, DepartmentLoadImportOptions, AppState, TrainingDepartment } from "../../models";
 
 import { departmentLoadActions } from "../../store/departmentLoadStore";
 
@@ -20,6 +20,7 @@ import { ImportLoadDetails } from "./ImportLoadDetails";
 import { useDebounce } from '../../hooks';
 import { paths } from "../../sharedConstants";
 import { mergeStyles } from "../../utilities";
+import { trainingDepartmentActions } from "../../store/trainingDepartmentStore";
 
 const styles = mergeStyles(commonStyles);
 
@@ -28,7 +29,10 @@ interface Props extends RouteComponentProps, WithStyles<typeof styles> {
 
 export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Props) {
     const dispatch = Redux.useDispatch();
-    const { departmentLoadState } = Redux.useSelector((state: AppState) => ({ departmentLoadState: state.departmentLoadState }));
+    const { departmentState, departmentLoadState } = Redux.useSelector((state: AppState) => ({
+        departmentState: state.trainingDepartmentState,
+        departmentLoadState: state.departmentLoadState
+    }));
 
     const [search, setSearch] = React.useState<string>();
     const [id, setId] = React.useState<number>(null);
@@ -38,14 +42,6 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
 
     React.useEffect(() => { getDepartmentLoads(); }, []);
     React.useEffect(() => { getDepartmentLoads(debouncedSearch); }, [debouncedSearch]);
-    React.useEffect(() => { 
-        if(departmentLoadState.modelLoading === true) return;
-
-        const { history, match } = props;
-        const tempId = match.params && match.params[paths.idParameterName];
-        const departmentId = parseInt(tempId, null);
-        history.push(paths.getDepartmentloadPath(`${departmentId}`, `${departmentLoadState.model.id}`));
-    }, [departmentLoadState.modelLoading]);
 
     //#region Department loads state
 
@@ -53,6 +49,7 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
         const { match } = props;
         const tempId = match.params && match.params[paths.idParameterName];
         const departmentId = parseInt(tempId, null);
+        dispatch(trainingDepartmentActions.getTrainingDepartment(departmentId));
         dispatch(departmentLoadActions.getModels({ departmentId: departmentId, search: search }));
     }
 
@@ -99,9 +96,14 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
     //#endregion
 
 
-    function handleBackClick() {
+    function handleToDepartmentsClick() {
         const { history } = props;
-        history.push(paths.getTrainingDepartmentPath(props.match.params[paths.idParameterName]));
+        history.push(paths.trainingDepartmentsPath);
+    }
+
+    function handleToDepartmentClick() {
+        const { history } = props;
+        history.push(paths.getTrainingDepartmentPath(props.match.params[paths.idParameterName]))
     }
 
     const { classes } = props;
@@ -111,17 +113,19 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
         departmentLoads = departmentLoadState.models;
     }
 
+    let department: TrainingDepartment = null;
+    if (departmentState.trainingDepartmentLoading === false) {
+        department = departmentState.trainingDepartment;
+    }
+
     return (
         <Grid container direction="column">
             <Grid container direction="row" alignItems="center">
-                <Tooltip title="Вернуться назад">
-                    <span>
-                        <IconButton disabled={departmentLoadState.modelsLoading} onClick={handleBackClick}>
-                            <ArrowBack />
-                        </IconButton>
-                    </span>
-                </Tooltip>
-                <Typography>Нагрузка кафедры</Typography>
+                <Breadcrumbs>
+                    <Link color="inherit" onClick={handleToDepartmentsClick}>Кафедры</Link>
+                    <Link color="inherit" onClick={handleToDepartmentClick}>{department && department.name || ''}</Link>
+                    <Typography color="textPrimary">Нагрузка кафедры</Typography>
+                </Breadcrumbs>
                 <Grid item xs />
                 <Search className={classes.searchIcon} />
                 <SearchInput

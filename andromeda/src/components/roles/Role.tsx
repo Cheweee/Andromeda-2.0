@@ -147,7 +147,7 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
                         <Card className={clsx(classes.margin1Y, classes.w100)}>
                             {departmentState.loading && <LinearProgress variant="query" />}
                             <CardContent>
-                                <Grid className={clsx(classes.overflowContainer, classes.fixedHeight300)}>
+                                <Grid className={clsx(classes.overflowContainer, classes.maxHeight300)}>
                                     <RoleDepartments departments={role && role.roleDepartments || []} />
                                 </Grid>
                             </CardContent>

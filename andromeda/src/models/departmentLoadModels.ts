@@ -18,8 +18,10 @@ export interface DepartmentLoad {
 export namespace DepartmentLoad {
     const currentYear = new Date().getFullYear();
     const nextYear = currentYear + 1;
+
+    export const currentStudyYear = currentYear + ' - ' + nextYear;
     export const initial: DepartmentLoad = {
-        studyYear: currentYear + ' - ' + nextYear,
+        studyYear: currentStudyYear,
         total: 0
     }
 }

@@ -94,11 +94,25 @@ namespace Andromeda.API
 
             services.AddScoped(provider =>
             {
+                var daoFactory = provider.GetService<IDaoFactory>();
+                return new UserGraduateDegreeService(daoFactory.UserGraduateDegreeDao);
+            });
+
+            services.AddScoped(provider =>
+            {
                 var logger = provider.GetService<ILogger<UserService>>();
                 var daoFactory = provider.GetService<IDaoFactory>();
                 var pinnedDisciplineService = provider.GetService<PinnedDisciplineService>();
+                var userGraduateDegreeService = provider.GetService<UserGraduateDegreeService>();
                 var httpAccessor = provider.GetService<IHttpContextAccessor>();
-                return new UserService(daoFactory.UserDao, pinnedDisciplineService, appsettings, httpAccessor, logger);
+                return new UserService(
+                    daoFactory.UserDao,
+                    pinnedDisciplineService,
+                    userGraduateDegreeService,
+                    appsettings,
+                    httpAccessor,
+                    logger
+                );
             });
 
             services.AddScoped(provider =>

@@ -18,6 +18,8 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
 
         public IUserDao UserDao => new UserDao(_settings, _logger);
 
+        public IUserGraduateDegreeDao UserGraduateDegreeDao => new UserGraduateDegreeDao(_settings, _logger);
+
         public IUserLoadDao UserLoadDao => new UserLoadDao(_settings, _logger);
 
         public IDepartmentDao DepartmentDao => new DepartmentDao(_settings, _logger);
@@ -25,7 +27,7 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
         public IStudentGroupDao StudentGroupDao => new StudentGroupDao(_settings, _logger);
 
         public IStudyLoadDao StudyLoadDao => new StudyLoadDao(_settings, _logger);
-        
+
         public IRoleDao RoleDao => new RoleDao(_settings, _logger);
 
         public IRoleInDepartmentDao RoleInDepartmentDao => new RoleInDepartmentDao(_settings, _logger);

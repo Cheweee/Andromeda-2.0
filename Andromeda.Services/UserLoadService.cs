@@ -13,10 +13,13 @@ namespace Andromeda.Services
 
         private readonly UserService _userService;
 
-        public UserLoadService(IUserLoadDao dao, UserService userService)
+        public UserLoadService(
+                IUserLoadDao dao,
+                UserService userService
+            )
         {
             _dao = dao ?? throw new ArgumentNullException(nameof(dao));
-            _userService = userService ?? throw new ArgumentNullException(nameof(dao));
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
         public async Task<IEnumerable<UserLoad>> Get(UserLoadGetOptions options)

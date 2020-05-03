@@ -19,6 +19,7 @@ namespace Andromeda.Services
     {
         private readonly IUserDao _dao;
         private readonly PinnedDisciplineService _pinnedDisciplineService;
+        private readonly UserGraduateDegreeService _userGraduateDegreeService;
         private readonly Appsettings _settings;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger _logger;
@@ -26,6 +27,7 @@ namespace Andromeda.Services
         public UserService(
             IUserDao dao,
             PinnedDisciplineService pinnedDisciplineService,
+            UserGraduateDegreeService userGraduateDegreeService,
             Appsettings settings,
             IHttpContextAccessor httpContextAccessor,
             ILogger logger
@@ -33,6 +35,8 @@ namespace Andromeda.Services
         {
             _dao = dao ?? throw new ArgumentNullException(nameof(dao));
             _pinnedDisciplineService = pinnedDisciplineService ?? throw new ArgumentException(nameof(pinnedDisciplineService));
+            _userGraduateDegreeService = userGraduateDegreeService ?? throw new ArgumentNullException(nameof(userGraduateDegreeService));
+
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -165,6 +169,23 @@ namespace Andromeda.Services
             await _pinnedDisciplineService.Delete(toDelete);
             await _pinnedDisciplineService.Update(toUpdate);
             await _pinnedDisciplineService.Create(toCreate);
+        }
+
+        private async Task UpdateUserGraduateDegrees(int userId, List<UserGraduateDegree> models)
+        {
+            var old = await _userGraduateDegreeService.Get(new UserGraduateDegreeGetOptions
+            {
+                UserId = userId
+            });
+            var toDelete = old.Select(o => o.Id).Where(o => !models.Select(du => du.Id).Contains(o)).ToList();
+            var toUpdate = old.Where(o => models.Select(du => du.Id).Contains(o.Id)).ToList();
+            var toCreate = models.Where(o => !old.Select(du => du.Id).Contains(o.Id)).ToList();
+
+            toCreate.ForEach(o => o.UserId = userId);
+
+            await _userGraduateDegreeService.Delete(toDelete);
+            await _userGraduateDegreeService.Update(toUpdate);
+            await _userGraduateDegreeService.Create(toCreate);
         }
     }
 }

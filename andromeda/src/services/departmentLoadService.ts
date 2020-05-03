@@ -61,7 +61,7 @@ class DepartmentLoadService {
             url += `${conditionIndex++ === 0 ? '?' : '&'}ids=${options.ids}`;
         if (options.departmentId)
             url += `${conditionIndex++ === 0 ? '?' : '&'}departmentId=${options.departmentId}`;
-        if(options.search)
+        if (options.search)
             url += `${conditionIndex++ === 0 ? '?' : '&'}search=${options.search}`;
 
         return fetch(url, {
@@ -98,8 +98,15 @@ class DepartmentLoadService {
     }
 
     private validateSemesterNumber(value: number): string {
-        const isValid = value && value > 0;
-        return isValid ? '' : 'Номер семестра должен быть больше нуля'
+        const moreThanZero = value && value > 0;
+        if (!moreThanZero)
+            return 'Номер семестра должен быть больше нуля'
+
+        const lessMaxValue = value && value <= 10;
+        if (!lessMaxValue)
+            return 'Номер семестра должен быть меньше 10';
+
+        return '';
     }
 
     public validateGroupDisciplineLoad(value: GroupDisciplineLoad): GroupDisciplineLoadValidation {

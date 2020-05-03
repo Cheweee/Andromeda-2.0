@@ -86,14 +86,16 @@ namespace Andromeda.Services
             var old = await _studyLoadService.Get(new StudyLoadGetOptions { GroupDisciplineLoadId = groupDisciplineId });
 
             var toDelete = old.Select(o => o.Id).Where(o => !models.Select(du => du.Id).Contains(o)).ToList();
-            var toUpdate = old.Where(o => models.Select(du => du.Id).Contains(o.Id)).ToList();
+            var toUpdate = models.Where(o => old.Select(du => du.Id).Contains(o.Id)).ToList();
             var toCreate = models.Where(o => !old.Select(du => du.Id).Contains(o.Id)).ToList();
 
             toCreate.ForEach(o => o.GroupDisciplineLoadId = groupDisciplineId);
 
             await _studyLoadService.Delete(toDelete);
-            await _studyLoadService.Update(toUpdate);
-            await _studyLoadService.Create(toCreate);
+            foreach (var entity in toUpdate)
+            await _studyLoadService.Update(entity);
+            foreach (var entity in toCreate)
+            await _studyLoadService.Create(entity);
         }
     }
 }

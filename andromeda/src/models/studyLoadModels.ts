@@ -12,27 +12,33 @@ export interface StudyLoad {
     // WARNING: Only UI Field
     groupDisciplineLoadIndex?: number;
 
-    userLoad: UserLoad[];
+    usersLoad: UserLoad[];
 }
 
 export namespace StudyLoad {
     export const initial: StudyLoad = {
         projectType: null,
-        shownValue: '',
-        userLoad: [],
-        value: 0
+        shownValue: '1',
+        usersLoad: [],
+        value: 1
     }
 
     export function getComputedValue(shownValue: string): number {
+        if (!shownValue) return 1;
         const regex = /^(\d)+/g;
-        const tempValue = shownValue.match(regex)[0];
-        const value = parseInt(tempValue);
+        const matches = shownValue.match(regex);
+        if (matches) {
+            const tempValue = matches[0];
+            const value = parseInt(tempValue);
 
-        return value;
+            return value;
+        }
+
+        return 1;
     }
 
     export function getGroupsInStream(shownValue: string): number {
-        const regex = /\/\d/g
+        const regex = /\/\d*/g
         let matches = shownValue.match(regex);
         if (matches) {
             let tempValue = matches[0].replace('/', '');
@@ -45,22 +51,29 @@ export namespace StudyLoad {
     }
 
     export function updateGroupsInStream(shownValue: string, groupsInStream: number): string {
-        const regex = /\/\d/g;
+        const regex = /\/\d*/g;
         if (!groupsInStream)
             groupsInStream = 1;
-        let matches = shownValue.match(regex);
-        const searchValue = matches[0];
-        return shownValue.replace(searchValue, `/${groupsInStream}`);
+        const matches = shownValue.match(regex);
+        if (matches) {
+            const searchValue = matches[0];
+            return shownValue.replace(searchValue, `/${groupsInStream}`);
+        }
+
+        return `${shownValue}/${groupsInStream}`;
     }
 
     export function updateComputedValue(shownValue: string, value: number): string {
-        const regex = /^(\d)+/g;
-        if(!value)
+        const regex = /^.*(?=\/)/g;
+        if (!value)
             value = 1;
 
-        let matches = shownValue.match(regex);
-        const searchValue = matches[0];
-        return shownValue.replace(searchValue, `${value}`);
+        const matches = shownValue.match(regex);
+        if (matches) {
+            const searchValue = matches[0];
+            return shownValue.replace(searchValue, `${value}`);
+        }
+        return `${value}`;
     }
 
     export function computeValue(shownValue: string): number {
@@ -75,7 +88,7 @@ export interface StudyLoadGetOptions {
 }
 
 export interface UserLoad {
-    userLoadId?: number;
+    id?: number;
     userId: number;
     studyLoadId: number;
     studentsCount: number;

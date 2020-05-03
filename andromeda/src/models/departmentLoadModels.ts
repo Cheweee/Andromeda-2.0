@@ -22,7 +22,8 @@ export namespace DepartmentLoad {
     export const currentStudyYear = currentYear + ' - ' + nextYear;
     export const initial: DepartmentLoad = {
         studyYear: currentStudyYear,
-        total: 0
+        total: 0,
+        groupDisciplineLoad: []
     }
 }
 

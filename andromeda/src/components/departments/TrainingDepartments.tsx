@@ -9,7 +9,7 @@ import { Column } from "../../models/commonModels";
 import { TrainingDepartment, AppState, DepartmentType } from "../../models";
 import { paths } from "../../sharedConstants";
 import { Edit, Delete, AccountBalance, Search, Add, BarChart } from "@material-ui/icons";
-import { SearchInput, TableComponent, ConfirmationDialog } from "../common";
+import { Input, TableComponent, ConfirmationDialog } from "../common";
 import { useDebounce } from "../../hooks";
 import { trainingDepartmentActions } from "../../store/trainingDepartmentStore";
 
@@ -106,9 +106,9 @@ export const TrainingDepartments = withStyles(styles)(withRouter(function (props
                 <Typography>Кафедры</Typography>
                 <Grid item xs />
                 <Search className={classes.searchIcon} />
-                <SearchInput
-                    search={search}
-                    onSearchChange={handleSearchChange}
+                <Input
+                    value={search}
+                    onValueChange={handleSearchChange}
                 />
                 <IconButton onClick={handleAdd}>
                     <Add />

@@ -87,7 +87,7 @@ export const GroupDisciplineLoadDetailsRow = withStyles(styles)(function (props:
                 <Grid item xs={3}>
                     <Typography>{`${groupDisciplineLoad.studentGroup.name} (${groupDisciplineLoad.studentGroup.studentsCount} ст.)`}</Typography>
                 </Grid>
-                <Grid item xs="auto">
+                <Grid item xs={2}>
                     <Typography>{`Всего: ${groupDisciplineLoad.amount.toFixed(2)} ч.`}</Typography>
                 </Grid>
                 <Grid item xs="auto">

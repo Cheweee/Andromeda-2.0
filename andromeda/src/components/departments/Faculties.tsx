@@ -9,7 +9,7 @@ import { Column } from "../../models/commonModels";
 import { Faculty, DepartmentType, AppState } from "../../models";
 import { paths } from "../../sharedConstants";
 import { Edit, Delete, Search, Add, Apartment } from "@material-ui/icons";
-import { SearchInput, TableComponent, ConfirmationDialog } from "../common";
+import { Input, TableComponent, ConfirmationDialog } from "../common";
 import { useDebounce } from "../../hooks";
 import { facultyActions } from "../../store/facultyStore";
 
@@ -93,9 +93,9 @@ export const Faculties = withStyles(styles)(withRouter(function (props: Props) {
                 <Typography>Факультеты и институты</Typography>
                 <Grid item xs />
                 <Search className={classes.searchIcon} />
-                <SearchInput
-                    search={search}
-                    onSearchChange={handleSearchChange}
+                <Input
+                    value={search}
+                    onValueChange={handleSearchChange}
                 />
                 <IconButton onClick={handleAdd}>
                     <Add />

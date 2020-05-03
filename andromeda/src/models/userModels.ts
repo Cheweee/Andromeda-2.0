@@ -54,6 +54,7 @@ export interface UserGetOptions extends GetOptions {
     username?: string;
     password?: string;
     departmentId?: number;
+    roleId?: number;
 }
 
 export interface UserAuthenticateOptions {

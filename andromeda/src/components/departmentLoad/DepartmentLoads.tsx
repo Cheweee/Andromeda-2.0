@@ -7,7 +7,7 @@ import { WithStyles, withStyles } from "@material-ui/core/styles";
 import { ArrowBack, Search, Add, InsertDriveFile, Edit, Delete } from "@material-ui/icons";
 import { Grid, Card, CardContent, Typography, IconButton, Tooltip, CircularProgress, CardActions, Breadcrumbs, Link } from "@material-ui/core";
 
-import { SearchInput, ConfirmationDialog } from "../common";
+import { Input, ConfirmationDialog } from "../common";
 
 import { commonStyles } from "../../muiTheme";
 import { DepartmentLoad, DepartmentLoadImportOptions, AppState, TrainingDepartment } from "../../models";
@@ -55,11 +55,13 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
 
     function handleAdd() {
         const { history } = props;
+        dispatch(departmentLoadActions.clearEditionState());
         history.push(paths.getDepartmentloadPath(props.match.params[paths.idParameterName], 'create'))
     }
 
     function handleEdit(data: DepartmentLoad) {
         const { history } = props;
+        dispatch(departmentLoadActions.clearEditionState());
         history.push(paths.getDepartmentloadPath(props.match.params[paths.idParameterName], `${data.id}`));
     }
 
@@ -128,9 +130,9 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
                 </Breadcrumbs>
                 <Grid item xs />
                 <Search className={classes.searchIcon} />
-                <SearchInput
-                    search={search}
-                    onSearchChange={handleSearchChange}
+                <Input
+                    value={search}
+                    onValueChange={handleSearchChange}
                 />
                 <Tooltip title={"Создать учебную нагрузку"}>
                     <span>

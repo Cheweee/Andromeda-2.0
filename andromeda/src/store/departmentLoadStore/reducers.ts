@@ -1,4 +1,4 @@
-import { DepartmentLoadState, ModelsState, ModelState, DeleteState } from "./state";
+import { DepartmentLoadState, ModelsState, ModelState, DeleteState, ValidateGroupDisciplineLoadState, ValidateUserDisciplineLoadState } from "./state";
 import { DepartmentLoadActions, ActionType } from "./actions";
 import { StudyLoad, DepartmentLoad, UserDisciplineLoad } from "../../models";
 
@@ -119,23 +119,35 @@ export function departmentLoadReducer(prevState: DepartmentLoadState = initialSt
 
             const groupDisciplineLoad = prevState.model.groupDisciplineLoad;
 
-            groupDisciplineLoad[action.index] = action.groupDisciplineLoad;
+            if (action.index >= 0)
+                groupDisciplineLoad[action.index] = action.groupDisciplineLoad;
+            else
+                groupDisciplineLoad.push(action.groupDisciplineLoad);
 
-            const updated: DepartmentLoad = { ...prevState.model, groupDisciplineLoad };
+            const total = groupDisciplineLoad.map(o => o.amount).reduce((prev, curr) => prev + curr);
+
+            const updated: DepartmentLoad = { ...prevState.model, groupDisciplineLoad, total };
 
             const state: ModelState = { modelLoading: false, model: updated };
             return { ...prevState, ...state };
         }
-
         case ActionType.deleteGroupDisciplineLoad: {
             if (prevState.modelLoading === true) return;
 
             const model = prevState.model;
+            const groupDisciplineLoad = model.groupDisciplineLoad;
 
-            const groupDisciplineLoad = model.groupDisciplineLoad.splice(action.index, 1);
-            const updatedModel = { ...model, groupDisciplineLoad };
+            groupDisciplineLoad.splice(action.index, 1);
 
-            const state: ModelState = { modelLoading: false, model: updatedModel };
+            const total = groupDisciplineLoad.map(o => o.amount).reduce((prev, curr) => prev + curr);
+
+            const updated: DepartmentLoad = { ...prevState.model, groupDisciplineLoad, total };
+
+            const state: ModelState = { modelLoading: false, model: updated };
+            return { ...prevState, ...state };
+        }
+        case ActionType.validateGroupDisciplineLoad: {
+            const state: ValidateGroupDisciplineLoadState = { groupDisciplineLoadFormErrors: action.formErrors };
             return { ...prevState, ...state };
         }
 
@@ -148,10 +160,10 @@ export function departmentLoadReducer(prevState: DepartmentLoadState = initialSt
             const selectedStudyLoad = groupDisciplineLoad.studyLoad.filter(o => action.userDisciplineLoad.studyLoad.some(vsl => vsl.projectType === o.projectType));
             const studyLoadInStream = selectedStudyLoad.filter(o => StudyLoad.getGroupsInStream(o.shownValue) > 1);
             for (let studyLoad of selectedStudyLoad) {
-                if (!studyLoad.userLoad) {
-                    studyLoad.userLoad = [];
+                if (!studyLoad.usersLoad) {
+                    studyLoad.usersLoad = [];
                 }
-                studyLoad.userLoad.push({
+                studyLoad.usersLoad.push({
                     studentsCount: -1,
                     studyLoadId: studyLoad.id,
                     user: action.userDisciplineLoad.user,
@@ -170,10 +182,10 @@ export function departmentLoadReducer(prevState: DepartmentLoadState = initialSt
                 .filter(o => studyLoadInStream.some(sls => sls.projectType === o.projectType));
 
             for (let studyLoad of additionalStudyLoad) {
-                if (!studyLoad.userLoad) {
-                    studyLoad.userLoad = [];
+                if (!studyLoad.usersLoad) {
+                    studyLoad.usersLoad = [];
                 }
-                studyLoad.userLoad.push({
+                studyLoad.usersLoad.push({
                     studentsCount: -1,
                     studyLoadId: studyLoad.id,
                     user: action.userDisciplineLoad.user,
@@ -192,19 +204,23 @@ export function departmentLoadReducer(prevState: DepartmentLoadState = initialSt
 
             const groupsDisciplinesLoad = prevState.model.groupDisciplineLoad;
 
-            const studyLoads = groupsDisciplinesLoad.filter(o => o.studyLoad.some(sl => sl.userLoad))
+            const studyLoads = groupsDisciplinesLoad.filter(o => o.studyLoad.some(sl => sl.usersLoad))
                 .map(o => o.studyLoad).reduce((prev, curr) => prev.concat(curr), []);
 
-            for(let studyLoad of studyLoads) {
-                if(!studyLoad.userLoad || !studyLoad.userLoad.some(o => o.userId === action.userId)) continue;
+            for (let studyLoad of studyLoads) {
+                if (!studyLoad.usersLoad || !studyLoad.usersLoad.some(o => o.userId === action.userId)) continue;
 
-                studyLoad.userLoad = studyLoad.userLoad.filter(o => o.userId !== action.userId);
+                studyLoad.usersLoad = studyLoad.usersLoad.filter(o => o.userId !== action.userId);
             }
 
             const model: DepartmentLoad = { ...prevState.model, groupDisciplineLoad: groupsDisciplinesLoad };
 
             const state: ModelState = { modelLoading: false, model: model };
 
+            return { ...prevState, ...state };
+        }
+        case ActionType.validateUserDisciplineLoad: {
+            const state: ValidateUserDisciplineLoadState = { userDisciplineLoadFormErrors: action.formErrors };
             return { ...prevState, ...state };
         }
 

@@ -7,7 +7,7 @@ import { WithStyles, withStyles } from '@material-ui/core/styles';
 import { Search, Edit, Delete, Add, SupervisorAccount } from '@material-ui/icons';
 import { Paper, Grid, Typography, IconButton } from '@material-ui/core';
 
-import { TableComponent, ConfirmationDialog, SearchInput } from '../common';
+import { TableComponent, ConfirmationDialog, Input } from '../common';
 
 import { commonStyles } from '../../muiTheme';
 import { User, Column, AppState } from '../../models';
@@ -104,9 +104,9 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
                 <Typography>Пользователи</Typography>
                 <Grid item xs />
                 <Search className={classes.searchIcon} />
-                <SearchInput
-                    search={search}
-                    onSearchChange={handleSearchChange}
+                <Input
+                    value={search}
+                    onValueChange={handleSearchChange}
                 />
                 <IconButton onClick={handleAdd}>
                     <Add />

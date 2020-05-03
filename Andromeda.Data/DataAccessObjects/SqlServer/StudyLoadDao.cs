@@ -15,12 +15,12 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
         {
         }
 
-        public async Task Create(List<StudyLoad> model)
+        public async Task Create(StudyLoad model)
         {
             try
             {
                 _logger.LogInformation("Trying to execute sql create study load query");
-                await ExecuteAsync(@"
+                model.Id = await QueryFirstAsync<int>(@"
                         insert into StudyLoad (
                             GroupDisciplineLoadId,
                             ShownValue,
@@ -108,13 +108,13 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
             }
         }
 
-        public async Task Update(List<StudyLoad> model)
+        public async Task Update(StudyLoad model)
         {
             try
             {
                 _logger.LogInformation("Trying to execute sql update study load query");
                 await ExecuteAsync(@"
-                    update set
+                    update StudyLoad set
                         GroupDisciplineLoadId = @GroupDisciplineLoadId,
                         ShownValue = @ShownValue,
                         Value = @Value,

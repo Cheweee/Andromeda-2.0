@@ -18,6 +18,8 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
 
         public IUserDao UserDao => new UserDao(_settings, _logger);
 
+        public IUserLoadDao UserLoadDao => new UserLoadDao(_settings, _logger);
+
         public IDepartmentDao DepartmentDao => new DepartmentDao(_settings, _logger);
 
         public IStudentGroupDao StudentGroupDao => new StudentGroupDao(_settings, _logger);

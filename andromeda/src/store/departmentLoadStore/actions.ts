@@ -1,5 +1,5 @@
 import { Action } from "redux";
-import { DepartmentLoadGetOptions, DepartmentLoad, ApplicationError, AppThunkAction, AppThunkDispatch, SnackbarVariant, AppState, DepartmentLoadImportOptions, GroupDisciplineLoad, UserDisciplineLoad } from "../../models";
+import { DepartmentLoadGetOptions, DepartmentLoad, ApplicationError, AppThunkAction, AppThunkDispatch, SnackbarVariant, AppState, DepartmentLoadImportOptions, GroupDisciplineLoad, UserDisciplineLoad, GroupDisciplineLoadValidation, UserDisciplineLoadValidation } from "../../models";
 import { departmentLoadService } from "../../services/departmentLoadService";
 import { snackbarActions } from "../snackbarStore";
 
@@ -35,10 +35,14 @@ export enum ActionType {
     generateFailure = 'GENERATE_DEPARTMENT_LOAD_FAILURE',
 
     updateDetails = 'UPDATE_DEPARTMENT_LOAD_DETAILS',
+
     updateGroupDisciplineLoad = 'UPDATE_GROUP_DISCIPLINE_LOAD',
     deleteGroupDisciplineLoad = 'DELETE_GROUP_DISCIPLINE_LOAD',
+    validateGroupDisciplineLoad = 'VALIDATE_GROUP_DISCIPLINE_LOAD',
+
     updateUserDiscplineLoad = 'UPDATE_USER_DISCIPLINE_LOAD',
-    deleteUserDisciplineLoad = 'DELETE_USER_DISCIPLINE_LOAD'
+    deleteUserDisciplineLoad = 'DELETE_USER_DISCIPLINE_LOAD',
+    validateUserDisciplineLoad = 'VALIDATE_USER_DISCIPLINE_LOAD'
 }
 //#endregion
 
@@ -110,12 +114,6 @@ export interface ClearEditionState extends Action<ActionType> {
     type: ActionType.clearEditionState;
 }
 
-// TODO: Реализовать валидацию нагрузки кафедры
-// export interface ValidateModel extends Action<ActionType> {
-//     type: ActionType.validate;
-//     formErrors: DepartmentLoadValidation;
-// }
-
 //#region Import actions
 export interface ImportRequest extends Action<ActionType> {
     type: ActionType.importRequest;
@@ -158,6 +156,10 @@ export interface DeleteGroupDisciplineLoad extends Action<ActionType> {
     type: ActionType.deleteGroupDisciplineLoad;
     index: number;
 }
+export interface ValidateGroupDisciplineLoad extends Action<ActionType> {
+    type: ActionType.validateGroupDisciplineLoad;
+    formErrors: GroupDisciplineLoadValidation;
+}
 
 export interface UpdateUserDisciplineLoad extends Action<ActionType> {
     type: ActionType.updateUserDiscplineLoad;
@@ -168,6 +170,10 @@ export interface DeleteUserDisciplineLoad extends Action<ActionType> {
     type: ActionType.deleteUserDisciplineLoad;
     userId: number;
 }
+export interface ValidateUserDisciplineLoad extends Action<ActionType> {
+    type: ActionType.validateUserDisciplineLoad;
+    formErrors: UserDisciplineLoadValidation;
+}
 
 export type GetModels = GetModelsRequest | GetModelsSuccess | GetModelsFailure;
 export type GetModel = GetModelRequest | GetModelSuccess | GetModelFailure;
@@ -176,9 +182,22 @@ export type Delete = DeleteRequest | DeleteSuccess | DeleteFailure;
 
 export type Import = ImportRequest | ImportSuccess | ImportFailure;
 export type Generate = GenerateRequest | GenerateSuccess | GenerateFailure;
-export type Update = UpdateDetails | UpdateGroupDisciplineLoad | DeleteGroupDisciplineLoad | UpdateUserDisciplineLoad | DeleteUserDisciplineLoad;
+export type Update = UpdateDetails
+    | UpdateGroupDisciplineLoad
+    | DeleteGroupDisciplineLoad
+    | ValidateGroupDisciplineLoad
+    | UpdateUserDisciplineLoad
+    | DeleteUserDisciplineLoad
+    | ValidateUserDisciplineLoad;
 
-export type DepartmentLoadActions = GetModels | GetModel | Save | Delete | ClearEditionState | Import | Generate | Update;
+export type DepartmentLoadActions = GetModels
+    | GetModel
+    | Save
+    | Delete
+    | ClearEditionState
+    | Import
+    | Generate
+    | Update;
 //#endregion
 
 function getModels(options: DepartmentLoadGetOptions): AppThunkAction<Promise<GetModelsSuccess | GetModelsFailure>> {
@@ -202,12 +221,13 @@ function getModels(options: DepartmentLoadGetOptions): AppThunkAction<Promise<Ge
 }
 function getModel(id?: number): AppThunkAction<Promise<GetModelSuccess | GetModelFailure>> {
     return async (dispatch: AppThunkDispatch, getState: () => AppState) => {
+        const state = getState();
+
         dispatch(request(id));
 
-        if (!id && id === NaN)
-            return dispatch(success(DepartmentLoad.initial));
+        if (!id || id === NaN)
+            return dispatch(success({ ...DepartmentLoad.initial }));
 
-        const state = getState();
         let models: DepartmentLoad[] = [];
 
         try {
@@ -221,7 +241,6 @@ function getModel(id?: number): AppThunkAction<Promise<GetModelSuccess | GetMode
             }
 
             let model = models.find(o => o.id === id);
-            //dispatch(validateFaculty(model));
             return dispatch(success(model));
         }
         catch (error) {
@@ -333,11 +352,19 @@ function updateGroupDisciplineLoad(index: number, groupDisciplineLoad: GroupDisc
 function deleteGroupDisciplineLoad(index: number): DeleteGroupDisciplineLoad {
     return { type: ActionType.deleteGroupDisciplineLoad, index: index };
 }
+function validateGroupDisciplineLoad(load: GroupDisciplineLoad): ValidateGroupDisciplineLoad {
+    const result = departmentLoadService.validateGroupDisciplineLoad(load);
+    return { type: ActionType.validateGroupDisciplineLoad, formErrors: result }
+}
 function updateUserDisciplineLoad(groupDisciplineLoadIndex: number, userDisciplineLoad: UserDisciplineLoad): UpdateUserDisciplineLoad {
     return { type: ActionType.updateUserDiscplineLoad, groupDisciplineLoadIndex: groupDisciplineLoadIndex, userDisciplineLoad: userDisciplineLoad };
 }
 function deleteUserDisciplineLoad(userId: number): DeleteUserDisciplineLoad {
     return { type: ActionType.deleteUserDisciplineLoad, userId: userId };
+}
+function validateUserDisciplineLoad(load: UserDisciplineLoad): ValidateUserDisciplineLoad {
+    const result = departmentLoadService.validateUserDisciplineLoad(load);
+    return { type: ActionType.validateUserDisciplineLoad, formErrors: result };
 }
 
 export default {
@@ -351,6 +378,8 @@ export default {
     updateDetails,
     updateGroupDisciplineLoad,
     deleteGroupDisciplineLoad,
+    validateGroupDisciplineLoad,
     updateUserDisciplineLoad,
-    deleteUserDisciplineLoad
+    deleteUserDisciplineLoad,
+    validateUserDisciplineLoad
 }

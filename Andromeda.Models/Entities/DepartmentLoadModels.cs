@@ -51,6 +51,8 @@ namespace Andromeda.Models.Entities
         public string ShownValue { get; set; }
         public double Value { get; set; }
         public ProjectType ProjectType { get; set; }
+
+        public List<UserLoad> UsersLoad { get; set; }
     }
 
     public class StudyLoadGetOptions
@@ -59,6 +61,25 @@ namespace Andromeda.Models.Entities
         public IReadOnlyList<int> GroupDisciplineLoadsIds { get; set; }
         public bool? OnlyNotDistibuted { get; set; }
         public bool? OnlyDistributed { get; set; }
+    }
+
+    public class UserLoad
+    {
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public int StudyLoadId { get; set; }
+        public int StudentsCount { get; set; }
+
+        public User User { get; set; }
+        public StudyLoad StudyLoad { get; set; }
+    }
+
+    public class UserLoadGetOptions
+    {
+        public int? StudyLoadId { get; set; }
+        public IReadOnlyList<int> StudyLoadsIds { get; set; }
+        public int? UserId { get; set; }
+        public IReadOnlyList<int> UsersIds { get; set; }
     }
 
     public class DepartmentLoadImportOptions

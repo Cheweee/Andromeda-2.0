@@ -9,7 +9,7 @@ import { Column } from "../../models/commonModels";
 import { Role, AppState } from "../../models";
 import { paths } from "../../sharedConstants";
 import { Edit, Delete, Search, Add, AssignmentInd } from "@material-ui/icons";
-import { SearchInput, TableComponent, ConfirmationDialog } from "../common";
+import { Input, TableComponent, ConfirmationDialog } from "../common";
 import { useDebounce } from "../../hooks";
 import { roleActions } from "../../store/roleStore";
 
@@ -92,9 +92,9 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
                 <Typography>Роли и должности</Typography>
                 <Grid item xs />
                 <Search className={classes.searchIcon} />
-                <SearchInput
-                    search={search}
-                    onSearchChange={handleSearchChange}
+                <Input
+                    value={search}
+                    onValueChange={handleSearchChange}
                 />
                 <IconButton onClick={handleAdd}>
                     <Add />

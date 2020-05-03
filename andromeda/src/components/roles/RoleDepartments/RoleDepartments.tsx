@@ -1,9 +1,12 @@
 import * as React from "react";
+
+import { WithStyles, withStyles } from "@material-ui/core/styles";
+import { ListItem, ListItemText, ListSubheader, List, Grid, Typography } from "@material-ui/core";
+
 import { mergeStyles } from "../../../utilities";
 import { commonStyles } from "../../../muiTheme";
-import { WithStyles, withStyles } from "@material-ui/core/styles";
-import { Department, DepartmentType, RoleInDepartment } from "../../../models";
-import { ListItem, ListItemText, ListSubheader, List, Grid, Typography } from "@material-ui/core";
+
+import { DepartmentType, RoleInDepartment } from "../../../models";
 
 const styles = mergeStyles(commonStyles);
 

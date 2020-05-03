@@ -74,6 +74,14 @@ export namespace ProjectType {
             default: return 'Неизвестный тип работ';
         }
     }
+
+    export function isProjectTypeDistributedByStudent(value: ProjectType): boolean {
+        switch(value) {
+            case ProjectType.graduationQualificationManagement: return true;
+
+            default: false;
+        }
+    }
 }
 
 export const ProjectTypes = [

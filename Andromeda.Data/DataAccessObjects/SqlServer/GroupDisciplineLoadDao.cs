@@ -115,7 +115,7 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
             {
                 _logger.LogInformation("Trying to execute sql update group discipline load query");
                 await ExecuteAsync(@"
-                    update set
+                    update GroupDisciplineLoad set
                         DepartmentLoadId = @DepartmentLoadId,
                         DisciplineTitleId = @DisciplineTitleId,
                         StudentGroupId = @StudentGroupId,

@@ -199,6 +199,8 @@ namespace Andromeda.Services
                     var group = newGroups.FirstOrDefault(o => o.Name == load.StudentGroup.Name);
                     if (group != null)
                         load.StudentGroupId = group.Id;
+
+                    load.StudyLoad.ForEach(o => o.UsersLoad = new List<UserLoad>());
                 }
 
                 departmentLoad.GroupDisciplineLoad = departmentLoad.GroupDisciplineLoad.Where(o => newGroups.Any(g => g.Id == o.StudentGroupId)
@@ -224,7 +226,7 @@ namespace Andromeda.Services
             var old = await _groupDisciplineLoadService.Get(new GroupDisciplineLoadGetOptions { DepartmentLoadId = departmentLoadId });
 
             var toDelete = old.Select(o => o.Id).Where(o => !models.Select(du => du.Id).Contains(o)).ToList();
-            var toUpdate = old.Where(o => models.Select(du => du.Id).Contains(o.Id)).ToList();
+            var toUpdate = models.Where(o => old.Select(du => du.Id).Contains(o.Id)).ToList();
             var toCreate = models.Where(o => !old.Select(du => du.Id).Contains(o.Id)).ToList();
 
             toCreate.ForEach(o => o.DepartmentLoadId = departmentLoadId);

@@ -151,11 +151,15 @@ namespace Andromeda.API
             services.AddScoped(provider =>
             {
                 var daoFactory = provider.GetService<IDaoFactory>();
-                var studentGroupService = provider.GetService<StudentGroupService>();
-                var departmentService = provider.GetService<DepartmentService>();
                 var userService = provider.GetService<UserService>();
-                var disciplineTitleService = provider.GetService<DisciplineTitleService>();
-                return new StudyLoadService(daoFactory.StudyLoadDao);
+                return new UserLoadService(daoFactory.UserLoadDao, userService);
+            });
+
+            services.AddScoped(provider =>
+            {
+                var daoFactory = provider.GetService<IDaoFactory>();
+                var userLoadService = provider.GetService<UserLoadService>();
+                return new StudyLoadService(daoFactory.StudyLoadDao, userLoadService);
             });
 
             services.AddScoped(provider =>

@@ -38,7 +38,7 @@ export const UserDisciplineDataDetails = withStyles(styles)(function (props: Pro
 
     React.useEffect(() => {
         const studyLoad = groupDisciplineLoad.map(o => o.studyLoad).reduce((prev, curr) => prev.concat(curr), []);
-        const total = studyLoad.filter(o => o.userLoad && o.userLoad.some(ul => ul.userId === user.id))
+        const total = studyLoad.filter(o => o.usersLoad && o.usersLoad.some(ul => ul.userId === user.id))
             .map(o => o.value).reduce((summ, curr) => summ + curr, 0);
 
         setTotal(total);
@@ -87,7 +87,7 @@ export const UserDisciplineDataDetails = withStyles(styles)(function (props: Pro
             <DialogContent>
                 <Grid>
                     {groupDisciplineLoad.map((groupDisciplineLoad, index) => {
-                        const userStudyLoad = groupDisciplineLoad.studyLoad.filter(o => o.userLoad && o.userLoad.some(ul => ul.userId === user.id))
+                        const userStudyLoad = groupDisciplineLoad.studyLoad.filter(o => o.usersLoad && o.usersLoad.some(ul => ul.userId === user.id))
                         return (
                             <Grid>
                                 <Autocomplete

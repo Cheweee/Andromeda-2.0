@@ -3,7 +3,7 @@ import { mergeStyles } from "../../../utilities";
 import { commonStyles } from "../../../muiTheme";
 import { WithStyles, withStyles } from "@material-ui/core/styles";
 import { GroupDisciplineLoad } from "../../../models";
-import { List, Grid, ListItem, ListItemIcon, ListItemText, Collapse, TablePagination } from "@material-ui/core";
+import { List, Grid, ListItem, ListItemIcon, ListItemText, Collapse, TablePagination, Typography } from "@material-ui/core";
 import { useState } from "react";
 import { Inbox, ExpandLess, ExpandMore } from "@material-ui/icons";
 import { GroupDisciplineLoadDetailsRow } from "./GroupDisciplineLoadRow";
@@ -23,7 +23,7 @@ interface Props extends WithStyles<typeof styles> {
 export const GroupsDisciplinesLoad = withStyles(styles)(function (props: Props) {
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [page, setPage] = useState<number>(0);
-    
+
     function handleChangePage(event: React.MouseEvent<HTMLButtonElement, MouseEvent>, page: number) {
         setPage(page);
     };
@@ -40,12 +40,22 @@ export const GroupsDisciplinesLoad = withStyles(styles)(function (props: Props) 
         onDeleteClick,
         onDetailsOpen,
         onDistributeClick,
-        search
+        search,
+
+        classes
     } = props;
-    
+
     const rows = groupsDisciplinesLoad
-    .filter(o => o.disciplineTitle.name.toLowerCase().includes(search.toLowerCase()) || o.studentGroup.name.includes(search.toLowerCase()))
-    .slice(rowsPerPage * page, rowsPerPage * (page + 1));
+        .filter(o => o.disciplineTitle.name.toLowerCase().includes(search.toLowerCase()) || o.studentGroup.name.includes(search.toLowerCase()))
+        .slice(rowsPerPage * page, rowsPerPage * (page + 1));
+
+    if (!groupsDisciplinesLoad.length) {
+        return (
+            <Grid className={classes.padding1} container direction="row" justify="center" alignItems="center">
+                <Typography color="textSecondary">Нагрузка еще не запланирована</Typography>
+            </Grid>
+        );
+    }
 
     return (
         <Grid>

@@ -13,9 +13,14 @@ import { Faculties, FacultyComponent } from "../components/departments";
 import { TrainingDepartments, TrainingDepartmentComponent } from "../components/departments";
 import { Roles, RoleComponent } from "../components/roles";
 import { DepartmentLoads, DepartmentLoadComponent } from "../components/departmentLoad";
+import { GroupDisciplineLoadComponent } from "../components/departmentLoad/groupDisciplineLoad";
 
 const idParameterName = 'id';
 const departmentIdParameterName = 'departmentId';
+const departmentLoadIdParameterName = 'departmentLoadId';
+const disciplineIdParameterName = 'disciplineId';
+const groupIdParameterName = 'groupId';
+const modeParameterName = 'mode';
 
 const getUserPath = (idParameter: string) => `/users/${idParameter}`;
 const getFacultyPath = (idParameter: string) => `/faculties/${idParameter}`;
@@ -23,6 +28,27 @@ const getTrainingDepartmentPath = (idParameter: string) => `/trainingdepartments
 const getRolePath = (idParameter: string) => `/roles/${idParameter}`;
 const getDepartmentloadsPath = (idParameter: string) => `/trainingdepartments/${idParameter}/departmentloads`;
 const getDepartmentloadPath = (departmentIdParameter: string, idParameter: string) => `/trainingdepartments/${departmentIdParameter}/departmentloads/${idParameter}`;
+const getGroupDisciplineLoadPath = (
+    departmentIdParameter: string,
+    departmentLoadIdParameter: string,
+    modeParameter: string,
+    disciplineIdParameter?: string,
+    groupIdParameter?: string,
+    semesterNumberParameter?: string
+) => {
+    let path = `/trainingdepartments/${departmentIdParameter}/departmentloads/${departmentLoadIdParameter}/groupdisciplineload`;
+    let conditionIndex = 0;
+    if (modeParameter)
+        path += `${(conditionIndex++ === 0 ? '?' : '&')}mode=${modeParameter}`;
+    if (disciplineIdParameter)
+        path += `${(conditionIndex++ === 0 ? '?' : '&')}disc=${disciplineIdParameter}`;
+    if (groupIdParameter)
+        path += `${(conditionIndex++ === 0 ? '?' : '&')}group=${groupIdParameter}`;
+    if(semesterNumberParameter)
+        path += `${(conditionIndex++ === 0 ? '?' : '&')}sem=${semesterNumberParameter}`;
+
+    return path;
+}
 
 export const paths = {
     dashboardPath: '/dashboard',
@@ -37,6 +63,7 @@ export const paths = {
     trainingDepartmentPath: getTrainingDepartmentPath(':' + idParameterName),
     rolePath: getRolePath(':' + idParameterName),
     departmentloadPath: getDepartmentloadPath(':' + departmentIdParameterName, ':' + idParameterName),
+    groupdisciplineloadPath: `/trainingdepartments/:${departmentIdParameterName}/departmentloads/:${departmentLoadIdParameterName}/groupdisciplineload`,
 
     getUserPath,
     getFacultyPath,
@@ -44,9 +71,14 @@ export const paths = {
     getRolePath,
     getDepartmentloadsPath,
     getDepartmentloadPath,
+    getGroupDisciplineLoadPath,
 
     idParameterName,
-    departmentIdParameterName
+    departmentIdParameterName,
+    departmentLoadIdParameterName,
+    modeParameterName,
+    disciplineIdParameterName,
+    groupIdParameterName
 };
 
 export const routes: Route[] = [
@@ -70,6 +102,7 @@ export const routes: Route[] = [
         exact: true, name: 'roles', path: paths.rolesPath, component: Roles,
         text: 'Роли', icon: AssignmentInd
     },
+    { exact: false, name: 'groupdisciplineload', path: paths.groupdisciplineloadPath, component: GroupDisciplineLoadComponent },
     { exact: false, name: 'departmentLoad', path: paths.departmentloadPath, component: DepartmentLoadComponent },
     { exact: false, name: 'departmentLoads', path: paths.departmentloadsPath, component: DepartmentLoads },
     { exact: false, name: 'user', path: paths.userPath, component: UserComponent },

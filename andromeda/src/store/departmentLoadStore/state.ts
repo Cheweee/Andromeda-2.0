@@ -1,4 +1,4 @@
-import { DepartmentLoad } from "../../models"
+import { DepartmentLoad, GroupDisciplineLoadValidation, UserDisciplineLoadValidation } from "../../models"
 
 export type ModelsLoading = {
     modelsLoading: true;
@@ -26,8 +26,20 @@ export type ModelsDeleted = {
     ids?: number[];
 }
 
+export type ValidateGroupDisciplineLoadState = {
+    groupDisciplineLoadFormErrors?: GroupDisciplineLoadValidation;
+}
+
+export type ValidateUserDisciplineLoadState = {
+    userDisciplineLoadFormErrors?: UserDisciplineLoadValidation;
+}
+
 export type ModelsState = ModelsLoading | ModelsLoaded;
 export type ModelState = ModelLoading | ModelLoaded;
 export type DeleteState = ModelsDeleting | ModelsDeleted;
+export type Validate = ValidateGroupDisciplineLoadState | ValidateGroupDisciplineLoadState
 
-export type DepartmentLoadState = ModelsState & ModelState & DeleteState;
+export type DepartmentLoadState = ModelsState 
+& ModelState 
+& DeleteState 
+& Validate;

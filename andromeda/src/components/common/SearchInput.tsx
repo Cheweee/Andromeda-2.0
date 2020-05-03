@@ -9,26 +9,26 @@ import { commonStyles } from "../../muiTheme";
 const styles = mergeStyles(commonStyles);
 
 interface Props extends WithStyles<typeof styles> {
-    search: string;
-    onSearchChange: (search: string) => void;
+    value: string;
+    onValueChange: (value: string) => void;
 }
 
-export const SearchInput = withStyles(styles)(function (props: Props) {
+export const Input = withStyles(styles)(function (props: Props) {
     function handleSearch(event: React.ChangeEvent<HTMLInputElement>) {
-        const { onSearchChange } = props;
-        const search = event.target.value;
-        onSearchChange(search);
+        const { onValueChange: onSearchChange } = props;
+        const value = event.target.value;
+        onSearchChange(value);
     }
 
     const {
-        search,
+        value,
         classes
     } = props;
     return (
         <InputBase
             id="search-field"
             className={classes.notUnderlined}
-            value={search}
+            value={value}
             onChange={handleSearch}
             placeholder="Поиск"
             margin="none"

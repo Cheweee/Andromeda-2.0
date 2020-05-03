@@ -14,7 +14,6 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 export const UserDisciplineLoadCard = withStyles(styles)(function (props: Props) {
-    const [, setUser] = React.useState<User>(User.initial);
     const [lections, setLections] = React.useState<number>(0);
     const [practicalLessons, setPracticalLessons] = React.useState<number>(0);
     const [laboratoryLessons, setLaboratoryLessons] = React.useState<number>(0);
@@ -39,8 +38,9 @@ export const UserDisciplineLoadCard = withStyles(styles)(function (props: Props)
 
     React.useEffect(() => {
         const userDisciplineLoad = props.userDisciplineLoad;
-        const user = userDisciplineLoad ? userDisciplineLoad.user : User.initial;
         const studyLoad = userDisciplineLoad ? userDisciplineLoad.studyLoad : [];
+
+        const maxLoad = props.role ? props.role.maxLoad : 150;
 
         setLections(studyLoad.filter(o => o.projectType === ProjectType.lection).map(o => o.value).reduce((prev, curr) => prev + curr, 0));
         setPracticalLessons(studyLoad.filter(o => o.projectType === ProjectType.practicalLesson).map(o => o.value).reduce((prev, curr) => prev + curr, 0));
@@ -63,9 +63,7 @@ export const UserDisciplineLoadCard = withStyles(styles)(function (props: Props)
 
         const amount = userDisciplineLoad.amount;
 
-        setLoadPercent(100 / props.role.maxLoad * amount);
-
-        setUser(user);
+        setLoadPercent(100 / maxLoad * amount);
 
         setAmount(amount);
     }, [props.userDisciplineLoad]);

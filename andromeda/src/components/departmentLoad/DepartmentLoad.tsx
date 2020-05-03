@@ -4,8 +4,8 @@ import * as Redux from "react-redux";
 import { RouteComponentProps } from "react-router-dom";
 
 import { WithStyles, withStyles } from "@material-ui/core/styles";
-import { Grid, Card, CardContent, Typography, Tooltip, IconButton, Paper, Breadcrumbs, Link, Button } from "@material-ui/core";
-import { Search, PieChartRounded, Add, Check } from "@material-ui/icons";
+import { Grid, Card, CardContent, Typography, Tooltip, IconButton, Paper, Breadcrumbs, Link, Button, LinearProgress } from "@material-ui/core";
+import { Search, PieChartRounded, Add, Check, Close } from "@material-ui/icons";
 
 import clsx from "clsx";
 
@@ -13,19 +13,19 @@ import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { paths } from "../../sharedConstants";
 
-import { DepartmentLoad, User, GroupDisciplineLoad, UserDisciplineLoad, AppState, TrainingDepartment, StudyLoad, Role } from "../../models";
+import { DepartmentLoad, User, GroupDisciplineLoad, UserDisciplineLoad, AppState, TrainingDepartment, StudyLoad, Role, UserRoleInDepartment, Faculty } from "../../models";
 
-import { SearchInput } from "../common";
-import { GroupDisciplineLoadDistribute, GroupsDisciplinesLoad } from "./groupDisciplineLoad";
+import { Input } from "../common";
+import { GroupsDisciplinesLoad } from "./groupDisciplineLoad";
 import { DepartmentLoadPercentage } from "./DepartmentLoadPercentage";
 import { UserDisciplineLoadChart } from "./userDisciplineLoad/UserDisciplineLoadChart";
-import { GroupDisciplineLoadDetails } from "./groupDisciplineLoad/GroupDisciplineLoadDetails";
 import { UserDisciplineLoadDetails } from "./userDisciplineLoad/UserDisciplineLoadDetails";
 import { UserDisciplineLoadCard, UserDisciplineDataDetails } from "./userDisciplineLoad";
 import { departmentLoadActions } from "../../store/departmentLoadStore";
 import { userActions } from "../../store/userStore";
 import { trainingDepartmentActions } from "../../store/trainingDepartmentStore";
 import { roleActions } from "../../store/roleStore";
+import { groupDisciplineLoadActions } from "../../store/groupDisciplineLoadStore";
 
 const styles = mergeStyles(commonStyles);
 
@@ -41,8 +41,6 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     }));
 
     //#region Department load state
-    const [groupDisciplineLoadDistributeOpen, setGroupDisciplineLoadDistributeOpen] = React.useState<boolean>(false);
-
     function handleGroupDisciplineLoadSelect(index: number) {
         if (openedGroupDisciplineLoadIndex === index) {
             setOpenedGroupDisciplineLoadIndex(-1)
@@ -71,17 +69,6 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     const [userDisciplineLoadDetailsOpen, setUserDisciplineLoadDetailsOpen] = React.useState<boolean>(false);
     const [openedGroupDisciplineLoadIndex, setOpenedGroupDisciplineLoadIndex] = React.useState<number>(-1);
 
-    //const [usersDisciplinesLoad, setUsersDisciplinesLoad] = React.useState<UserDisciplineLoad[]>([]);
-
-
-    function handleGroupDisciplineLoadDistributeCancel() {
-        setGroupDisciplineLoadDistributeOpen(false);
-    }
-
-    function handleGroupDisciplineLoadDistributeAccept() {
-        setGroupDisciplineLoadDistributeOpen(false);
-    }
-
     async function handleGenerateStudyLoad() {
         dispatch(departmentLoadActions.generate(departmentLoad))
     }
@@ -97,39 +84,26 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
 
 
     //#region Group discipline load details
-    const [groupDisciplineLoadDetailsOpen, setGroupDisciplineLoadDetailsOpen] = React.useState<boolean>(false);
     const [selectedGroupDisciplineLoadIndex, setSelectedGroupDisciplineLoadIndex] = React.useState<number>(-1);
     const [selectedGroupDisciplineLoad, setSelectedGroupDisciplineLoad] = React.useState<GroupDisciplineLoad>(null);
 
     function handleGroupDisciplineLoadAdd() {
-        setGroupDisciplineLoadDetailsOpen(true);
-        setSelectedGroupDisciplineLoad(null);
-        setSelectedGroupDisciplineLoadIndex(-1);
+        const { history, match } = props;
+        const departmentId = match.params[paths.departmentIdParameterName];
+        const departmentLoadId = match.params[paths.idParameterName];
+
+        history.push(paths.getGroupDisciplineLoadPath(departmentId, departmentLoadId, 'create'));
     }
 
     function handleGroupDisciplineLoadEdit(index: number) {
-        setGroupDisciplineLoadDetailsOpen(true);
-
         const selected = groupDisciplineLoad[index];
-        const toUpdate: GroupDisciplineLoad = {
-            ...selected,
-            studyLoad: [...selected.studyLoad]
-        };
-        setSelectedGroupDisciplineLoad(toUpdate);
-        setSelectedGroupDisciplineLoadIndex(index);
-    }
 
-    function handleGroupDisciplineLoadDetailsCancel() {
-        setGroupDisciplineLoadDetailsOpen(false);
-        setSelectedGroupDisciplineLoad(null);
-        setSelectedGroupDisciplineLoadIndex(-1);
-    }
+        const { history, match } = props;
+        const departmentId = match.params[paths.departmentIdParameterName];
+        const departmentLoadId = match.params[paths.idParameterName];
 
-    function handleGroupDisciplineDetailsAccept(value: GroupDisciplineLoad) {
-        setGroupDisciplineLoadDetailsOpen(false);
-        dispatch(departmentLoadActions.updateGroupDisciplineLoad(selectedGroupDisciplineLoadIndex, value));
-        setSelectedGroupDisciplineLoad(null);
-        setSelectedGroupDisciplineLoadIndex(-1);
+
+        history.push(paths.getGroupDisciplineLoadPath(departmentId, departmentLoadId, 'edit', selected.disciplineTitleId.toString(), selected.studentGroupId.toString(), selected.semesterNumber.toString()));
     }
 
     function handleGroupDisciplineLoadDelete(index: number) {
@@ -175,16 +149,13 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     function handleUserDisciplineLoadEdit(index: number) {
         const userDisciplineLoad = usersDisciplinesLoad[index];
         const user = userDisciplineLoad.user;
-        const userLoad = groupDisciplineLoad.filter(o => o.studyLoad && o.studyLoad.some(sl => sl.userLoad && sl.userLoad.some(ul => ul.userId === user.id)));
+        const userLoad = groupDisciplineLoad.filter(o => o.studyLoad && o.studyLoad.some(sl => sl.usersLoad && sl.usersLoad.some(ul => ul.userId === user.id)));
 
         setUserDisciplineLoadDataDetailsOpen(true);
         setUserGroupsDisciplinesLoad(userLoad);
         setSelectedUser(user);
     }
 
-    function handleUserDisciplineLoadDelete(userId: number) {
-        dispatch(departmentLoadActions.deleteUserDisciplineLoad(userId));
-    }
 
     function handleUserDisciplineLoadDataDetailsAccept() {
 
@@ -196,21 +167,31 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
         setUserDisciplineLoadDataDetailsOpen(false);
     }
 
+    function handleCancelClick() {
+        initialize(true);
+    }
+
     function handleDepartmentLoadSave() {
+        departmentLoad.departmentId = department.id;
+        for (let groupLoad of departmentLoad.groupDisciplineLoad) {
+            groupLoad.faculty = department.parent as Faculty;
+            groupLoad.facultyId = department.parentId;
+        }
         dispatch(departmentLoadActions.save(departmentLoad));
     }
 
     React.useEffect(() => { initialize(); }, [props.match.params]);
 
-    function initialize() {
+    function initialize(force: boolean = false) {
         const { match } = props;
         const tempId = match.params && match.params[paths.idParameterName];
         const id = parseInt(tempId, null);
         const tempDepartmentId = match.params && match.params[paths.departmentIdParameterName];
         const departmentId = parseInt(tempDepartmentId, null);
 
-        dispatch(departmentLoadActions.getModel(id));
-        dispatch(userActions.getUsers({ departmentId: id }));
+        if (force || departmentLoadState.modelLoading === true)
+            dispatch(departmentLoadActions.getModel(id));
+        dispatch(userActions.getUsers({ departmentId: departmentId }));
         dispatch(trainingDepartmentActions.getTrainingDepartment(departmentId));
         dispatch(roleActions.getRoles({}));
     }
@@ -237,12 +218,12 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     if (departmentLoadState.modelLoading === false) {
         departmentLoad = departmentLoadState.model;
 
-        departmentLoad.groupDisciplineLoad.filter(o => o.studyLoad.some(sl => sl.userLoad && sl.userLoad.length))
+        departmentLoad.groupDisciplineLoad.filter(o => o.studyLoad.some(sl => sl.usersLoad && sl.usersLoad.length))
             .map(o => o.studyLoad)
             .reduce<StudyLoad[]>((prev: StudyLoad[], curr: StudyLoad[]) => prev.concat(curr), [])
-            .filter(o => Boolean(o.userLoad))
+            .filter(o => Boolean(o.usersLoad))
             .map(sl => {
-                for (let ul of sl.userLoad) {
+                for (let ul of sl.usersLoad) {
                     const userLoad = usersDisciplinesLoad.find(o => o.user.id === ul.userId)
                     if (userLoad) {
                         userLoad.studyLoad.push(sl);
@@ -264,12 +245,14 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     }
 
     let department: TrainingDepartment = null;
+    let departmentUsersRoles: UserRoleInDepartment[] = [];
     if (trainingDepartmentState.trainingDepartmentLoading === false) {
         department = trainingDepartmentState.trainingDepartment;
+        departmentUsersRoles = department && department.users;
     }
 
     let roles: Role[] = [];
-    if(roleState.loading === false) {
+    if (roleState.loading === false) {
         roles = roleState.roles;
     }
 
@@ -280,9 +263,10 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     const disabled = trainingDepartmentState.trainingDepartmentLoading && userState.usersLoading && departmentLoadState.modelLoading;
 
     const allocatedStudyLoad = groupDisciplineLoad.map(o => o.studyLoad).reduce((prev, curr) => prev.concat(curr), [])
-        .filter(o => Boolean(o.userLoad)).map(o => o.value).reduce((prev, curr) => prev + curr, 0);
+        .filter(o => o.usersLoad && o.usersLoad.length > 0).map(o => o.value).reduce((prev, curr) => prev + curr, 0);
     const unallocatedStudyLoad: number = total - allocatedStudyLoad;
     const percentage: number = (100 * allocatedStudyLoad / total) | 0;
+
 
     return (
         <Grid container direction="column">
@@ -294,9 +278,16 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                     <Typography color="textPrimary">{departmentLoad && departmentLoad.studyYear || DepartmentLoad.currentStudyYear}</Typography>
                 </Breadcrumbs>
                 <Grid item xs />
+                <Tooltip title="Отменить">
+                    <span>
+                        <IconButton disabled={disabled} onClick={handleCancelClick}>
+                            <Close />
+                        </IconButton>
+                    </span>
+                </Tooltip>
                 <Tooltip title="Сохранить нагрузку кафедры">
                     <span>
-                        <IconButton disabled={disabled} onClick={handleDepartmentLoadSave}>
+                        <IconButton color="primary" disabled={disabled} onClick={handleDepartmentLoadSave}>
                             <Check />
                         </IconButton>
                     </span>
@@ -308,9 +299,9 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                         <Typography>Нераспределенная нагрузка</Typography>
                         <Grid item xs />
                         <Search className={classes.searchIcon} />
-                        <SearchInput
-                            search={unallocatedLoadSearch}
-                            onSearchChange={handleUnallocatedLoadSearchChange}
+                        <Input
+                            value={unallocatedLoadSearch}
+                            onValueChange={handleUnallocatedLoadSearchChange}
                         />
                         <Tooltip title="Добавить учебную нагрузку">
                             <span>
@@ -366,14 +357,14 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                         <Typography>Распределенная нагрузка</Typography>
                         <Grid item xs />
                         <Search className={classes.searchIcon} />
-                        <SearchInput
-                            search={unallocatedLoadSearch}
-                            onSearchChange={handleUnallocatedLoadSearchChange}
+                        <Input
+                            value={unallocatedLoadSearch}
+                            onValueChange={handleUnallocatedLoadSearchChange}
                         />
                     </Grid>
                     <Grid className={classes.margin1Y} container direction="row" spacing={3}>
-                        {usersDisciplinesLoad.map((o, index) => {
-                            const userRole = department.users.find(u => u.userId === o.user.id);
+                        {departmentUsersRoles.length > 0 && usersDisciplinesLoad.map((o, index) => {
+                            const userRole = departmentUsersRoles.find(u => u.userId === o.user.id);
                             const role = roles.find(r => r.id === userRole.roleId);
                             return (
                                 <Grid key={index} item xs={4}>
@@ -405,45 +396,16 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                                 </IconButton>
                             </span>
                         </Tooltip>
-                        {unallocatedStudyLoad ?
-                            <Tooltip title="Распределить нагрузку">
-                                <span>
-                                    <IconButton color="primary" onClick={() => handleGroupDisciplineLoadDistributeClick()}>
-                                        <Add />
-                                    </IconButton>
-                                </span>
-                            </Tooltip>
-                            :
-                            <Tooltip title="Сохранить распределение">
-                                <span>
-                                    <IconButton
-                                        color="primary"
-                                        className={clsx(!unallocatedStudyLoad && classes.buttonSuccess)}
-                                        onClick={handleDepartmentLoadSave}
-                                    >
-                                        <Check />
-                                    </IconButton>
-                                </span>
-                            </Tooltip>
-                        }
+                        <Tooltip title="Распределить нагрузку">
+                            <span>
+                                <IconButton color="primary" onClick={() => handleGroupDisciplineLoadDistributeClick()}>
+                                    <Add />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
                     </Grid>
                 </Paper>
             </footer>
-            <GroupDisciplineLoadDistribute
-                open={groupDisciplineLoadDistributeOpen}
-                users={departmentUsers}
-                groupDisciplineLoad={selectedGroupDisciplineLoad}
-                onAccept={handleGroupDisciplineLoadDistributeAccept}
-                onClose={handleGroupDisciplineLoadDistributeCancel}
-            />
-            <GroupDisciplineLoadDetails
-                open={groupDisciplineLoadDetailsOpen}
-                groupDisciplineLoad={selectedGroupDisciplineLoad}
-                groups={department && department.groups || []}
-                disciplinesTitles={department && department.titles || []}
-                onAccept={handleGroupDisciplineDetailsAccept}
-                onCancel={handleGroupDisciplineLoadDetailsCancel}
-            />
             <UserDisciplineLoadDetails
                 selectedUser={selectedUser}
                 selectedGroupDisciplineLoadIndex={openedGroupDisciplineLoadIndex}

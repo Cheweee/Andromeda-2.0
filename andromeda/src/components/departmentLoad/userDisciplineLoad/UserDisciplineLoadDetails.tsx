@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { mergeStyles } from "../../../utilities";
 import { commonStyles } from "../../../muiTheme";
-import { WithStyles, withStyles, Dialog, DialogTitle, DialogContent, DialogActions, Grid, Button, TextField, Typography, List, ListItem, ListItemIcon, Checkbox, ListItemText, Tooltip } from "@material-ui/core";
+import { WithStyles, withStyles, Dialog, DialogTitle, DialogContent, DialogActions, Grid, Button, TextField, Typography, List, ListItem, ListItemIcon, Checkbox, ListItemText, Tooltip, InputBase, Slider } from "@material-ui/core";
 import { User, UserDisciplineLoadValidation, StudentGroup, GroupDisciplineLoad, DisciplineTitle, StudyLoad, ProjectType, UserLoad, UserDisciplineLoad } from "../../../models";
 import { Autocomplete } from "@material-ui/lab";
 import { Help, HelpOutline, PermContactCalendar } from "@material-ui/icons";
@@ -14,7 +14,7 @@ interface Props extends WithStyles<typeof styles> {
     readonly open: boolean;
     readonly users: User[];
     readonly groupsDisciplinesLoad: GroupDisciplineLoad[];
-    
+
     selectedGroupDisciplineLoadIndex: number;
     selectedGroupDisciplineLoad: GroupDisciplineLoad;
     selectedUser: User;
@@ -28,6 +28,7 @@ export const UserDisciplineLoadDetails = withStyles(styles)(function (props: Pro
     const [groupDisciplineLoad, setGroupDisciplineLoad] = React.useState<GroupDisciplineLoad>(GroupDisciplineLoad.initial);
     const [alreadyDistributedLoad, setAlreadyDistributedLoad] = React.useState<UserLoad[]>([])
     const [studyLoad, setStudyLoad] = React.useState<StudyLoad[]>([]);
+    const [studentsCount, setStudentsCount] = React.useState<number>(0);
     const [selectedStudyLoad, setSelectedStudyLoad] = React.useState<StudyLoad[]>([]);
     const [formErrors, setFormErrors] = React.useState<UserDisciplineLoadValidation>(UserDisciplineLoadValidation.initial);
 
@@ -39,7 +40,7 @@ export const UserDisciplineLoadDetails = withStyles(styles)(function (props: Pro
         const groupDisciplineLoad = props.selectedGroupDisciplineLoad;
         const studyLoad = props.selectedGroupDisciplineLoad ? props.selectedGroupDisciplineLoad.studyLoad : [];
         const alreadyDistributedLoad = studyLoad
-            .filter(o => Boolean(o.userLoad)).map(o => o.userLoad)
+            .filter(o => Boolean(o.usersLoad)).map(o => o.usersLoad)
             .reduce((prev, curr) => prev.concat(curr), []);
 
         setGroupDisciplineLoad(groupDisciplineLoad);
@@ -48,13 +49,9 @@ export const UserDisciplineLoadDetails = withStyles(styles)(function (props: Pro
     }, [props.selectedGroupDisciplineLoad]);
 
     React.useEffect(() => {
-        setUser(props.selectedUser);
-    }, [props.selectedUser]);
-
-    React.useEffect(() => {
         const studyLoad = groupDisciplineLoad ? groupDisciplineLoad.studyLoad : [];
         const alreadyDistributedLoad = studyLoad
-            .filter(o => Boolean(o.userLoad)).map(o => o.userLoad)
+            .filter(o => Boolean(o.usersLoad)).map(o => o.usersLoad)
             .reduce((prev, curr) => prev.concat(curr), []);
 
         setAlreadyDistributedLoad(alreadyDistributedLoad);
@@ -153,6 +150,10 @@ export const UserDisciplineLoadDetails = withStyles(styles)(function (props: Pro
         )
     }
 
+    function valuetext(value) {
+        return `${value}°C`;
+    }
+
     return (
         <Dialog fullWidth maxWidth="md" scroll="paper" open={open} onClose={onCancel}>
             <DialogTitle>Нагрузка преподавателя</DialogTitle>
@@ -203,12 +204,12 @@ export const UserDisciplineLoadDetails = withStyles(styles)(function (props: Pro
                 />
                 <List>
                     {studyLoad.map(function (load, index) {
-                        const distributed = alreadyDistributedLoad.find(o => o.studyLoadId === load.id);
+                        const hasDistributed = alreadyDistributedLoad.find(o => o.studyLoadId === load.id);
                         return (
-                            <ListItem key={index} button onClick={() => handleSelectStudyLoad(load)}>
+                            <ListItem key={index}>
                                 <ListItemIcon>
-                                    {distributed ? (
-                                        <Tooltip title={`Нагрузка уже распределена на пользователя ${User.getFullName(distributed.user)}`}>
+                                    {hasDistributed ? (
+                                        <Tooltip title={`Нагрузка уже распределена на пользователя ${User.getFullName(hasDistributed.user)}`}>
                                             <PermContactCalendar color="disabled" />
                                         </Tooltip>
                                     ) : (
@@ -216,12 +217,12 @@ export const UserDisciplineLoadDetails = withStyles(styles)(function (props: Pro
                                                 edge="start"
                                                 checked={selectedStudyLoad.indexOf(load) >= 0}
                                                 tabIndex={-1}
-                                                disableRipple
+                                                onChange={() => handleSelectStudyLoad(load)}
                                             />
                                         )}
                                 </ListItemIcon>
                                 <ListItemText key={load.id}>
-                                    <Grid container direction="row">
+                                    <Grid container direction="row" alignItems="center">
                                         <Grid item xs>
                                             <Typography>{ProjectType.getProjectTypeDescription(load.projectType)}</Typography>
                                         </Grid>
@@ -231,6 +232,24 @@ export const UserDisciplineLoadDetails = withStyles(styles)(function (props: Pro
                                                 <Tooltip title="Обратите внимание, если вы распределяете нагрузку по дисциплине с несколькими группами в потоке, то нагрузка будет применена ко всем группам в потоке, но значение нагрузки не изменится">
                                                     <HelpOutline color="disabled" className={classes.margin1Left} />
                                                 </Tooltip>
+                                            </Grid>
+                                        )}
+                                        {ProjectType.isProjectTypeDistributedByStudent(load.projectType) && (
+                                            <Grid direction="row" container item xs={5} className={classes.margin1X}>
+                                                <Typography>Количество студентов:</Typography>
+                                                <Tooltip title="Для данного типа работ нагрузка распределяется на количество выбранных студентов">
+                                                    <HelpOutline color="disabled" className={classes.margin1Left} />
+                                                </Tooltip>
+                                                <Slider
+                                                    defaultValue={1}
+                                                    getAriaValueText={valuetext}
+                                                    step={1}
+                                                    min={1}
+                                                    value={studentsCount}
+                                                    onChange={(event: React.ChangeEvent, value: number) => setStudentsCount(value)}
+                                                    max={groupDisciplineLoad.studentGroup.studentsCount}
+                                                    valueLabelDisplay="on"
+                                                />
                                             </Grid>
                                         )}
                                         <Grid item>

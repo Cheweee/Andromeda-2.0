@@ -73,14 +73,21 @@ namespace Andromeda.Data.DataAccessObjects
                 _logger.LogInformation("Try to create get users sql query");
 
                 sql.AppendLine(@"
-                    select 
-                        [Id],
-                        [Username],
-                        [Firstname],
-                        [Secondname],
-                        [Lastname],
-                        [Email]                    
-                    from [User]");
+                    select u.[Id]
+                         , u.[Username]
+                         , u.[Firstname]
+                         , u.[Secondname]
+                         , u.[Lastname]
+                         , u.[Email]                    
+                    from [User] u");
+
+                if (options.DepartmentId.HasValue)
+                {
+                    sql.AppendLine(@"
+                        join [UserRoleInDepartment] urid on urid.UserId = u.Id
+                        join [RoleInDepartment] rid on rid.Id = urid.RoleInDepartmentId and rid.DepartmentId = @DepartmentId
+                    ");
+                }
 
                 int conditionIndex = 0;
                 if (options.Id.HasValue)

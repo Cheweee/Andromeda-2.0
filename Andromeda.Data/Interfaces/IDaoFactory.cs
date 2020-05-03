@@ -3,6 +3,7 @@ namespace Andromeda.Data.Interfaces
     public interface IDaoFactory
     {
         IUserDao UserDao { get; }
+        IUserLoadDao UserLoadDao { get; }
         IDepartmentDao DepartmentDao { get; }
         IStudentGroupDao StudentGroupDao { get; }
         IStudyLoadDao StudyLoadDao { get; }

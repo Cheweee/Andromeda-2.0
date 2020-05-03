@@ -17,6 +17,7 @@ namespace Andromeda.Models.Entities
 
         public List<PinnedDiscipline> PinnedDisciplines { get; set; }
         public List<Department> Departments { get; set; }
+        public List<UserGraduateDegree> GraduateDegrees { get; set; }
     }
 
     public class AuthenticatedUser : User

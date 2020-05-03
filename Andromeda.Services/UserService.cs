@@ -48,9 +48,10 @@ namespace Andromeda.Services
             model.Password = null;
 
             if (model.PinnedDisciplines != null)
-            {
                 await UpdateUserPinnedDisciplines(model.Id, model.PinnedDisciplines);
-            }
+
+            if (model.GraduateDegrees != null)
+                await UpdateUserGraduateDegrees(model.Id, model.GraduateDegrees);
 
             return model;
         }
@@ -60,11 +61,13 @@ namespace Andromeda.Services
             var users = await _dao.Get(options);
             var usersIds = users.Select(o => o.Id).ToList();
             var usersPinnedDisciplines = await _pinnedDisciplineService.Get(new PinnedDisciplineGetOptions { UsersIds = usersIds });
+            var usersGraduateDegrees = await _userGraduateDegreeService.Get(new UserGraduateDegreeGetOptions { UsersIds = usersIds });
 
             foreach (var user in users)
-            {
                 user.PinnedDisciplines = usersPinnedDisciplines.Where(o => o.UserId == user.Id).ToList();
-            }
+
+            foreach (var user in users)
+                user.GraduateDegrees = usersGraduateDegrees.Where(o => o.UserId == user.Id).ToList();
 
             return users;
         }
@@ -113,6 +116,9 @@ namespace Andromeda.Services
 
             if (model.PinnedDisciplines != null)
                 await UpdateUserPinnedDisciplines(model.Id, model.PinnedDisciplines);
+
+            if (model.GraduateDegrees != null)
+                await UpdateUserGraduateDegrees(model.Id, model.GraduateDegrees);
 
             return model;
         }

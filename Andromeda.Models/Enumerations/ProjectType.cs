@@ -1,45 +1,45 @@
 namespace Andromeda.Models.Enumerations
 {
-    ///<summary>Перечисление типов работ по учебной дисциплине.</summary>
+    ///<summary> Перечисление типов работ по учебной дисциплине. </summary>
     public enum ProjectType
     {
-        ///<summary>Лекции</summary>
+        ///<summary> Лекции </summary>
         Lection,
-        ///<summary>Практические занятия</summary>
+        ///<summary> Практические занятия </summary>
         PracticalLesson,
-        ///<summary>Лабораторные занятия</summary>
+        ///<summary> Лабораторные занятия </summary>
         LaboratoryLesson,
-        ///<summary>Тематические дискуссии</summary>
+        ///<summary> Тематические дискуссии </summary>
         ThematicalDiscussion,
-        ///<summary>Консультации</summary>
+        ///<summary> Консультации </summary>
         Consultation,
-        ///<summary>Экзамены</summary>
+        ///<summary> Экзамены </summary>
         Exam,
-        ///<summary>Зачеты</summary>
+        ///<summary> Зачеты </summary>
         Offest,
-        ///<summary>Рефераты</summary>
+        ///<summary> Рефераты </summary>
         Abstract,
-        ///<summary>Контрольные работы ЗФО</summary>
+        ///<summary> Контрольные работы ЗФО </summary>
         EsTestPapers,
-        ///<summary>Государственные экзамены</summary>
+        ///<summary> Государственные экзамены </summary>
         StateExam,
-        ///<summary>Вступительные экзамены в аспирантуру</summary>
+        ///<summary> Вступительные экзамены в аспирантуру </summary>
         PostgraduateEntranceExam,
-        ///<summary>Практика</summary>
+        ///<summary> Практика </summary>
         Practice,
-        ///<summary>Руководство кафедрой</summary>
+        ///<summary> Руководство кафедрой </summary>
         DepartmentManagement,
-        ///<summary>НИРС</summary>
+        ///<summary> Научно-исследовательская работа студента (НИРС) </summary>
         StudentResearchWork,
-        ///<summary>КР, КП</summary>
+        ///<summary> Курсовые работы/проекты </summary>
         CourseWork,
-        ///<summary>Руководство ВКР</summary>
+        ///<summary> Руководство выпускной кавалификационной работой (ВКР) </summary>
         GraduationQualificationManagement,
         ///<summary>Руководство программой магистратуры</summary>
         MasterProgramManagement,
         ///<summary>Руководство программой аспирантуры</summary>
         PostgraduateProgramManagement,
-        ///<summary>Контрольные, РГР, ДЗ и др.</summary>
+        ///<summary> Контрольные, РГР, ДЗ и др. </summary>
         Other
     }
 }

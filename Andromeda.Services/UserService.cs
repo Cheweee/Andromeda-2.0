@@ -55,7 +55,7 @@ namespace Andromeda.Services
 
             return model;
         }
-
+        
         public async Task<IEnumerable<User>> Get(UserGetOptions options)
         {
             var users = await _dao.Get(options);

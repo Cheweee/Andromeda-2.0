@@ -90,9 +90,7 @@ export function userReducer(prevState: UserState = initialState, action: UserAct
             return { ...prevState, ...state, ...validationState }
         }
         case ActionType.updateUserPinnedDisciplines: {
-            if (prevState.userLoading === true) {
-                return prevState;
-            }
+            if (prevState.userLoading === true) return prevState;
 
             const pinnedDisciplines = prevState.user.pinnedDisciplines.filter(o => o.disciplineTitleId !== action.disciplineTitle.id);
 
@@ -112,12 +110,35 @@ export function userReducer(prevState: UserState = initialState, action: UserAct
             return { ...prevState, ...state };
         }
         case ActionType.deleteUserPinnedDiscipline: {
-            if (prevState.userLoading === true) {
-                return prevState;
-            }
+            if (prevState.userLoading === true) return prevState; 
 
             const pinnedDisciplines = prevState.user.pinnedDisciplines.filter(o => o.disciplineTitleId !== action.id);
             const user = { ...prevState.user, pinnedDisciplines }
+
+            const state: SelectedUserState = { userLoading: false, user: user };
+            return { ...prevState, ...state };
+        }
+        case ActionType.updateGraduateDegrees: {
+            if (prevState.userLoading === true) return prevState;
+
+            const graduateDegrees = prevState.user.graduateDegrees.filter(o => o.branchOfScience !== action.branchOfScience);
+
+            graduateDegrees.push({
+                branchOfScience: action.branchOfScience,
+                graduateDegree: action.graduateDegree,
+                userId: prevState.user.id
+            });
+
+            const user = { ...prevState.user, graduateDegrees }
+
+            const state: SelectedUserState = { userLoading: false, user: user };
+            return { ...prevState, ...state };
+        }
+        case ActionType.deleteGraduateDegree: {
+            if (prevState.userLoading === true) return prevState;
+
+            const graduateDegrees = prevState.user.graduateDegrees.filter(o => o.branchOfScience !== action.branchOfScience);
+            const user = { ...prevState.user, graduateDegrees }
 
             const state: SelectedUserState = { userLoading: false, user: user };
             return { ...prevState, ...state };

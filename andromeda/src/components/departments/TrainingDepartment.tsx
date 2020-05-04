@@ -13,7 +13,7 @@ import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { paths } from "../../sharedConstants";
 
-import { TrainingDepartment, DepartmentType, Faculty, User, RoleInDepartment, StudyDirection, StudentGroup, DisciplineTitle, AppState } from "../../models";
+import { TrainingDepartment, DepartmentType, Faculty, User, RoleInDepartment, StudyDirection, StudentGroup, DisciplineTitle, AppState, UserRoleInDepartment } from "../../models";
 
 import { DepartmentDetails } from "./DepartmentDetails";
 import { UsersRolesInDepartment, UserRolesInDepartmentDetails } from "./UsersRolesInDepartments";
@@ -149,7 +149,6 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
     const [selectedUser, setSelectedUser] = React.useState<User>(null);
     const [selectedRoles, setSelectedRoles] = React.useState<RoleInDepartment[]>([]);
     const [selectUserRolesDialogOpen, setSelectUserRolesDialogOpen] = React.useState<boolean>(false);
-    const [users, setUsers] = React.useState<User[]>([]);
 
     function handleUserRolesAdd(event: React.MouseEvent<Element, MouseEvent>) {
         event.stopPropagation();
@@ -186,21 +185,6 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
     //#endregion
 
     React.useEffect(() => { initialize(); }, [props.match.params]);
-    React.useEffect(() => {
-        if (userState.usersLoading === true) return;
-
-        const departmentUsers = department && department.users;
-
-        let users: User[] = [];
-        if (!selectedUser) {
-            users = userState.users.filter(o => !users.map(u => u.id).includes(o.id));
-        } else {
-            const usersWithouteSelectedUser = departmentUsers.filter(o => o.id !== selectedUser.id).map(o => o.id);
-            users = userState.users.filter(o => !usersWithouteSelectedUser.includes(o.id));
-        }
-
-        setUsers(users);
-    }, [userState.usersLoading, selectedUser]);
 
     function initialize() {
         const { match } = props;
@@ -236,8 +220,10 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
     const { classes } = props;
 
     let department: TrainingDepartment = null;
+    let departmentUsers: UserRoleInDepartment[] = [];
     if (trainingDepartmentState.trainingDepartmentLoading === false) {
         department = trainingDepartmentState.trainingDepartment;
+        departmentUsers = department && department.users || [];
     }
 
     const disabled = trainingDepartmentState.trainingDepartmentLoading || userState.usersLoading;
@@ -245,6 +231,16 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
     let faculties: Faculty[] = [];
     if (facultyState.facultiesLoading === false) {
         faculties = facultyState.faculties;
+    }
+
+    let users: User[] = [];
+    if (userState.usersLoading === false) {
+        if (!selectedUser) {
+            users = userState.users.filter(o => !departmentUsers.map(u => u.userId).includes(o.id));
+        } else {
+            const usersWithouteSelectedUser = departmentUsers.filter(o => o.id !== selectedUser.id).map(o => o.id);
+            users = userState.users.filter(o => !usersWithouteSelectedUser.includes(o.id));
+        }
     }
 
     const isDepartmentExists: boolean = department && Boolean(department.id);

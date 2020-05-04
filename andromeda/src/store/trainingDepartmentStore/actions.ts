@@ -178,16 +178,16 @@ export type UpdateTrainingDepartmentDisciplineTitles = UpdateTrainingDepartmentD
 export type DeleteTrainingDepartment = DeleteTrainingDepartmentRequest | DeleteTrainingDepartmentSuccess | DeleteTrainingDepartmentFailure;
 
 export type TrainingDepartmentsActions = GetTrainingDepartments
- | GetTrainingDepartment 
- | UpdateTrainingDepartment 
- | SaveTrainingDepartment 
- | UpdateTrainingDepartmentUsersRoles
- | UpdateTrainingDepartmentStudyDirections
- | UpdateTrainingDepartmentStudentGroups
- | UpdateTrainingDepartmentDisciplineTitles
- | DeleteTrainingDepartment 
- | ClearTrainingDepartmentEditionState 
- | ValidateTrainingDepartment;
+    | GetTrainingDepartment
+    | UpdateTrainingDepartment
+    | SaveTrainingDepartment
+    | UpdateTrainingDepartmentUsersRoles
+    | UpdateTrainingDepartmentStudyDirections
+    | UpdateTrainingDepartmentStudentGroups
+    | UpdateTrainingDepartmentDisciplineTitles
+    | DeleteTrainingDepartment
+    | ClearTrainingDepartmentEditionState
+    | ValidateTrainingDepartment;
 //#endregion
 
 function getTrainingDepartments(options: TrainingDepartmentGetOptions): AppThunkAction<Promise<GetTrainingDepartmentsSuccess | GetTrainingDepartmentsFailure>> {
@@ -213,8 +213,8 @@ function getTrainingDepartment(id?: number): AppThunkAction<Promise<GetTrainingD
     return async (dispatch: AppThunkDispatch, getState: () => AppState) => {
         dispatch(request(id));
 
-        if (!id && id === NaN)
-            return dispatch(success(TrainingDepartment.initial));
+        if (!id || id === NaN)
+            return dispatch(success({ ...TrainingDepartment.initial }));
 
         const state = getState();
         let trainingdepartments: TrainingDepartment[] = [];
@@ -244,7 +244,7 @@ function getTrainingDepartment(id?: number): AppThunkAction<Promise<GetTrainingD
         function failure(error: ApplicationError): GetTrainingDepartmentFailure { return { type: ActionType.getTrainingDepartmentFailure, error: error }; }
     }
 }
-function updateTrainingDepartmentDetails(model: TrainingDepartment) : UpdateTrainingDepartmentDetails {
+function updateTrainingDepartmentDetails(model: TrainingDepartment): UpdateTrainingDepartmentDetails {
     const formErrors = departmentService.validateTrainingDepartment(model);
 
     return { type: ActionType.updateTrainingDepartmentDetails, trainingDepartment: model, formErrors: formErrors };
@@ -255,7 +255,7 @@ function updateTrainingDepartmentUsers(user: User, roles: RoleInDepartment[]): U
 function deleteTrainingDepartmentUser(id: number): DeleteTrainingDepartmentUsers {
     return { type: ActionType.deleteTrainingDepartmentUsers, id: id };
 }
-function updateTrainingDepartmentStudyDirections(studyDirection: StudyDirection) : UpdateTrainingDepartmentStudyDirections {
+function updateTrainingDepartmentStudyDirections(studyDirection: StudyDirection): UpdateTrainingDepartmentStudyDirections {
     return { type: ActionType.updateTrainingDepartmentStudyDirections, studyDirection: studyDirection };
 }
 function deleteTrainingDepartmentStudyDirections(name: string): DeleteTrainingDepartmentStudyDirections {
@@ -280,14 +280,13 @@ function saveTrainingDepartment(model: TrainingDepartment): AppThunkAction<Promi
         try {
             if (model.id) {
                 const result = await departmentService.update(model) as TrainingDepartment;
-                dispatch(snackbarActions.showSnackbar('Факультет успешно сохранен', SnackbarVariant.success));
+                dispatch(snackbarActions.showSnackbar('Кафедра успешно сохранена', SnackbarVariant.success));
                 return dispatch(updateSuccess(result));
             } else {
                 const result = await departmentService.create(model) as TrainingDepartment;
-                dispatch(snackbarActions.showSnackbar('Факультет успешно сохранен', SnackbarVariant.success));
+                dispatch(snackbarActions.showSnackbar('Кафедра успешно сохранена', SnackbarVariant.success));
                 return dispatch(createSuccess(result));
             }
-                //case DepartmentType.TrainingDepartment: message = 'Кафедра успешно сохранена';
         }
         catch (error) {
             if (error instanceof ApplicationError)
@@ -308,8 +307,7 @@ function deleteTrainingDepartments(ids: number[]): AppThunkAction<Promise<Delete
         try {
             await departmentService.delete(ids);
 
-            dispatch(snackbarActions.showSnackbar('Кафедра успешно сохранена', SnackbarVariant.success));
-            dispatch(snackbarActions.showSnackbar('Роль успешно удалена.', SnackbarVariant.success));
+            dispatch(snackbarActions.showSnackbar('Кафедра успешно удалена.', SnackbarVariant.success));
             return dispatch(success());
         }
         catch (error) {

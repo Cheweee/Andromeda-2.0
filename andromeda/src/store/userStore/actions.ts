@@ -1,6 +1,6 @@
 import { Action } from "redux";
 
-import { User, ApplicationError, AuthenticatedUser, UserGetOptions, UserAuthenticateOptions, UserValidation, SnackbarVariant, PinnedDiscipline, ProjectType, DisciplineTitle } from "../../models";
+import { User, ApplicationError, AuthenticatedUser, UserGetOptions, UserAuthenticateOptions, UserValidation, SnackbarVariant, PinnedDiscipline, ProjectType, DisciplineTitle, GraduateDegree, BranchOfScience } from "../../models";
 import { userService, sessionService } from "../../services";
 import { AppThunkAction, AppState, AppThunkDispatch } from "../../models/reduxModels";
 import { snackbarActions } from "../snackbarStore";
@@ -24,6 +24,8 @@ export enum ActionType {
     updateUserDetails = 'UPDATE_USER_DETAILS',
     updateUserPinnedDisciplines = 'UPDATE_USER_PINNED_DISCIPLINES',
     deleteUserPinnedDiscipline = 'DELETE_USER_PINNED_DISCIPLINE',
+    updateGraduateDegrees = 'UPDATE_USER_GRADUATE_DEGREE',
+    deleteGraduateDegree = 'DELETE_USER_GRADUATE_DEGREE',
 
     saveRequest = 'SAVE_USER_REQUEST',
     createSuccess = 'CREATE_USER_SUCCESS',
@@ -108,6 +110,17 @@ export interface DeleteUserPinnedDisciplines extends Action<ActionType> {
     id: number;
 }
 
+export interface UpdateGraduateDegrees extends Action<ActionType> {
+    type: ActionType.updateGraduateDegrees;
+    graduateDegree: GraduateDegree;
+    branchOfScience: BranchOfScience;
+}
+
+export interface DeleteGraduateDegree extends Action<ActionType> {
+    type: ActionType.deleteGraduateDegree;
+    branchOfScience: BranchOfScience;
+}
+
 export interface SaveRequest extends Action<ActionType> {
     type: ActionType.saveRequest;
     user: User;
@@ -160,19 +173,23 @@ export type Signin = SigninRequest | SigninSuccess | SigninFailure;
 export type GetUsers = GetUsersRequest | GetUsersSuccess | GetUsersFailure;
 export type GetUser = GetRequest | GetSuccess | GetFailure
 export type SaveUser = SaveRequest | CreateSuccess | UpdateSuccess | SaveFailure;
-export type UpdateSelectedUser = UpdateUserDetails | UpdateUserPinnedDisciplines | DeleteUserPinnedDisciplines;
+export type UpdateSelectedUser = UpdateUserDetails
+    | UpdateUserPinnedDisciplines
+    | DeleteUserPinnedDisciplines
+    | UpdateGraduateDegrees
+    | DeleteGraduateDegree;
 export type DeleteUser = DeleteRequest | DeleteSuccess | DeleteFailure;
 
-export type UserActions = Signin |
-    Signout |
-    GetUsers |
-    GetUser |
-    ClearEditionState |
-    SaveUser |
-    DeleteUser |
-    UpdateSelectedUser |
-    ValidateCredentials |
-    Validate;
+export type UserActions = Signin
+    | Signout
+    | GetUsers
+    | GetUser
+    | ClearEditionState
+    | SaveUser
+    | DeleteUser
+    | UpdateSelectedUser
+    | ValidateCredentials
+    | Validate;
 //#endregion
 
 //#region Actions
@@ -295,9 +312,9 @@ function getUser(id?: number): AppThunkAction<Promise<GetSuccess | GetFailure>> 
 }
 
 function updateUserDetails(user: User): UpdateUserDetails {
-        const formErrors = userService.validateUser(user);
+    const formErrors = userService.validateUser(user);
 
-        return { type: ActionType.updateUserDetails, user: user, formErrors: formErrors };
+    return { type: ActionType.updateUserDetails, user: user, formErrors: formErrors };
 }
 
 function updateUserPinnedDisciplines(disciplineTitle: DisciplineTitle, projectTypes: ProjectType[]): UpdateUserPinnedDisciplines {
@@ -306,6 +323,14 @@ function updateUserPinnedDisciplines(disciplineTitle: DisciplineTitle, projectTy
 
 function deleteUserPinnedDiscipline(id: number): DeleteUserPinnedDisciplines {
     return { type: ActionType.deleteUserPinnedDiscipline, id: id };
+}
+
+function updateGraduateDegrees(graduateDegree: GraduateDegree, branchOfScience: BranchOfScience): UpdateGraduateDegrees {
+    return { type: ActionType.updateGraduateDegrees, graduateDegree, branchOfScience };
+}
+
+function deleteGraduateDegree(branchOfScience: BranchOfScience): DeleteGraduateDegree {
+    return { type: ActionType.deleteGraduateDegree, branchOfScience };
 }
 
 function deleteUsers(ids: number[]): AppThunkAction<Promise<DeleteSuccess | DeleteFailure>> {
@@ -346,6 +371,8 @@ export default {
     updateUserDetails,
     updateUserPinnedDisciplines,
     deleteUserPinnedDiscipline,
+    updateGraduateDegrees,
+    deleteGraduateDegree,
     clearEditionState,
     getUsers,
     getUser,

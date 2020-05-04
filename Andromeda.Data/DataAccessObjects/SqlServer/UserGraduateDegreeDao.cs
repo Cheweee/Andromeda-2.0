@@ -66,10 +66,10 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 _logger.LogInformation("Try to create get study load sql query");
 
                 sql.AppendLine(@"
-                    select ul.Id
-                        , UserId
-                        , GraduateDegree
-                        , BranchOfScience
+                    select ugd.Id
+                        , ugd.UserId
+                        , ugd.GraduateDegree
+                        , ugd.BranchOfScience
                     from UserGraduateDegree ugd
                 ");
 

@@ -2,8 +2,8 @@ import * as React from "react";
 import { withStyles, WithStyles } from "@material-ui/core/styles";
 import { mergeStyles } from "../../../utilities";
 import { commonStyles } from "../../../muiTheme";
-import { Dialog, DialogTitle, DialogContent, Grid, TextField, InputAdornment, DialogActions, Button, FormControl, FormHelperText } from "@material-ui/core";
-import { PinnedDisciplineValidation, DisciplineTitle, DisciplineTitleValidation, PinnedDiscipline } from "../../../models";
+import { Dialog, DialogTitle, DialogContent, Grid, TextField, DialogActions, Button } from "@material-ui/core";
+import { PinnedDisciplineValidation, DisciplineTitle } from "../../../models";
 import { Autocomplete } from "@material-ui/lab";
 import { ProjectTypes, ProjectType } from "../../../models/commonModels";
 
@@ -50,7 +50,7 @@ export const PinnedDisciplineDetails = withStyles(styles)(function (props: Props
         onAccept
     } = props;
 
-    function handleStudyDirectionChange (event: React.ChangeEvent, value: DisciplineTitle) {
+    function handleDisciplineTitleChange (event: React.ChangeEvent, value: DisciplineTitle) {
         setDisciplineTitle(value);
     }
 
@@ -75,7 +75,7 @@ export const PinnedDisciplineDetails = withStyles(styles)(function (props: Props
                         getOptionLabel={(option: DisciplineTitle) => `${option.name}`}
                         options={disciplinesTitles}
                         value={disciplineTitle}
-                        onChange={handleStudyDirectionChange}
+                        onChange={handleDisciplineTitleChange}
                         renderOption={(option: DisciplineTitle) => `${option.name}`}
                         renderInput={params => (
                             <TextField

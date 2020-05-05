@@ -40,16 +40,24 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
 
     const debouncedSearch = useDebounce(search, 500);
 
-    React.useEffect(() => { getDepartmentLoads(); }, []);
+    React.useEffect(() => { initialize(); }, []);
     React.useEffect(() => { getDepartmentLoads(debouncedSearch); }, [debouncedSearch]);
 
     //#region Department loads state
+
+    function initialize() {
+        const { match } = props;
+        const tempId = match.params && match.params[paths.idParameterName];
+        const departmentId = parseInt(tempId, null);
+        dispatch(trainingDepartmentActions.getTrainingDepartment(departmentId));
+
+        getDepartmentLoads();
+    }
 
     function getDepartmentLoads(search?: string) {
         const { match } = props;
         const tempId = match.params && match.params[paths.idParameterName];
         const departmentId = parseInt(tempId, null);
-        dispatch(trainingDepartmentActions.getTrainingDepartment(departmentId));
         dispatch(departmentLoadActions.getModels({ departmentId: departmentId, search: search }));
     }
 

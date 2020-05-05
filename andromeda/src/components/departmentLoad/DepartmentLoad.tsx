@@ -13,7 +13,7 @@ import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { paths } from "../../sharedConstants";
 
-import { DepartmentLoad, User, GroupDisciplineLoad, UserDisciplineLoad, AppState, TrainingDepartment, StudyLoad, Role, UserRoleInDepartment, Faculty } from "../../models";
+import { DepartmentLoad, User, GroupDisciplineLoad, UserDisciplineLoad, AppState, TrainingDepartment, StudyLoad, Role, UserRoleInDepartment, Faculty, DepartmentLoadGenerateOptions } from "../../models";
 
 import { Input } from "../common";
 import { GroupsDisciplinesLoad } from "./groupDisciplineLoad";
@@ -26,6 +26,7 @@ import { userActions } from "../../store/userStore";
 import { trainingDepartmentActions } from "../../store/trainingDepartmentStore";
 import { roleActions } from "../../store/roleStore";
 import { groupDisciplineLoadActions } from "../../store/groupDisciplineLoadStore";
+import { DepartmentLoadGenerateDetails } from "./DepartmentLoadGenerateDetails";
 
 const styles = mergeStyles(commonStyles);
 
@@ -69,8 +70,21 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     const [userDisciplineLoadDetailsOpen, setUserDisciplineLoadDetailsOpen] = React.useState<boolean>(false);
     const [openedGroupDisciplineLoadIndex, setOpenedGroupDisciplineLoadIndex] = React.useState<number>(-1);
 
-    async function handleGenerateStudyLoad() {
-        dispatch(departmentLoadActions.generate(departmentLoad))
+    const [ generateDetailsOpen, setGenerateDetailsOpen ] = React.useState<boolean>(false);
+
+    function handleGenerateDetailsOpen() {
+        setGenerateDetailsOpen(true);
+    }
+
+    function handleGenerateDetailsAccept(options: DepartmentLoadGenerateOptions) {
+        options.departmentLoad = departmentLoad;
+
+        setGenerateDetailsOpen(false);
+        dispatch(departmentLoadActions.generate(options));
+    }
+
+    function handleGenerateDetailsCancel() {
+        setGenerateDetailsOpen(false);
     }
     //#endregion
 
@@ -364,8 +378,8 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                     </Grid>
                     <Grid className={classes.margin1Y} container direction="row" spacing={3}>
                         {departmentUsersRoles.length > 0 && usersDisciplinesLoad.map((o, index) => {
-                            const userRole = departmentUsersRoles.find(u => u.userId === o.user.id);
-                            const role = roles.find(r => r.id === userRole.roleId);
+                            const userRoles = departmentUsersRoles.filter(u => u.userId === o.user.id);
+                            const role = roles.find(r => userRoles.some(ur => ur.roleId === r.id) && r.canTeach);
                             return (
                                 <Grid key={index} item xs={4}>
                                     <Grid className={classes.margin1Y} container direction="row" alignItems="center">
@@ -391,7 +405,7 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                         <Grid item xs />
                         <Tooltip title="Автоматическое распределение нагрузки">
                             <span>
-                                <IconButton color="primary" onClick={handleGenerateStudyLoad}>
+                                <IconButton color="primary" onClick={handleGenerateDetailsOpen}>
                                     <PieChartRounded />
                                 </IconButton>
                             </span>
@@ -423,6 +437,11 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                 userGroupsDisciplinesLoad={userGroupsDisciplinesLoad}
                 onAccept={handleUserDisciplineLoadDataDetailsAccept}
                 onCancel={handleUserDisciplineLoadDataDetailsCancel}
+            />
+            <DepartmentLoadGenerateDetails
+                onAccept={handleGenerateDetailsAccept}
+                onCancel={handleGenerateDetailsCancel}
+                open={generateDetailsOpen}
             />
         </Grid >
     );

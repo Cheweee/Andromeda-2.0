@@ -45,6 +45,23 @@ export namespace DepartmentLoadImportOptions {
     export const initial: DepartmentLoadImportOptions = {};
 }
 
+export interface DepartmentLoadGenerateOptions {
+    useTeachingExperience?: boolean;
+    useMethodicalDevelopments?: boolean;
+    useFinalTestsResults?: boolean;
+    useIndependetTestsResults?: boolean;
+    useGraduateDegrees?: boolean;
+    usePinnedDisciplines?: boolean;
+
+    departmentLoad: DepartmentLoad;
+}
+
+export namespace DepartmentLoadGenerateOptions {
+    export const initial:DepartmentLoadGenerateOptions = {
+        departmentLoad: null
+    };
+}
+
 export interface GroupDisciplineLoad {
     id?: number;
     disciplineTitleId: number;

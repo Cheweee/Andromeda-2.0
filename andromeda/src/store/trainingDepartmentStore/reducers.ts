@@ -91,11 +91,11 @@ export function trainingDepartmentReducer(prevState: TrainingDepartmentState = i
         case ActionType.updateTrainingDepartmentDisciplinesTitles: {
             if(prevState.trainingDepartmentLoading === true) return prevState;
 
-            const disciplinesTitles = prevState.trainingDepartment.titles.filter(o => o.name !== action.disciplineTitle.name);
+            const titles = prevState.trainingDepartment.titles.filter(o => o.name !== action.disciplineTitle.name);
 
-            disciplinesTitles.push(action.disciplineTitle);
+            titles.push(action.disciplineTitle);
 
-            const department = { ...prevState.trainingDepartment, disciplinesTitles };
+            const department = { ...prevState.trainingDepartment, titles };
             
             const state: SelectedTrainingDepartmentState = { trainingDepartmentLoading: false, trainingDepartment: department };
             return { ...prevState, ...state };
@@ -103,9 +103,9 @@ export function trainingDepartmentReducer(prevState: TrainingDepartmentState = i
         case ActionType.deleteTrainingDepartmentDisciplinesTitles: {
             if(prevState.trainingDepartmentLoading === true) return prevState;
 
-            const disciplinesTitles = prevState.trainingDepartment.titles.filter(o => o.name !== action.name);
+            const titles = prevState.trainingDepartment.titles.filter(o => o.name !== action.name);
 
-            const department = { ...prevState.trainingDepartment, disciplinesTitles };
+            const department = { ...prevState.trainingDepartment, titles };
                     
             const state: SelectedTrainingDepartmentState = { trainingDepartmentLoading: false, trainingDepartment: department };
             return { ...prevState, ...state };

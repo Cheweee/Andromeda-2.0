@@ -1,4 +1,4 @@
-import { DepartmentLoad, DepartmentLoadGetOptions, DepartmentLoadImportOptions, StudyLoad, ProjectType, GroupDisciplineLoad, GroupDisciplineLoadValidation, DisciplineTitle, StudentGroup, UserDisciplineLoadValidation, UserDisciplineLoad, User } from "../models";
+import { DepartmentLoad, DepartmentLoadGetOptions, DepartmentLoadImportOptions, StudyLoad, ProjectType, GroupDisciplineLoad, GroupDisciplineLoadValidation, DisciplineTitle, StudentGroup, UserDisciplineLoadValidation, UserDisciplineLoad, User, DepartmentLoadGenerateOptions } from "../models";
 import { ResponseHandler, handleJsonResponse, handleResponse } from "../utilities";
 
 class DepartmentLoadService {
@@ -42,13 +42,13 @@ class DepartmentLoadService {
         }).then(handleJsonResponse as ResponseHandler<DepartmentLoad>);
     }
 
-    public async generate(departmentLoad: DepartmentLoad): Promise<DepartmentLoad> {
+    public async generate(options: DepartmentLoadGenerateOptions): Promise<DepartmentLoad> {
         const url = `${this.apiUrl}/generate`
-        return fetch(this.apiUrl, {
+        return fetch(url, {
             credentials: 'include',
             method: 'POST',
             headers: this.jsonHeaders,
-            body: JSON.stringify(departmentLoad)
+            body: JSON.stringify(options)
         }).then(handleJsonResponse as ResponseHandler<DepartmentLoad>);
     }
 

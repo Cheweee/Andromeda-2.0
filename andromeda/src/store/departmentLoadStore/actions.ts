@@ -1,5 +1,5 @@
 import { Action } from "redux";
-import { DepartmentLoadGetOptions, DepartmentLoad, ApplicationError, AppThunkAction, AppThunkDispatch, SnackbarVariant, AppState, DepartmentLoadImportOptions, GroupDisciplineLoad, UserDisciplineLoad, GroupDisciplineLoadValidation, UserDisciplineLoadValidation } from "../../models";
+import { DepartmentLoadGetOptions, DepartmentLoad, ApplicationError, AppThunkAction, AppThunkDispatch, SnackbarVariant, AppState, DepartmentLoadImportOptions, GroupDisciplineLoad, UserDisciplineLoad, GroupDisciplineLoadValidation, UserDisciplineLoadValidation, DepartmentLoadGenerateOptions } from "../../models";
 import { departmentLoadService } from "../../services/departmentLoadService";
 import { snackbarActions } from "../snackbarStore";
 
@@ -324,7 +324,7 @@ function importDepartmentLoad(options: DepartmentLoadImportOptions): AppThunkAct
         function failure(error: ApplicationError): ImportFailure { return { type: ActionType.importFailure, error: error }; }
     }
 }
-function generate(model: DepartmentLoad): AppThunkAction<Promise<GenerateSuccess | GenerateFailure>> {
+function generate(model: DepartmentLoadGenerateOptions): AppThunkAction<Promise<GenerateSuccess | GenerateFailure>> {
     return async (dispatch: AppThunkDispatch) => {
         dispatch(request);
 

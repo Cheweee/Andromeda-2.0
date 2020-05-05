@@ -36,7 +36,7 @@ namespace Andromeda.Services.GenerateLoadStrategies
                     .Where(o => o.StudyLoad.Any(sl => generateRatios.Any(gr => gr.StudyLoadId == sl.Id)))
                     .ToList();
 
-                IEnumerable<int> usersIds = generateRatios.SelectMany(o => o.Ratios.Select(r => r.Key.Id));
+                IEnumerable<int> usersIds = generateRatios.SelectMany(o => o.Ratios.Select(r => r.Key.Id)).Distinct();
 
                 var usersRolesInDepartment = await _userRoleInDepartmentService.Get(new UserRoleInDepartmentGetOptions
                 {
@@ -62,9 +62,10 @@ namespace Andromeda.Services.GenerateLoadStrategies
                             continue;
 
                         User user = null;
-                        while (true)
+                        var orderedRatios = studyLoadRatio.Ratios.OrderBy(o => o.Value).ToList();
+                        for(int i = 0; i < orderedRatios.Count; i++)
                         {
-                            var supposedUser = studyLoadRatio.Ratios.OrderBy(o => o.Value).FirstOrDefault().Key;
+                            var supposedUser = orderedRatios[i].Key;
                             var userRolesInDepartment = usersRolesInDepartment.Where(o => o.UserId == supposedUser.Id).ToList();
                             var role = roles.FirstOrDefault(o => userRolesInDepartment.Any(urd => urd.RoleId == o.Id) && o.CanTeach);
                             double userLoadSum = groupDisciplineLoads

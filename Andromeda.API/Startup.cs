@@ -153,12 +153,21 @@ namespace Andromeda.API
                 return new DisciplineTitleService(daoFactory.DisciplineTitleDao);
             });
 
+            #region Регистрация стратегий распределения учебной нагрузки
             services.AddScoped<IGenerateStrategy>(provider =>
             {
                 var userService = provider.GetService<UserService>();
 
                 return new ByPinnedDisciplinesStrategy(userService);
             });
+            services.AddScoped<IGenerateStrategy>(provider =>
+            {
+                var userService = provider.GetService<UserService>();
+                
+                return new ByGraduateDegreesStrategy(userService);
+            });
+
+            // Стратегия обработки коэффициентов должна быть зарегистрирована последней
             services.AddScoped<IGenerateStrategy>(provider => 
             {
                 var roleService = provider.GetService<RoleService>();
@@ -166,6 +175,7 @@ namespace Andromeda.API
 
                 return new CalculateRatiosStrategy(roleService, userRoleInDepartmentService);
             });
+            #endregion
 
             services.AddScoped(provider =>
             {

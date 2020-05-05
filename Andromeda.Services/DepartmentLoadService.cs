@@ -28,7 +28,7 @@ namespace Andromeda.Services
         private readonly StudyDirectionService _studyDirectionService;
         private readonly FileService _fileService;
 
-        private readonly IGenerateStrategy _generateStrategy;
+        private readonly IGenerateDepartmentLoad _generateStrategy;
         private readonly ILogger<DepartmentLoadService> _logger;
 
         public DepartmentLoadService(
@@ -40,7 +40,7 @@ namespace Andromeda.Services
             StudyLoadService studyLoadService,
             StudyDirectionService studyDirectionService,
             FileService fileService,
-            IGenerateStrategy generateStrategy,
+            IGenerateDepartmentLoad generateStrategy,
             ILogger<DepartmentLoadService> logger
         )
         {
@@ -64,16 +64,6 @@ namespace Andromeda.Services
             var loadsIds = loads.Select(o => o.Id).ToList();
 
             var groupDisciplineLoad = await _groupDisciplineLoadService.Get(new GroupDisciplineLoadGetOptions
-            {
-                DepartmentLoadsIds = loadsIds
-            });
-
-            var disciplinesTitles = await _disciplineTitleService.Get(new DisciplineTitleGetOptions
-            {
-                DepartmentLoadsIds = loadsIds
-            });
-
-            var studentGroups = await _studentGroupService.Get(new StudentGroupGetOptions
             {
                 DepartmentLoadsIds = loadsIds
             });
@@ -108,9 +98,10 @@ namespace Andromeda.Services
             return model;
         }
 
-        public async Task<DepartmentLoad> Generate(DepartmentLoad model)
+        public async Task<DepartmentLoad> Generate(DepartmentLoadGenerateOptions options)
         {
-            await _generateStrategy.Generate(model);
+            var model = options.departmentLoad;
+            await _generateStrategy.Generate(options, model);
             return model;
         }
 

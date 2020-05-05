@@ -73,13 +73,18 @@ namespace Andromeda.Data.DataAccessObjects
                 _logger.LogInformation("Try to create get users sql query");
 
                 sql.AppendLine(@"
-                    select u.[Id]
-                         , u.[Username]
-                         , u.[Firstname]
-                         , u.[Secondname]
-                         , u.[Lastname]
-                         , u.[Email]                    
-                    from [User] u");
+                    select distinct
+                          u.[Id]
+                        , u.[Username]
+                        , u.[Firstname]
+                        , u.[Secondname]
+                        , u.[Lastname]
+                        , u.[Email]                    
+                    from [User] u
+                ");
+
+                if(options.OnlyWithPinnedDisciplines.HasValue && options.OnlyWithPinnedDisciplines.Value)
+                    sql.AppendLine("join [PinnedDiscipline] pd on pd.UserId = u.Id");
 
                 if (options.DepartmentId.HasValue)
                 {

@@ -153,14 +153,19 @@ namespace Andromeda.API
                 return new DisciplineTitleService(daoFactory.DisciplineTitleDao);
             });
 
-            services.AddScoped(provider =>
+            services.AddScoped<IGenerateStrategy>(provider =>
             {
                 var userService = provider.GetService<UserService>();
-                var pinnedDisciplineService = provider.GetService<PinnedDisciplineService>();
 
-                return new ByPinnedDisciplinesStrategy(userService, pinnedDisciplineService);
+                return new ByPinnedDisciplinesStrategy(userService);
             });
-            services.AddScoped<IGenerateStrategy>(provider => provider.GetService<ByPinnedDisciplinesStrategy>());
+            services.AddScoped<IGenerateStrategy>(provider => 
+            {
+                var roleService = provider.GetService<RoleService>();
+                var userRoleInDepartmentService = provider.GetService<UserRoleInDepartmentService>();
+
+                return new CalculateRatiosStrategy(roleService, userRoleInDepartmentService);
+            });
 
             services.AddScoped(provider =>
             {

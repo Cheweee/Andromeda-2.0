@@ -16,7 +16,6 @@ namespace Andromeda.Models.Entities
         public DateTime DateUpdated { get; set; }
 
         public List<PinnedDiscipline> PinnedDisciplines { get; set; }
-        public List<Department> Departments { get; set; }
         public List<UserGraduateDegree> GraduateDegrees { get; set; }
     }
 
@@ -32,6 +31,8 @@ namespace Andromeda.Models.Entities
         public string Username { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
+
+        public bool? OnlyWithPinnedDisciplines { get; set; }
 
         public int? DepartmentId { get; set; }
     }

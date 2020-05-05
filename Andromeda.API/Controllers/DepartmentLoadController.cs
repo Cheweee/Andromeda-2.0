@@ -42,9 +42,9 @@ namespace Andromeda.API.Controllers
 
         [Authorize]
         [HttpPost("generate")]
-        public async Task<IActionResult> Generate([FromBody] DepartmentLoad model)
+        public async Task<IActionResult> Generate([FromBody] DepartmentLoadGenerateOptions options)
         {
-            return Ok(await _service.Generate(model));
+            return Ok(await _service.Generate(options));
         }
 
         [Authorize]

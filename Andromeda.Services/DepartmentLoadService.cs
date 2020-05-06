@@ -101,6 +101,7 @@ namespace Andromeda.Services
         public async Task<DepartmentLoad> Generate(DepartmentLoadGenerateOptions options)
         {
             var model = options.departmentLoad;
+            model.GroupDisciplineLoad.ForEach(o => o.StudyLoad.ForEach(sl => sl.UsersLoad.Clear()));
             await _generateStrategy.Generate(options, model);
             return model;
         }

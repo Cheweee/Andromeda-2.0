@@ -83,8 +83,6 @@ namespace Andromeda.Services.GenerateLoadStrategies
 
                         if (user != null)
                         {
-                            studyLoad.UsersLoad.Clear();
-
                             studyLoad.UsersLoad.Add(new UserLoad
                             {
                                 StudentsCount = groupDisciplineLoad.StudentGroup.StudentsCount,

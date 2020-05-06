@@ -158,7 +158,9 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
     }
 
     function handleUserRolesEdit(userId: number) {
-        const selectedUser = users.find(o => o.id === userId);
+        if(userState.usersLoading === true) return;
+        
+        const selectedUser = userState.users.find(o => o.id === userId);
         const selectedRolesInDepartmentIds = department.users.filter(o => o.userId === userId).map(o => o.roleInDepartmentId);
         const selectedRolesInDepartment = department.roles.filter(o => selectedRolesInDepartmentIds.includes(o.id));
 

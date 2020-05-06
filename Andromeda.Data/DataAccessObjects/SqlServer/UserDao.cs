@@ -121,6 +121,9 @@ namespace Andromeda.Data.DataAccessObjects
                 {
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} [Email] = @email");
                 }
+
+                sql.AppendLine("order by u.Lastname, u.Firstname, u.Secondname");
+                
                 _logger.LogInformation($"Sql query successfully created:\n{sql.ToString()}");
 
                 _logger.LogInformation("Try to execute sql get users query");

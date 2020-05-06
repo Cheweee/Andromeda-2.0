@@ -160,17 +160,13 @@ namespace Andromeda.Services
 
                 if (options.UpdateStudentsGroups)
                 {
-                    var groups = new List<StudentGroup>();
-                    var departmentGroups = studentGroups.Where(o => o.DepartmentId == options.DepartmentId).ToList();
-                    foreach (var group in departmentGroups)
-                    {
-                        var direction = group.StudyDirection;
-                        if (direction != null)
-                        {
-                            groups.Add(group);
-                        }
+                    var enabledGroups = studentGroups.Where(o => o.StudyDirectionId != 0 && o.StudyDirection != null).ToList();
+                    
+                    var departmentsIds = studentGroups.Select(o => o.DepartmentId).Distinct().ToList();
+                    foreach(int departmentId in departmentsIds) {
+                        var departmentGroups = enabledGroups.Where(o => o.DepartmentId == departmentId).ToList();
+                        await _departmentService.UpdateDepartmentStudentsGroups(departmentId, departmentGroups);
                     }
-                    await _departmentService.UpdateDepartmentStudentsGroups(options.DepartmentId.Value, groups);
                 }
 
                 if (options.UpdateDisciplinesTitles)
@@ -186,16 +182,23 @@ namespace Andromeda.Services
                     var title = newTitles.FirstOrDefault(o => o.Name == load.DisciplineTitle.Name);
                     if (title != null)
                         load.DisciplineTitleId = title.Id;
+                    else
+                        _logger.LogError("Discipline title not found");
 
                     var group = newGroups.FirstOrDefault(o => o.Name == load.StudentGroup.Name);
                     if (group != null)
                         load.StudentGroupId = group.Id;
+                    else
+                        _logger.LogError("Student group not found");
 
                     load.StudyLoad.ForEach(o => o.UsersLoad = new List<UserLoad>());
                 }
 
-                departmentLoad.GroupDisciplineLoad = departmentLoad.GroupDisciplineLoad.Where(o => newGroups.Any(g => g.Id == o.StudentGroupId)
-                && newTitles.Any(t => t.Id == o.DisciplineTitleId)).ToList();
+                departmentLoad.GroupDisciplineLoad = departmentLoad.GroupDisciplineLoad
+                .Where(o =>
+                    newGroups.Any(g => g.Id == o.StudentGroupId) &&
+                    newTitles.Any(t => t.Id == o.DisciplineTitleId)
+                ).ToList();
                 await Create(departmentLoad);
                 return departmentLoad;
             }
@@ -356,6 +359,7 @@ namespace Andromeda.Services
                 string tempStartYear = Regex.Match(studentGroupCell.StringCellValue, @"[а-я,А-Я]\d{2}").Value;
                 int startYear = int.Parse(Regex.Match(tempStartYear, @"\d{2}").Value);
                 string directionCode = Regex.Match(studyDirectionCell.StringCellValue, @"\d{2}.\d{2}.\d{2}").Value;
+
                 var studyDirection = studyDirections.Find(o => directionCode == o.Code);
 
                 var title = new DisciplineTitle
@@ -443,7 +447,7 @@ namespace Andromeda.Services
                         groupDisciplineLoad.StudyLoad.Add(new StudyLoad
                         {
                             Value = GetValueFromCell(examsCell),
-                            ShownValue= GetShownValueFromCell(examsCell),
+                            ShownValue = GetShownValueFromCell(examsCell),
                             ProjectType = ProjectType.Exam
                         });
                     if (offsetsCell != null)
@@ -537,7 +541,7 @@ namespace Andromeda.Services
                             ShownValue = GetShownValueFromCell(postgraduateProgramManagementCell),
                             ProjectType = ProjectType.PostgraduateProgramManagement
                         });
-                    
+
                     departmentLoad.GroupDisciplineLoad.Add(groupDisciplineLoad);
                 }
                 #endregion
@@ -637,7 +641,7 @@ namespace Andromeda.Services
 
         private string GetShownValueFromCell(ICell cell)
         {
-            switch(cell.CellType)
+            switch (cell.CellType)
             {
                 case CellType.Numeric: return cell.NumericCellValue.ToString();
                 case CellType.String: return cell.StringCellValue;

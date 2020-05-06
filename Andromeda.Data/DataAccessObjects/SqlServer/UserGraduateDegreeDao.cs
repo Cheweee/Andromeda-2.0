@@ -46,7 +46,7 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 _logger.LogInformation("Trying to execute sql delete user graduate degree query");
                 await ExecuteAsync(@"
                     delete from UserGraduateDegree
-                    where Id = any(@ids)
+                    where Id in @ids
                 ", new { ids });
                 _logger.LogInformation("Sql delete user graduate degree query successfully executed");
             }

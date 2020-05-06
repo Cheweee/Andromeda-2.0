@@ -18,6 +18,8 @@ namespace Andromeda.Services
 
         public async Task Delete(IReadOnlyList<int> ids) => await _dao.Delete(ids);
 
+        public async Task Update(List<RoleInDepartment> models) => await _dao.Update(models);
+
         public async Task<IEnumerable<RoleInDepartment>> Get(RoleInDepartmentGetOptions options) => await _dao.Get(options);
     }
 }

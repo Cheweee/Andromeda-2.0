@@ -8,6 +8,7 @@ namespace Andromeda.Data.Interfaces
     {
         Task<IEnumerable<RoleInDepartment>> Get(RoleInDepartmentGetOptions options);
         Task Create(List<RoleInDepartment> models);
+        Task Update(List<RoleInDepartment> models);
         Task Delete(IReadOnlyList<int> ids);
     }
 }

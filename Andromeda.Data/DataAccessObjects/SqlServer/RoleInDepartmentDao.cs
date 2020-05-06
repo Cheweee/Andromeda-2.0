@@ -106,5 +106,25 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 throw exception;
             }
         }
+    
+        public async Task Update(List<RoleInDepartment> models)
+        {
+            try
+            {
+                _logger.LogInformation("Trying to execute sql update role in department query");
+                await ExecuteAsync(@"
+                        update [RoleInDepartment] set
+                            [RoleId] = @RoleId,
+                            [DepartmentId] = @DepartmentId
+                        where [Id] = @Id
+                ", models);
+                _logger.LogInformation("Sql  update role in department query successfully executed");
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception.Message);
+                throw exception;
+            }
+        }
     }
 }

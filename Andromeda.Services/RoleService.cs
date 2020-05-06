@@ -25,11 +25,10 @@ namespace Andromeda.Services
         public async Task<Role> Create(Role model)
         {
             await _dao.Create(model);
-            if (model.RoleDepartments != null)
-            {
-                model.RoleDepartments.ForEach(o => o.RoleId = model.Id);
-                await _roleInDepartmentService.Create(model.RoleDepartments);
-            }
+            
+            if(model.RoleDepartments != null)
+                await UpdateRoleDeparmtents(model.Id, model.RoleDepartments);
+                
             return model;
         }
 
@@ -52,17 +51,9 @@ namespace Andromeda.Services
         public async Task<Role> Update(Role model)
         {
             await _dao.Update(model);
-            var oldRoleDepartments = await _roleInDepartmentService.Get(new RoleInDepartmentGetOptions
-            {
-                RoleId = model.Id
-            });
-            var roleDepartmentsToDelete = oldRoleDepartments.Where(o => !model.RoleDepartments.Contains(o));
-            var roleDepartmentsToCreate = model.RoleDepartments.Where(o => !oldRoleDepartments.Contains(o)).ToList();
-
-            roleDepartmentsToCreate.ForEach(o => o.RoleId = model.Id);
-
-            await _roleInDepartmentService.Delete(roleDepartmentsToDelete.Select(o => o.Id).ToList());
-            await _roleInDepartmentService.Create(roleDepartmentsToCreate.ToList());
+            
+            if(model.RoleDepartments != null)
+                await UpdateRoleDeparmtents(model.Id, model.RoleDepartments);
 
             return model;
         }
@@ -101,6 +92,22 @@ namespace Andromeda.Services
                 _logger.LogError(exception.Message);
                 throw exception;
             }
+        }
+    
+    
+        public async Task UpdateRoleDeparmtents(int roleId, List<RoleInDepartment> models)
+        {
+            var old = await _roleInDepartmentService.Get(new RoleInDepartmentGetOptions { RoleId = roleId });
+
+            var toDelete = old.Select(o => o.Id).Where(o => !models.Select(du => du.Id).Contains(o)).ToList();
+            var toUpdate = old.Where(o => models.Select(du => du.Id).Contains(o.Id)).ToList();
+            var toCreate = models.Where(o => !old.Select(du => du.Id).Contains(o.Id)).ToList();
+
+            toCreate.ForEach(o => o.RoleId = roleId);
+
+            await _roleInDepartmentService.Delete(toDelete);
+            await _roleInDepartmentService.Update(toUpdate);
+            await _roleInDepartmentService.Create(toCreate);
         }
     }
 }

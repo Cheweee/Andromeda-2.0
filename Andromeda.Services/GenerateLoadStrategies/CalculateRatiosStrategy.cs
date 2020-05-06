@@ -83,7 +83,7 @@ namespace Andromeda.Services.GenerateLoadStrategies
 
                         if (user != null)
                         {
-                            var existedUserLoad = studyLoad.UsersLoad.Find(o => o.UserId == user.Id);
+                            studyLoad.UsersLoad.Clear();
 
                             studyLoad.UsersLoad.Add(new UserLoad
                             {

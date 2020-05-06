@@ -8,6 +8,7 @@ namespace Andromeda.Utilities.Migrations
     {
         public override void Up()
         {
+            Delete.ForeignKey("FK_PinnedDiscipline_DisciplineTitleId_DisciplineTitle_Id").OnTable("PinnedDiscipline");
             Delete.Column("DisciplineTitleId").FromTable("PinnedDiscipline");
             Create.Column("DisciplineTitleId").OnTable("PinnedDiscipline")
                 .AsInt32()

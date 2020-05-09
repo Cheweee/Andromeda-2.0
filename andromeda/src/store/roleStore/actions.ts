@@ -239,7 +239,7 @@ function deleteRoles(ids: number[]): AppThunkAction<Promise<DeleteSuccess | Dele
 
         try {
             await roleService.delete(ids);
-            dispatch(snackbarActions.showSnackbar('Роль успешно удалена.', SnackbarVariant.success));
+            dispatch(snackbarActions.showSnackbar('Роль успешно удалена.', SnackbarVariant.info));
             return dispatch(success());
         }
         catch (error) {

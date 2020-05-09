@@ -1,9 +1,10 @@
 import * as React from "react";
-import { Snackbar, SnackbarContent, Icon, IconButton, WithStyles, withStyles } from "@material-ui/core";
+import { Snackbar, SnackbarContent, IconButton, WithStyles, withStyles } from "@material-ui/core";
 import clsx from "clsx";
 import { mergeStyles } from "../../utilities";
 import { commonStyles } from "../../muiTheme";
 import { Close } from "@material-ui/icons";
+import { Alert } from "@material-ui/lab";
 
 const styles = mergeStyles(commonStyles);
 
@@ -22,23 +23,12 @@ export const MessageSnackbar = withStyles(styles)(function (props: Props) {
                 horizontal: 'center',
             }}
             open={props.open}
-            autoHideDuration={6000}
+            autoHideDuration={5000}
             onClose={props.onClose}
         >
-            <SnackbarContent
-                className={clsx(props.classes[props.variant])}
-                aria-describedby="client-snackbar"
-                message={
-                    <span id="client-snackbar" className={props.classes.message}>
-                        {props.message}
-                    </span>
-                }
-                action={[
-                    <IconButton key="close" aria-label="close" color="inherit" onClick={props.onClose}>
-                        <Close className={props.classes.icon} />
-                    </IconButton>
-                ]}
-            />
+            <Alert elevation={6} variant="filled" onClose={props.onClose} severity={props.variant}>
+                {props.message}
+            </Alert>
         </Snackbar>
     )
 });

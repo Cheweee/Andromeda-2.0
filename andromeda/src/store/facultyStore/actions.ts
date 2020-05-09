@@ -259,7 +259,7 @@ function deleteFaculties(ids: number[]): AppThunkAction<Promise<DeleteFacultiesS
         try {
             await departmentService.delete(ids);
 
-            dispatch(snackbarActions.showSnackbar('Факультет успешно удален.', SnackbarVariant.success));
+            dispatch(snackbarActions.showSnackbar('Факультет успешно удален.', SnackbarVariant.info));
             return dispatch(success());
         }
         catch (error) {

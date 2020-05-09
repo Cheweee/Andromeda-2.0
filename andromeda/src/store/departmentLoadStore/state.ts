@@ -34,12 +34,17 @@ export type ValidateUserDisciplineLoadState = {
     userDisciplineLoadFormErrors?: UserDisciplineLoadValidation;
 }
 
+export type ImportState = {
+    importing: boolean;
+}
+
 export type ModelsState = ModelsLoading | ModelsLoaded;
 export type ModelState = ModelLoading | ModelLoaded;
 export type DeleteState = ModelsDeleting | ModelsDeleted;
-export type Validate = ValidateGroupDisciplineLoadState | ValidateGroupDisciplineLoadState
+export type ValidationState = ValidateGroupDisciplineLoadState | ValidateGroupDisciplineLoadState
 
-export type DepartmentLoadState = ModelsState 
-& ModelState 
-& DeleteState 
-& Validate;
+export type DepartmentLoadState = ModelsState
+    & ModelState
+    & DeleteState
+    & ImportState
+    & ValidationState;

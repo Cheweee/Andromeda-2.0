@@ -339,7 +339,7 @@ function deleteUsers(ids: number[]): AppThunkAction<Promise<DeleteSuccess | Dele
 
         try {
             await userService.delete(ids);
-            dispatch(snackbarActions.showSnackbar('Пользователь успешно удален.', SnackbarVariant.success));
+            dispatch(snackbarActions.showSnackbar('Пользователь успешно удален.', SnackbarVariant.info));
             return dispatch(success());
         }
         catch (error) {

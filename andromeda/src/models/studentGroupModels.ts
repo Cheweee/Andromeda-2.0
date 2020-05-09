@@ -4,7 +4,6 @@ import { Validation } from "./commonModels";
 export interface StudentGroup {
     id?: number;
     studyLoadId?: number;
-    departmentId?: number;
     studyDirectionId: number;
     name: string;
     studentsCount: number;

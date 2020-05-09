@@ -1,11 +1,12 @@
-import { DepartmentLoadState, ModelsState, ModelState, DeleteState, ValidateGroupDisciplineLoadState, ValidateUserDisciplineLoadState } from "./state";
+import { DepartmentLoadState, ModelsState, ModelState, DeleteState, ValidateGroupDisciplineLoadState, ValidateUserDisciplineLoadState, ImportState } from "./state";
 import { DepartmentLoadActions, ActionType } from "./actions";
-import { StudyLoad, DepartmentLoad, UserDisciplineLoad } from "../../models";
+import { StudyLoad, DepartmentLoad } from "../../models";
 
 const initialState: DepartmentLoadState = {
     deleting: false,
     modelLoading: true,
-    modelsLoading: true
+    modelsLoading: true,
+    importing: true
 }
 
 export function departmentLoadReducer(prevState: DepartmentLoadState = initialState, action: DepartmentLoadActions): DepartmentLoadState {
@@ -71,21 +72,18 @@ export function departmentLoadReducer(prevState: DepartmentLoadState = initialSt
         }
 
         case ActionType.importRequest: {
-            const state: ModelsState = { modelsLoading: true };
-            return { ...prevState, ...state };
+            const importState: ImportState = { importing: true };
+            return { ...prevState, ...importState };
         }
         case ActionType.importSuccess: {
             if (prevState.modelsLoading === true) return;
 
-            const updated = prevState.models.slice(0);
-            updated.push(action.model);
-
-            const state: ModelsState = { modelsLoading: false, models: updated };
+            const state: ModelsState = { modelsLoading: false, models: prevState.models.concat(action.model) };
             const modelState: ModelState = { modelLoading: false, model: action.model };
             return { ...prevState, ...state, ...modelState };
         }
         case ActionType.importFailure: {
-            const state: ModelsState = { modelsLoading: false };
+            const state: ImportState = { importing: false };
             return { ...prevState, ...state };
         }
 

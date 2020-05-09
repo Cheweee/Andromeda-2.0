@@ -22,7 +22,6 @@ interface Props extends WithStyles<typeof styles> {
 
 const initialGroup: StudentGroup = {
     currentCourse: 1,
-    departmentId: 0,
     name: '',
     startYear: minYear,
     studentsCount: 0,

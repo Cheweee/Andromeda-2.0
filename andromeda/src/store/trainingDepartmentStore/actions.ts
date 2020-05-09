@@ -307,7 +307,7 @@ function deleteTrainingDepartments(ids: number[]): AppThunkAction<Promise<Delete
         try {
             await departmentService.delete(ids);
 
-            dispatch(snackbarActions.showSnackbar('Кафедра успешно удалена.', SnackbarVariant.success));
+            dispatch(snackbarActions.showSnackbar('Кафедра успешно удалена.', SnackbarVariant.info));
             return dispatch(success());
         }
         catch (error) {

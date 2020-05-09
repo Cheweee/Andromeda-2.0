@@ -24,15 +24,13 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                             Name,
                             StudentsCount,
                             StartYear,
-                            CurrentCourse,
-                            DepartmentId
+                            CurrentCourse
                         ) values (
                             @StudyDirectionId,
                             @Name,
                             @StudentsCount,
                             @StartYear,
-                            @CurrentCourse,
-                            @DepartmentId
+                            @CurrentCourse
                         );
                 ", model);
                 _logger.LogInformation("Sql create student group query successfully executed");
@@ -82,8 +80,7 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                         sg.Name,
                         sg.StudentsCount,
                         sg.StartYear,
-                        sg.CurrentCourse,
-                        sg.DepartmentId
+                        sg.CurrentCourse
                     from StudentGroup sg
                     left join GroupDisciplineLoad gdl on gdl.StudentGroupId = sg.Id
                     ");
@@ -100,14 +97,8 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 if (options.Id.HasValue)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} sg.Id = @id");
 
-                if (options.DepartmentId.HasValue)
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} sg.DepartmentId = @DepartmentId");
-
                 if (options.Ids != null && options.Ids.Count > 0)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} sg.Id in @Ids");
-
-                if (options.DepartmentIds != null && options.DepartmentIds.Count > 0)
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} sg.DepartmentId in @DepartmentIds");
 
                 if (options.Names != null && options.Names.Count > 0)
                     sql.AppendLine($@"{(conditionIndex++ == 0 ? "where" : "and")} sg.Name in @Names");
@@ -143,8 +134,7 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                         Name = @Name,
                         StudentsCount = @StudentsCount, 
                         StartYear = @StartYear, 
-                        CurrentCourse = @CurrentCourse, 
-                        DepartmentId = @DepartmentId
+                        CurrentCourse = @CurrentCourse
                     from StudentGroup
                     where Id = @Id
                 ", model);

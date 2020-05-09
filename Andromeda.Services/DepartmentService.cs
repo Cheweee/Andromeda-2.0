@@ -58,7 +58,7 @@ namespace Andromeda.Services
                 department.Users = departmentsUsers.Where(o => o.DepartmentId == department.Id).ToList();
                 department.Roles = departmentsRoles.Where(o => o.DepartmentId == department.Id).ToList();
                 department.StudyDirections = departmentsStudyDirections.Where(o => o.DepartmentId == department.Id).ToList();
-                department.Groups = departmentsGroups.Where(o => o.DepartmentId == department.Id).ToList();
+                department.Groups = departmentsGroups.Where(o => department.StudyDirections.Any(sd => sd.Id == o.StudyDirectionId)).ToList();
             }
 
             return departments;
@@ -67,38 +67,18 @@ namespace Andromeda.Services
         public async Task<Department> Create(Department model)
         {
             await _dao.Create(model);
-            if (model.Users != null)
-            {
-                model.Users.ForEach(o => o.DepartmentId = model.Id);
-                await _userRoleInDepartmentService.Create(model.Users);
-            }
-
-            if (model.Groups != null)
-            {
-                model.Groups.ForEach(o => o.DepartmentId = model.Id);
-                await _studentGroupService.Create(model.Groups);
-            }
-
-            if (model.StudyDirections != null)
-            {
-                model.StudyDirections.ForEach(o => o.DepartmentId = model.Id);
-                await _studyDirectionService.Create(model.StudyDirections);
-            }
 
             if (model.Titles != null)
-            {
-                model.Titles.ForEach(o => o.DepartmentId = model.Id);
-                await _discplineTitleService.Create(model.Titles);
-            }
+                await UpdateDepartmentDisciplinesTitles(model.Id, model.Titles);
 
-            if(model.ChildDepartments != null)
-            {
-                foreach(var department in model.ChildDepartments)
-                {
-                    department.ParentId = model.Id;
-                    await Create(department);
-                }
-            }
+            if (model.Users != null)
+                await UpdateDepartmentUsersRoles(model.Id, model.Users);
+
+            if (model.StudyDirections != null)
+                await UpdateDepartmentStudyDirections(model.Id, model.StudyDirections);
+
+            if (model.Groups != null)
+                await UpdateDepartmentStudentsGroups(model.Id, model.Groups);
 
             return model;
         }
@@ -217,7 +197,6 @@ namespace Andromeda.Services
             {
                 var direction = studyDirections.FirstOrDefault(sd => sd.Code == o.StudyDirection.Code);
 
-                o.DepartmentId = departmentId;
                 o.StudyDirectionId = direction.Id;
             });
 

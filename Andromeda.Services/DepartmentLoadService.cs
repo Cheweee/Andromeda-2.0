@@ -163,9 +163,9 @@ namespace Andromeda.Services
                 {
                     var enabledGroups = studentGroups.Where(o => o.StudyDirectionId != 0 && o.StudyDirection != null).ToList();
                     
-                    var departmentsIds = studentGroups.Select(o => o.DepartmentId).Distinct().ToList();
+                    var departmentsIds = studentGroups.Select(o => o.StudyDirection.DepartmentId).Distinct().ToList();
                     foreach(int departmentId in departmentsIds) {
-                        var departmentGroups = enabledGroups.Where(o => o.DepartmentId == departmentId).ToList();
+                        var departmentGroups = enabledGroups.Where(o => o.StudyDirection.DepartmentId == departmentId).ToList();
                         await _departmentService.UpdateDepartmentStudentsGroups(departmentId, departmentGroups);
                     }
                 }
@@ -378,7 +378,6 @@ namespace Andromeda.Services
                     var group = new StudentGroup
                     {
                         CurrentCourse = Convert.ToInt32(courseCell.NumericCellValue),
-                        DepartmentId = studyDirection.DepartmentId,
                         Name = studentGroupCell.StringCellValue,
                         StartYear = startYear,
                         StudentsCount = Convert.ToInt32(studentsCountCell.NumericCellValue),

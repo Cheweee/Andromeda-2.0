@@ -52,6 +52,10 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 await ExecuteAsync(@"
                     delete from StudentGroup
                     where Id in @Ids
+                    go
+
+                    delete from [GroupDisciplineLoad]
+                    where [StudentGroupId] in @Ids
                 ", new { ids });
                 _logger.LogInformation("Sql delete student groups query successfully executed");
             }
@@ -84,7 +88,15 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                     left join GroupDisciplineLoad gdl on gdl.StudentGroupId = sg.Id
                     ");
 
-                int conditionIndex = 0;
+                if (options.DepartmentId.HasValue)
+                {
+                    sql.AppendLine("left join [StudyDirection] sd on sd.Id = sg.StudyDirectionId and sd.DepartmentId = @DepartmentId");
+                }
+
+                if (options.DepartmentLoadsIds != null && options.DepartmentLoadsIds.Count > 0)
+                    sql.AppendLine($"left join [StudyDirection] sd on sd.Id = sg.StudyDirectionId and sd.DepartmentId in @DepartmentLoadsIds");
+
+                    int conditionIndex = 0;
                 if (options.Id.HasValue)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} sg.Id = @id");
 
@@ -100,7 +112,7 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 if (options.Names != null && options.Names.Count > 0)
                     sql.AppendLine($@"{(conditionIndex++ == 0 ? "where" : "and")} sg.Name in @Names");
 
-                if(options.DepartmentLoadsIds != null && options.DepartmentLoadsIds.Count > 0)
+                if (options.DepartmentLoadsIds != null && options.DepartmentLoadsIds.Count > 0)
                     sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} gdl.DepartmentLoadId in @DepartmentLoadsIds");
 
                 if (!string.IsNullOrEmpty(options.Search))

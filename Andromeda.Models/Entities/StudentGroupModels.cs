@@ -16,8 +16,6 @@ namespace Andromeda.Models.Entities
 
         public int CurrentCourse { get; set; }
 
-        public int DepartmentId { get; set; }
-
         public StudyDirection StudyDirection { get; set; }
     }
 

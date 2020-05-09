@@ -46,6 +46,10 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 await ExecuteAsync(@"
                     delete from DisciplineTitle
                     where Id in @ids
+                    go
+
+                    delete from [GroupDisciplineLoad]
+                    where [DisciplineTitleId] in @Ids
                 ", new { ids });
                 _logger.LogInformation("Sql delete disciplines titles query successfully executed");
             }

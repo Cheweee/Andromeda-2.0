@@ -184,13 +184,13 @@ function getFaculty(id?: number): AppThunkAction<Promise<GetFacultySuccess | Get
         let facultys: Faculty[] = [];
 
         try {
-            if (state.facultyState.facultiesLoading === true) {
+            if (state.facultyState.modelsLoading === true) {
                 facultys = await departmentService.getFaculties({ id, type: DepartmentType.Faculty });
                 if (!facultys) {
                     dispatch(snackbarActions.showSnackbar('Не удалось найти факультет', SnackbarVariant.warning));
                 }
             } else {
-                facultys = state.facultyState.faculties;
+                facultys = state.facultyState.models;
             }
 
             let faculty = facultys.find(o => o.id === id);

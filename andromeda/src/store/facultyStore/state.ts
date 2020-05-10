@@ -1,29 +1,29 @@
 import { Faculty, DepartmentValidation } from "../../models"
 
-export type FacultiesLoading = {
-    facultiesLoading: true;
+export type ModelsLoading = {
+    modelsLoading: true;
 }
 
-export type FacultiesLoaded = {
-    facultiesLoading: false;
-    faculties: Faculty[];
+export type ModelsLoaded = {
+    modelsLoading: false;
+    models: Faculty[];
 }
 
-export type FacultyLoading = {
-    facultyLoading: true;
+export type ModelLoading = {
+    modelLoading: true;
 }
 
-export type FacultyLoaded = {
-    facultyLoading: boolean;
-    faculty?: Faculty;
+export type ModelLoaded = {
+    modelLoading: boolean;
+    model?: Faculty;
 }
 
-export type FacultiesDeleting = {
+export type ModelsDeleting = {
     deleting: true;
     ids: number[];
 }
 
-export type FacultiesDeleted = {
+export type ModelsDeleted = {
     deleting: false;
     deleted?: boolean;
     ids?: number[];
@@ -33,8 +33,8 @@ export type ValidateFacultyState = {
     formErrors?: DepartmentValidation;
 }
 
-export type FacultiesState = FacultiesLoading | FacultiesLoaded;
-export type SelectedFacultyState = FacultyLoading | FacultyLoaded;
-export type DeleteFacultiesState = FacultiesDeleting | FacultiesDeleted;
+export type ModelsState = ModelsLoading | ModelsLoaded;
+export type ModelState = ModelLoading | ModelLoaded;
+export type DeleteState = ModelsDeleting | ModelsDeleted;
 
-export type FacultyState = FacultiesState & SelectedFacultyState & DeleteFacultiesState & ValidateFacultyState;
+export type FacultyState = ModelsState & ModelState & DeleteState & ValidateFacultyState;

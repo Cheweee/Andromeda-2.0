@@ -1,11 +1,11 @@
-import { FacultyState, FacultiesState, SelectedFacultyState, ValidateFacultyState, DeleteFacultiesState } from "./state";
+import { FacultyState, ModelsState, ModelState, ValidateFacultyState, DeleteState } from "./state";
 import { DepartmentValidation, User } from "../../models";
 import { FacultiesActions, ActionType } from "./actions";
 
 const initialState: FacultyState = {
     deleting: false,
-    facultiesLoading: true,
-    facultyLoading: true,
+    modelsLoading: true,
+    modelLoading: true,
 
     formErrors: DepartmentValidation.initial
 }
@@ -13,46 +13,46 @@ const initialState: FacultyState = {
 export function facultyReducer(prevState: FacultyState = initialState, action: FacultiesActions): FacultyState {
     switch (action.type) {
         case ActionType.getFacultiesRequest: {
-            const state: FacultiesState = { facultiesLoading: true };
+            const state: ModelsState = { modelsLoading: true };
             return { ...prevState, ...state };
         }
         case ActionType.getFacultiesSuccess: {
-            const state: FacultiesState = { facultiesLoading: false, faculties: action.faculties };
+            const state: ModelsState = { modelsLoading: false, models: action.faculties };
             return { ...prevState, ...state };
         }
         case ActionType.getFacultiesFailure: {
-            const state: FacultiesState = { facultiesLoading: false, faculties: undefined };
+            const state: ModelsState = { modelsLoading: false, models: undefined };
             return { ...prevState, ...state };
         }
 
         case ActionType.getFacultyRequest: {
-            const state: SelectedFacultyState = { facultyLoading: true };
+            const state: ModelState = { modelLoading: true };
             return { ...prevState, ...state };
         }
         case ActionType.getFacultySuccess: {
-            const state: SelectedFacultyState = { facultyLoading: false, faculty: action.faculty };
+            const state: ModelState = { modelLoading: false, model: action.faculty };
             return { ...prevState, ...state };
         }
         case ActionType.getFacultyFailure: {
-            const state: SelectedFacultyState = { facultyLoading: false, faculty: undefined };
+            const state: ModelState = { modelLoading: false, model: undefined };
             return { ...prevState, ...state };
         }
 
         case ActionType.updateFacultyDetails: {
-            if (prevState.facultyLoading === true) return prevState;
+            if (prevState.modelLoading === true) return prevState;
 
-            const faculty = { ...prevState.faculty, ...action.faculty };
+            const faculty = { ...prevState.model, ...action.faculty };
             const formErrors = { ...prevState.formErrors, ...action.formErrors };
 
-            const state: SelectedFacultyState = { facultyLoading: false, faculty: faculty };
+            const state: ModelState = { modelLoading: false, model: faculty };
             const validationState: ValidateFacultyState = { formErrors: formErrors };
             return { ...prevState, ...state, ...validationState }
         }
 
         case ActionType.updateFacultyUsers: {
-            if (prevState.facultyLoading === true) return prevState;
+            if (prevState.modelLoading === true) return prevState;
 
-            const users = prevState.faculty.users.filter(o => o.id !== action.user.id);
+            const users = prevState.model.users.filter(o => o.id !== action.user.id);
 
             for (const role of action.roles) {
                 users.push({
@@ -66,76 +66,85 @@ export function facultyReducer(prevState: FacultyState = initialState, action: F
                 });
             }
 
-            const faculty = { ...prevState.faculty, users };
+            const faculty = { ...prevState.model, users };
 
-            const state: SelectedFacultyState = { facultyLoading: false, faculty };
+            const state: ModelState = { modelLoading: false, model: faculty };
             return { ...prevState, ...state };
         }
         case ActionType.deleteFacultyUsers: {
-            if (prevState.facultyLoading === true) return prevState;
+            if (prevState.modelLoading === true) return prevState;
 
-            const users = prevState.faculty.users.filter(o => o.userId !== action.id);
+            const users = prevState.model.users.filter(o => o.userId !== action.id);
 
-            const faculty = { ...prevState.faculty, users };
+            const faculty = { ...prevState.model, users };
 
-            const state: SelectedFacultyState = { facultyLoading: false, faculty };
+            const state: ModelState = { modelLoading: false, model: faculty };
             return { ...prevState, ...state };
         }
 
         case ActionType.updateFacultyDepartments: {
-            if (prevState.facultyLoading === true) return prevState;
+            if (prevState.modelLoading === true) return prevState;
 
-            const departments = prevState.faculty.departments.filter(o => action.departments.some(d => d.id !== o.id));
+            const departments = prevState.model.departments.filter(o => action.departments.some(d => d.id !== o.id));
 
             const faculty = {
-                ...prevState.faculty,
+                ...prevState.model,
                 departments: departments.concat(action.departments)
             };
 
-            const state: SelectedFacultyState = { facultyLoading: false, faculty: faculty };
+            const state: ModelState = { modelLoading: false, model: faculty };
             return { ...prevState, ...state };
         }
         case ActionType.deleteFacultyDepartments: {
-            if (prevState.facultyLoading === true) return prevState;
-            const departments = prevState.faculty.departments.filter(o => o.id !== action.id);
-            const faculty = { ...prevState.faculty, departments }
+            if (prevState.modelLoading === true) return prevState;
+            const departments = prevState.model.departments.filter(o => o.id !== action.id);
+            const faculty = { ...prevState.model, departments }
 
-            const state: SelectedFacultyState = { facultyLoading: false, faculty: faculty };
+            const state: ModelState = { modelLoading: false, model: faculty };
             return { ...prevState, ...state };
         }
 
         case ActionType.saveRequest: return prevState;
         case ActionType.createSuccess: {
-            if (prevState.facultiesLoading === true) return prevState;
-            const state: FacultiesState = { facultiesLoading: false, faculties: prevState.faculties.concat(action.department) };
-            return { ...prevState, ...state };
+            if (prevState.modelsLoading === true || prevState.modelLoading === true) return prevState;
+            
+            const updatedModel = { ...prevState.model, ...action.department };
+            const updatedModels = prevState.models.concat(action.department);
+
+            const modelsState: ModelsState = { modelsLoading: false, models: updatedModels };
+            const modelState: ModelState = { modelLoading: false, model: updatedModel };
+            return { ...prevState, ...modelsState, ...modelState };
         }
         case ActionType.updateSuccess: {
-            if (prevState.facultiesLoading === true) return prevState;
-            const updated = prevState.faculties.map(o => o.id == action.department.id ? action.department : o);
-            const state: FacultiesState = { facultiesLoading: false, faculties: updated };
-            return { ...prevState, ...state };
+            if (prevState.modelsLoading === true || prevState.modelLoading === true) return prevState;
+
+            const updatedModel = { ...prevState.model, ...action.department };
+            const updatedModels = prevState.models.map(o => o.id == action.department.id ? action.department : o);
+
+            const modelsState: ModelsState = { modelsLoading: false, models: updatedModels };
+            const modelState: ModelState = { modelLoading: false, model: updatedModel };
+            return { ...prevState, ...modelsState, ...modelState };
         }
         case ActionType.saveFailure: return prevState;
 
 
         case ActionType.deleteRequest: {
-            const deleteState: DeleteFacultiesState = { deleting: true, ids: action.ids };
+            const deleteState: DeleteState = { deleting: true, ids: action.ids };
             return { ...prevState, ...deleteState };
         }
         case ActionType.deleteSuccess: {
-            if (prevState.facultiesLoading === true) return prevState;
-            const state: FacultiesState = { facultiesLoading: false, faculties: prevState.faculties.filter((value) => !prevState.ids.includes(value.id)) };
-            const deleteState: DeleteFacultiesState = { deleting: false, deleted: true };
+            if (prevState.modelsLoading === true) return prevState;
+            const state: ModelsState = { modelsLoading: false, models: prevState.models.filter((value) => !prevState.ids.includes(value.id)) };
+            const deleteState: DeleteState = { deleting: false, deleted: true };
             return { ...prevState, ...deleteState, ...state };
         }
         case ActionType.deleteFailure: {
-            const deleteState: DeleteFacultiesState = { deleting: false, deleted: false };
+            const deleteState: DeleteState = { deleting: false, deleted: false };
             return { ...prevState, ...deleteState };
         }
 
         case ActionType.clearFacultyEditionState: {
-            const state: SelectedFacultyState = { facultyLoading: true, faculty: undefined };
+            const state: ModelState = { modelLoading: true, model: undefined };
             return { ...prevState, ...state };
         }
 

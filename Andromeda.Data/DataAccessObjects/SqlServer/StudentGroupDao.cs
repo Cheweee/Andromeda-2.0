@@ -80,17 +80,17 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                         sg.StudentsCount,
                         sg.StartYear,
                         sg.CurrentCourse
-                    from StudentGroup sg
-                    left join GroupDisciplineLoad gdl on gdl.StudentGroupId = sg.Id
-                    ");
-
-                if (options.DepartmentId.HasValue)
-                {
-                    sql.AppendLine("left join [StudyDirection] sd on sd.Id = sg.StudyDirectionId and sd.DepartmentId = @DepartmentId");
-                }
+                    from StudentGroup sg                    
+                ");
 
                 if (options.DepartmentLoadsIds != null && options.DepartmentLoadsIds.Count > 0)
-                    sql.AppendLine($"left join [StudyDirection] sd on sd.Id = sg.StudyDirectionId and sd.DepartmentId in @DepartmentLoadsIds");
+                    sql.AppendLine($"join GroupDisciplineLoad gdl on gdl.StudentGroupId = sg.Id and gdl.DepartmentLoadId in @DepartmentLoadsIds");
+
+                if (options.DepartmentId.HasValue)
+                    sql.AppendLine("join [StudyDirection] sd on sd.Id = sg.StudyDirectionId and sd.DepartmentId = @DepartmentId");
+
+                if (options.DepartmentIds != null && options.DepartmentIds.Count > 0)
+                    sql.AppendLine($"join [StudyDirection] sd on sd.Id = sg.StudyDirectionId and sd.DepartmentId in @DepartmentIds");
 
                     int conditionIndex = 0;
                 if (options.Id.HasValue)
@@ -101,9 +101,6 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
 
                 if (options.Names != null && options.Names.Count > 0)
                     sql.AppendLine($@"{(conditionIndex++ == 0 ? "where" : "and")} sg.Name in @Names");
-
-                if (options.DepartmentLoadsIds != null && options.DepartmentLoadsIds.Count > 0)
-                    sql.AppendLine($"{(conditionIndex++ == 0 ? "where" : "and")} gdl.DepartmentLoadId in @DepartmentLoadsIds");
 
                 if (!string.IsNullOrEmpty(options.Search))
                     sql.AppendLine($@"{(conditionIndex++ == 0 ? "where" : "and")} lower(sg.Name) like '%lower(@search)%'");

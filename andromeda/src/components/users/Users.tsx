@@ -94,8 +94,8 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
 
     let users: User[] = [];
 
-    if(userState.usersLoading === false) {
-        users = userState.users;
+    if(userState.modelsLoading === false) {
+        users = userState.models;
     }
 
     return (
@@ -113,7 +113,7 @@ export const Users = withStyles(styles)(withRouter(function (props: Props) {
                 </IconButton>
             </Grid>
             <Paper className={classes.margin1Y}>
-                <TableComponent columns={columns} data={users} loading={userState.usersLoading} />
+                <TableComponent columns={columns} data={users} loading={userState.modelsLoading} />
             </Paper>
             <ConfirmationDialog
                 open={open}

@@ -5,7 +5,7 @@ import * as Redux from "react-redux";
 
 import { WithStyles, withStyles } from "@material-ui/core/styles";
 import { Grid, Tooltip, IconButton, Card, LinearProgress, CardContent, Typography, Breadcrumbs, Link } from "@material-ui/core";
-import { ArrowBack, Close, Check, Edit } from "@material-ui/icons";
+import { Close, Check, Edit } from "@material-ui/icons";
 
 import clsx from "clsx";
 
@@ -76,19 +76,16 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
     }
 
     async function handleCancelClick() {
-        const { match } = props;
-        const tempId = match.params && match.params[paths.idParameterName];
-        const id = parseInt(tempId, null);
-        dispatch(roleActions.getRole(id));
+        dispatch(roleActions.getRole(role.id));
     }
 
     const { classes } = props;
 
-    const disabled = roleState.roleLoading || departmentState.loading;
+    const disabled = roleState.modelLoading || departmentState.loading;
 
     let role: Role = null;
-    if (roleState.roleLoading === false) {
-        role = roleState.role;
+    if (roleState.modelLoading === false) {
+        role = roleState.model;
     }
     let departments: Department[] = [];
     if (departmentState.loading === false) {
@@ -123,7 +120,7 @@ export const RoleComponent = withStyles(styles)(withRouter(function (props: Prop
                             </Tooltip>
                         </Grid>
                         <Card className={clsx(classes.margin1Y, classes.w100)}>
-                            {roleState.roleLoading && <LinearProgress variant="query" />}
+                            {roleState.modelLoading && <LinearProgress variant="query" />}
                             <CardContent>
                                 <RoleDetails
                                     disabled={disabled}

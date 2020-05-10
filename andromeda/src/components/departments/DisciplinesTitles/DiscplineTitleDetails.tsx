@@ -2,10 +2,8 @@ import * as React from "react";
 import { mergeStyles, getShortening } from "../../../utilities";
 import { commonStyles } from "../../../muiTheme";
 import { WithStyles, withStyles } from "@material-ui/core/styles";
-import { DisciplineTitle, DisciplineTitleValidation } from "../../../models";
-import { useState, useEffect } from "react";
+import { DisciplineTitle, DisciplineTitleValidation, Validation } from "../../../models";
 import { Dialog, DialogTitle, DialogContent, Grid, DialogActions, Button, TextField } from "@material-ui/core";
-import { group } from "console";
 
 const styles = mergeStyles(commonStyles);
 
@@ -16,28 +14,19 @@ interface Props extends WithStyles<typeof styles> {
     onAccept: (title: DisciplineTitle) => void;
 }
 
-const initialTitle: DisciplineTitle = {
-    name: '',
-    shortname: ''
-}
-
-const initialValidation: DisciplineTitleValidation = {
-    isValid: false
-}
-
 export const DisciplineTitleDetails = withStyles(styles)(function (props: Props) {
-    const [title, setTitle] = useState(initialTitle);
-    const [formErrors, setFormErrors] = useState(initialValidation);
+    const [name, setName] = React.useState<string>('');
+    const [shortname, setShortname] = React.useState<string>('');
+    const [formErrors, setFormErrors] = React.useState<DisciplineTitleValidation>(Validation.initial);
 
-    useEffect(() => {
-        if (props.disciplineTitle) {
-            setTitle(props.disciplineTitle);
-        }
+    React.useEffect(() => {
+        setName(props.disciplineTitle ? props.disciplineTitle.name : '');
+        setShortname(props.disciplineTitle ? props.disciplineTitle.shortname : '');
     }, [props.disciplineTitle]);
 
-    useEffect(() => {
-        const nameError = title.name ? '' : 'Наименование учебной дисциплины обязательно';
-        const shortnameError = title.shortname ? '' : 'Краткое наименование учебной дисциплины обязательно';
+    React.useEffect(() => {
+        const nameError = name ? '' : 'Наименование учебной дисциплины обязательно';
+        const shortnameError = shortname ? '' : 'Краткое наименование учебной дисциплины обязательно';
         const isValid = !nameError && !shortnameError;
 
         setFormErrors({
@@ -45,7 +34,7 @@ export const DisciplineTitleDetails = withStyles(styles)(function (props: Props)
             shortnameError,
             isValid
         });
-    }, [title]);
+    }, [name, shortname]);
 
     const {
         classes,
@@ -54,19 +43,27 @@ export const DisciplineTitleDetails = withStyles(styles)(function (props: Props)
         onAccept
     } = props;
 
-    const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    function handleNameChange (event: React.ChangeEvent<HTMLInputElement>) {
         const name = event.target && event.target.value;
         const shortname = getShortening(name);
-        setTitle({ ...title, name, shortname });
+        setName(name);
+        setShortname(shortname);
     }
 
-    const handleShortnameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setTitle({ ...title, shortname: event.target && event.target.value });
+    function handleShortnameChange (event: React.ChangeEvent<HTMLInputElement>) {
+        setShortname(event.target && event.target.value);
     }
 
-    const handleAccept = () => {
-        onAccept(title);
-        setTitle(initialTitle);
+    function handleAccept() {
+        onAccept({ name, shortname });
+        setName('');
+        setShortname('');
+    }
+
+    function handleCancel() {
+        onCancel();
+        setName('');
+        setShortname('');
     }
 
     return (
@@ -83,13 +80,13 @@ export const DisciplineTitleDetails = withStyles(styles)(function (props: Props)
                         variant="outlined"
                         fullWidth
                         required
-                        value={title.shortname}
+                        value={shortname}
                         onChange={handleShortnameChange}
                         error={Boolean(formErrors.shortnameError)}
                         helperText={formErrors.shortnameError}
                     />
                     <TextField
-                        id="name"
+                        id="disciplineTitlename"
                         name="name"
                         label="Наименование"
                         placeholder={`Введите наименование дисциплины`}
@@ -98,7 +95,7 @@ export const DisciplineTitleDetails = withStyles(styles)(function (props: Props)
                         fullWidth
                         multiline
                         required
-                        value={title.name}
+                        value={name}
                         onChange={handleNameChange}
                         error={Boolean(formErrors.nameError)}
                         helperText={formErrors.nameError}
@@ -106,7 +103,7 @@ export const DisciplineTitleDetails = withStyles(styles)(function (props: Props)
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onCancel} color="primary">
+                <Button onClick={handleCancel}>
                     Отмена
                     </Button>
                 <Button disabled={!formErrors.isValid} onClick={handleAccept} color="primary" autoFocus>

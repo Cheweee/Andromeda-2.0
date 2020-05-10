@@ -82,8 +82,8 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
     ]
 
     let roles: Role[] = [];
-    if(roleState.loading === false) {
-        roles = roleState.roles;
+    if(roleState.modelsLoading === false) {
+        roles = roleState.models;
     }
 
     return (
@@ -101,7 +101,7 @@ export const Roles = withStyles(styles)(withRouter(function (props: Props) {
                 </IconButton>
             </Grid>
             <Paper className={classes.margin1Y}>
-                <TableComponent columns={columns} data={roles} loading={roleState.loading} />
+                <TableComponent columns={columns} data={roles} loading={roleState.modelsLoading} />
             </Paper>
             <ConfirmationDialog
                 open={open}

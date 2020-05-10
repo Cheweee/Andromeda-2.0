@@ -164,8 +164,8 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
             )}
             {!departmentLoadState.modelsLoading && (
                 <Grid container direction="row" wrap="wrap">
-                    {Boolean(departmentLoads.length) ? departmentLoads.map(o =>
-                        <Grid item xs={3} className={classes.margin1}>
+                    {Boolean(departmentLoads.length) ? departmentLoads.map((o, index) =>
+                        <Grid key={index} item xs={3} className={classes.margin1}>
                             <Card>
                                 <CardContent>
                                     <DepartmentLoadDetails

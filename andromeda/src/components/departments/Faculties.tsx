@@ -84,8 +84,8 @@ export const Faculties = withStyles(styles)(withRouter(function (props: Props) {
     ]
 
     let departments: Faculty[] = [];
-    if(facultyState.facultiesLoading === false) 
-        departments = facultyState.faculties;
+    if(facultyState.modelsLoading === false) 
+        departments = facultyState.models;
 
     return (
         <Grid container direction="column" >
@@ -102,7 +102,7 @@ export const Faculties = withStyles(styles)(withRouter(function (props: Props) {
                 </IconButton>
             </Grid>
             <Paper className={classes.margin1Y}>
-                <TableComponent columns={columns} data={departments} loading={facultyState.facultiesLoading} />
+                <TableComponent columns={columns} data={departments} loading={facultyState.modelsLoading} />
             </Paper>
             <ConfirmationDialog
                 open={open}

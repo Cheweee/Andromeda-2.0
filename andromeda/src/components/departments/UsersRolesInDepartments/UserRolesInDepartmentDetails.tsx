@@ -93,7 +93,7 @@ export const UserRolesInDepartmentDetails = withStyles(styles)(function (props: 
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onCancel} color="primary">
+                <Button onClick={onCancel}>
                     Отмена
                     </Button>
                 <Button onClick={() => onClose(user, roles)} color="primary" autoFocus>

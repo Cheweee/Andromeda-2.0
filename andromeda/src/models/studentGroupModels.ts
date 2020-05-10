@@ -29,3 +29,7 @@ export interface StudentGroupValidation extends Validation {
     startYearError?: string;
     nameError?: string;
 }
+
+export namespace StudentGroupValidation {
+    export const initial = Validation.initial;
+}

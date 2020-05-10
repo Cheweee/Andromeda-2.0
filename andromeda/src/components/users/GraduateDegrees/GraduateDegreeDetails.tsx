@@ -44,11 +44,8 @@ export const GraduateDegreeDetails = withStyles(styles)(function (props: Props) 
 
     const {
         classes,
-
         branchesOfSciences,
-
         open,
-
         onAccept,
         onCancel
     } = props;
@@ -63,6 +60,14 @@ export const GraduateDegreeDetails = withStyles(styles)(function (props: Props) 
 
     function handleAccept() {
         onAccept(graduateDegree, branchOfScience);
+        
+        setGraduateDegree(null);
+        setBranchOfScience(null);
+    }
+
+    function handleCancel() {
+        onCancel();
+
         setGraduateDegree(null);
         setBranchOfScience(null);
     }
@@ -76,6 +81,7 @@ export const GraduateDegreeDetails = withStyles(styles)(function (props: Props) 
                         className={classes.w100}
                         noOptionsText={"Ученая степень не найдена"}
                         getOptionLabel={(option: GraduateDegree) => `${GraduateDegree.getGraduateDegreeDescription(option)}`}
+                        getOptionSelected={(option: GraduateDegree, value: GraduateDegree) => option === value}
                         options={GraduateDegrees}
                         value={graduateDegree}
                         onChange={handleGraduateDegreeChange}
@@ -97,6 +103,7 @@ export const GraduateDegreeDetails = withStyles(styles)(function (props: Props) 
                         className={classes.w100}
                         noOptionsText={"Отрасль науки не найдена"}
                         getOptionLabel={(option: BranchOfScience) => `${BranchOfScience.getBranchOfScienceDescription(option)}`}
+                        getOptionSelected={(option: BranchOfScience, value: BranchOfScience) => option === value}
                         options={branchesOfSciences}
                         value={branchOfScience}
                         onChange={handleBranchOfScienceChange}
@@ -117,7 +124,7 @@ export const GraduateDegreeDetails = withStyles(styles)(function (props: Props) 
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onCancel} color="primary">
+                <Button onClick={handleCancel}>
                     Отмена
                     </Button>
                 <Button disabled={!formErrors.isValid} onClick={handleAccept} color="primary" autoFocus>

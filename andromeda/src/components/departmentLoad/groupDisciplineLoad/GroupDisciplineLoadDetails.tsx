@@ -26,8 +26,8 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 export const GroupDisciplineLoadDetails = withStyles(styles)(function (props: Props) {
-    const [disciplineTitle, setDisciplineTitle] = React.useState<DisciplineTitle>(DisciplineTitle.initial);
-    const [studentGroup, setStudentGroup] = React.useState<StudentGroup>(StudentGroup.initial);
+    const [disciplineTitle, setDisciplineTitle] = React.useState<DisciplineTitle>(null);
+    const [studentGroup, setStudentGroup] = React.useState<StudentGroup>(null);
     const [semesterNumber, setSemesterNumber] = React.useState<number>(0);
 
     React.useEffect(() => {
@@ -76,7 +76,7 @@ export const GroupDisciplineLoadDetails = withStyles(styles)(function (props: Pr
                     <Autocomplete
                         noOptionsText={"Дисциплина не найдена"}
                         getOptionLabel={(option: DisciplineTitle) => `${option.name}`}
-                        getOptionSelected={(option: DisciplineTitle) => option.id === disciplineTitle.id}
+                        getOptionSelected={(option: DisciplineTitle, value: DisciplineTitle) => value && option.id === value.id}
                         options={disciplinesTitles}
                         value={disciplineTitle}
                         onChange={handleDisciplineTitleChange}
@@ -100,7 +100,7 @@ export const GroupDisciplineLoadDetails = withStyles(styles)(function (props: Pr
                         <Autocomplete
                             noOptionsText={"Группа не найдена"}
                             getOptionLabel={(option: StudentGroup) => `${option.name}`}
-                            getOptionSelected={(option: StudentGroup) => option.id === studentGroup.id}
+                            getOptionSelected={(option: StudentGroup, value: StudentGroup) => value && option.id === value.id}
                             options={studentGroups}
                             value={studentGroup}
                             onChange={handleStudentGroupChange}

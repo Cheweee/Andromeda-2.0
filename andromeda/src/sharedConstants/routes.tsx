@@ -31,7 +31,7 @@ const getDepartmentloadPath = (departmentIdParameter: string, idParameter: strin
 const getGroupDisciplineLoadPath = (
     departmentIdParameter: string,
     departmentLoadIdParameter: string,
-    modeParameter: string,
+    modeParameter?: string,
     disciplineIdParameter?: string,
     groupIdParameter?: string,
     semesterNumberParameter?: string
@@ -63,7 +63,7 @@ export const paths = {
     trainingDepartmentPath: getTrainingDepartmentPath(':' + idParameterName),
     rolePath: getRolePath(':' + idParameterName),
     departmentloadPath: getDepartmentloadPath(':' + departmentIdParameterName, ':' + idParameterName),
-    groupdisciplineloadPath: `/trainingdepartments/:${departmentIdParameterName}/departmentloads/:${departmentLoadIdParameterName}/groupdisciplineload`,
+    groupdisciplineloadPath: getGroupDisciplineLoadPath(':' + departmentIdParameterName, ':' + departmentLoadIdParameterName),
 
     getUserPath,
     getFacultyPath,

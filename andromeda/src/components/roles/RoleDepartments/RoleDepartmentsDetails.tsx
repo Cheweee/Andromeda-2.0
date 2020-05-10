@@ -114,17 +114,10 @@ export const RoleDepartmentsDetails = withStyles(styles)(function (props: Props)
             </DialogTitle>
             <DialogContent>
                 {Boolean(faculties.length) && (
-                    <ExpansionPanel square classes={{
-                        root: classes.panelRoot,
-                        expanded: classes.panelExpanded
-                    }}>
+                    <ExpansionPanel square classes={{ root: classes.panelRoot }}>
                         <ExpansionPanelSummary
                             expandIcon={<ExpandMore />}
-                            classes={{
-                                root: classes.summaryRoot,
-                                content: classes.summaryContent,
-                                expanded: classes.summaryExpanded
-                            }}
+                            classes={{ root: classes.summaryRoot, content: classes.summaryContent }}
                         >
                             <FormControlLabel
                                 onClick={(event) => event.stopPropagation()}
@@ -134,8 +127,8 @@ export const RoleDepartmentsDetails = withStyles(styles)(function (props: Props)
                         </ExpansionPanelSummary>
                         <ExpansionPanelDetails classes={{ root: classes.detailsRoot }}>
                             <List className={classes.w100}>
-                                {faculties.map(department =>
-                                    <ListItem button onClick={() => handleSelect(department)}>
+                                {faculties.map((department, index) =>
+                                    <ListItem key={index} button onClick={() => handleSelect(department)}>
                                         <Grid container direction="row" alignItems="center">
                                             <Checkbox
                                                 edge="start"
@@ -153,17 +146,10 @@ export const RoleDepartmentsDetails = withStyles(styles)(function (props: Props)
                 )}
                 <Divider />
                 {Boolean(trainingDepartments.length) && (
-                    <ExpansionPanel square classes={{
-                        root: classes.panelRoot,
-                        expanded: classes.panelExpanded
-                    }}>
+                    <ExpansionPanel square classes={{ root: classes.panelRoot }}>
                         <ExpansionPanelSummary
                             expandIcon={<ExpandMore />}
-                            classes={{
-                                root: classes.summaryRoot,
-                                content: classes.summaryContent,
-                                expanded: classes.summaryExpanded
-                            }}
+                            classes={{ root: classes.summaryRoot, content: classes.summaryContent }}
                         >
                             <FormControlLabel
                                 onClick={(event) => event.stopPropagation()}
@@ -173,8 +159,8 @@ export const RoleDepartmentsDetails = withStyles(styles)(function (props: Props)
                         </ExpansionPanelSummary>
                         <ExpansionPanelDetails classes={{ root: classes.detailsRoot }}>
                             <List className={classes.w100}>
-                                {trainingDepartments.map(department =>
-                                    <ListItem button onClick={() => handleSelect(department)}>
+                                {trainingDepartments.map((department, index) =>
+                                    <ListItem key={index} button onClick={() => handleSelect(department)}>
                                         <Grid container direction="row" alignItems="center">
                                             <Checkbox
                                                 edge="start"

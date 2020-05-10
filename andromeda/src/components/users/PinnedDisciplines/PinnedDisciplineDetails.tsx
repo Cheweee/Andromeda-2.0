@@ -20,7 +20,7 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 export const PinnedDisciplineDetails = withStyles(styles)(function (props: Props) {
-    const [disciplineTitle, setDisciplineTitle] = React.useState<DisciplineTitle>(DisciplineTitle.initial);
+    const [disciplineTitle, setDisciplineTitle] = React.useState<DisciplineTitle>(null);
     const [projectTypes, setProjectTypes] = React.useState<ProjectType[]>([]);
     const [formErrors, setFormErrors] = React.useState<PinnedDisciplineValidation>(PinnedDisciplineValidation.initial);
 
@@ -50,18 +50,25 @@ export const PinnedDisciplineDetails = withStyles(styles)(function (props: Props
         onAccept
     } = props;
 
-    function handleDisciplineTitleChange (event: React.ChangeEvent, value: DisciplineTitle) {
+    function handleDisciplineTitleChange(event: React.ChangeEvent, value: DisciplineTitle) {
         setDisciplineTitle(value);
     }
 
-    function handleProjectTypeChange (event: React.ChangeEvent, values: ProjectType[]) {
+    function handleProjectTypeChange(event: React.ChangeEvent, values: ProjectType[]) {
         setProjectTypes(values);
     }
 
     function handleAccept() {
         onAccept(disciplineTitle, projectTypes);
-        setDisciplineTitle(DisciplineTitle.initial);
+        setDisciplineTitle(null);
         setProjectTypes([]);
+    }
+
+    function handleCancel() {
+        setDisciplineTitle(null);
+        setProjectTypes([]);
+
+        onCancel();
     }
 
     return (
@@ -73,6 +80,7 @@ export const PinnedDisciplineDetails = withStyles(styles)(function (props: Props
                         className={classes.w100}
                         noOptionsText={"Дисциплина не найдена"}
                         getOptionLabel={(option: DisciplineTitle) => `${option.name}`}
+                        getOptionSelected={(option: DisciplineTitle) => disciplineTitle && option.id === disciplineTitle.id}
                         options={disciplinesTitles}
                         value={disciplineTitle}
                         onChange={handleDisciplineTitleChange}
@@ -116,9 +124,7 @@ export const PinnedDisciplineDetails = withStyles(styles)(function (props: Props
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onCancel} color="primary">
-                    Отмена
-                    </Button>
+                <Button onClick={handleCancel}>Отмена</Button>
                 <Button disabled={!formErrors.isValid} onClick={handleAccept} color="primary" autoFocus>
                     Принять
                 </Button>

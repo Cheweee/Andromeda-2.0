@@ -85,20 +85,20 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
 
     React.useEffect(() => { initialize(); }, [props.match.params]);
     React.useEffect(() => {
-        if (userState.usersLoading === true) return;
+        if (userState.modelsLoading === true) return;
 
         const departmentUsers = department && department.users;
 
         let users: User[] = [];
         if (!selectedUser) {
-            users = userState.users.filter(o => !users.map(u => u.id).includes(o.id));
+            users = userState.models.filter(o => !users.map(u => u.id).includes(o.id));
         } else {
             const usersWithoutSelectedUser = departmentUsers.filter(o => o.id !== selectedUser.id).map(o => o.id);
-            users = userState.users.filter(o => !usersWithoutSelectedUser.includes(o.id));
+            users = userState.models.filter(o => !usersWithoutSelectedUser.includes(o.id));
         }
 
         setUsers(users);
-    }, [userState.usersLoading, selectedUser])
+    }, [userState.modelsLoading, selectedUser])
 
     function initialize() {
         const { match } = props;
@@ -120,24 +120,21 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
     }
 
     function handleCancelClick() {
-        const { match } = props;
-        const tempId = match.params && match.params[paths.idParameterName];
-        const id = parseInt(tempId, null);
-        dispatch(facultyActions.getFaculty(id));
+        dispatch(facultyActions.getFaculty(department.id));
     }
 
     const { classes } = props;
 
     let department: Faculty = null;
     let facultyDepartments: TrainingDepartment[] = [];
-    if (facultyState.facultyLoading === false) {
-        department = facultyState.faculty;
+    if (facultyState.modelLoading === false) {
+        department = facultyState.model;
     }
     if (trainingDepartmentState.trainingDepartmentsLoading === false) {
         facultyDepartments = trainingDepartmentState.trainingDepartments.filter(o => department && o.parentId === department.id);
     }
 
-    const disabled = facultyState.facultyLoading || userState.usersLoading || trainingDepartmentState.trainingDepartmentsLoading;
+    const disabled = facultyState.modelLoading || userState.modelsLoading || trainingDepartmentState.trainingDepartmentsLoading;
 
     return (
         <form autoComplete="off" noValidate>
@@ -166,7 +163,7 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
                         </Tooltip>
                     </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        {facultyState.facultyLoading && <LinearProgress variant="query" />}
+                        {facultyState.modelLoading && <LinearProgress variant="query" />}
                         <CardContent>
                             <DepartmentDetails
                                 department={department}
@@ -202,7 +199,7 @@ export const FacultyComponent = withStyles(styles)(withRouter(function (props: P
                         </Tooltip>
                     </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        {userState.usersLoading && <LinearProgress variant="query" />}
+                        {userState.modelsLoading && <LinearProgress variant="query" />}
                         <CardContent>
                             <Grid className={clsx(classes.overflowContainer, classes.maxHeight300)}>
                                 <UsersRolesInDepartment

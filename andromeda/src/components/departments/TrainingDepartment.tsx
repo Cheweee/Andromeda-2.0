@@ -158,9 +158,9 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
     }
 
     function handleUserRolesEdit(userId: number) {
-        if(userState.usersLoading === true) return;
-        
-        const selectedUser = userState.users.find(o => o.id === userId);
+        if (userState.modelsLoading === true) return;
+
+        const selectedUser = userState.models.find(o => o.id === userId);
         const selectedRolesInDepartmentIds = department.users.filter(o => o.userId === userId).map(o => o.roleInDepartmentId);
         const selectedRolesInDepartment = department.roles.filter(o => selectedRolesInDepartmentIds.includes(o.id));
 
@@ -197,21 +197,18 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
         dispatch(userActions.getUsers({}));
     }
 
-    const handleBackClick = () => {
+    function handleBackClick() {
         const { history } = props;
         dispatch(trainingDepartmentActions.clearTrainingDepartmentEditionState());
         history.push(paths.trainingDepartmentsPath);
     }
 
-    const handleSaveClick = async () => {
+    function handleSaveClick() {
         dispatch(trainingDepartmentActions.saveTrainingDepartment(department));
     }
 
-    const handleCancelClick = async () => {
-        const { match } = props;
-        const tempId = match.params && match.params[paths.idParameterName];
-        const id = parseInt(tempId, null);
-        dispatch(trainingDepartmentActions.getTrainingDepartment(id));
+    function handleCancelClick() {
+        dispatch(trainingDepartmentActions.getTrainingDepartment(department.id));
     }
 
     function handleStudyload() {
@@ -228,20 +225,20 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
         departmentUsers = department && department.users || [];
     }
 
-    const disabled = trainingDepartmentState.trainingDepartmentLoading || userState.usersLoading;
+    const disabled = trainingDepartmentState.trainingDepartmentLoading || userState.modelsLoading;
 
     let faculties: Faculty[] = [];
-    if (facultyState.facultiesLoading === false) {
-        faculties = facultyState.faculties;
+    if (facultyState.modelsLoading === false) {
+        faculties = facultyState.models;
     }
 
     let users: User[] = [];
-    if (userState.usersLoading === false) {
+    if (userState.modelsLoading === false) {
         if (!selectedUser) {
-            users = userState.users.filter(o => !departmentUsers.map(u => u.userId).includes(o.id));
+            users = userState.models.filter(o => !departmentUsers.map(u => u.userId).includes(o.id));
         } else {
             const usersWithouteSelectedUser = departmentUsers.filter(o => o.id !== selectedUser.id).map(o => o.id);
-            users = userState.users.filter(o => !usersWithouteSelectedUser.includes(o.id));
+            users = userState.models.filter(o => !usersWithouteSelectedUser.includes(o.id));
         }
     }
 
@@ -405,7 +402,7 @@ export const TrainingDepartmentComponent = withStyles(styles)(withRouter(functio
                 <StudentGroupDetails
                     studyDirections={department && department.studyDirections || []}
                     open={studentGroupOpen}
-                    selectedGroup={selectedStudentGroup}
+                    group={selectedStudentGroup}
                     onCancel={handleStudentGroupDetailsCancel}
                     onAccept={handleStudentGroupDetailsAccept}
                 />

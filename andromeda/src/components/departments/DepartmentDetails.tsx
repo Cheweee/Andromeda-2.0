@@ -4,7 +4,7 @@ import { commonStyles } from "../../muiTheme";
 import { withStyles, WithStyles } from "@material-ui/core/styles";
 import { Grid, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import { Faculty, Department, DepartmentValidation, DepartmentType } from "../../models";
+import { Department, DepartmentValidation, DepartmentType } from "../../models";
 import { capitalize } from "../../utilities";
 import { useState, useEffect } from "react";
 
@@ -22,11 +22,10 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 export const DepartmentDetails = withStyles(styles)(function (props: Props) {
-    const [ selectedParent, setSelectedParent ] = useState<Department>(Department.initial);
+    const [ selectedParent, setSelectedParent ] = useState<Department>(null);
 
     useEffect(() => {
-        const parent = props.parentDepartment || Department.initial;
-        setSelectedParent(parent);
+        setSelectedParent(props.parentDepartment);
     }, [props.parentDepartment]);
 
     const {
@@ -87,12 +86,11 @@ export const DepartmentDetails = withStyles(styles)(function (props: Props) {
                         id="name"
                         name="name"
                         label="Сокращение"
-                        placeholder={`Введите сокращение наименования ${placeholder}`}
+                        placeholder={`Введите сокращенное наименование ${placeholder}`}
                         margin="normal"
                         variant="outlined"
                         fullWidth
                         required
-                        autoComplete="firstname"
                         disabled={disabled}
                         value={department && department.name || ''}
                         error={Boolean(formErrors.nameError)}
@@ -104,11 +102,10 @@ export const DepartmentDetails = withStyles(styles)(function (props: Props) {
                     <TextField
                         id="fullname"
                         name="fullname"
-                        label="Полное наименование"
-                        placeholder={`Введите полное наименование ${placeholder}`}
+                        label="наименование"
+                        placeholder={`Введите наименование ${placeholder}`}
                         margin="normal"
                         variant="outlined"
-                        autoComplete="fullname"
                         fullWidth
                         disabled={disabled}
                         value={department && department.fullName || ''}
@@ -125,6 +122,7 @@ export const DepartmentDetails = withStyles(styles)(function (props: Props) {
                             className={classes.w100}
                             noOptionsText={"Факультет не найден"}
                             getOptionLabel={(option: Department) => option.fullName}
+                            getOptionSelected={(option: Department, value: Department) => value && option.id === value.id}
                             options={parentDepartments}
                             value={selectedParent}
                             onChange={handleParentChange}

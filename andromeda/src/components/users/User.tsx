@@ -34,8 +34,6 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
         disciplineTitleState: state.disciplineTitleState
     }));
     //#region User state
-    const [isUserExist, setIsUserExist] = React.useState<boolean>(false);
-
     function handleUserDetailsChange(model: User) {
         dispatch(userActions.updateUserDetails(model));
     }
@@ -91,10 +89,7 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
     }
 
     function handlePinnedDisciplineEdit(disciplineTitleId: number) {
-        const discipline: DisciplineTitle = {
-            name: user.pinnedDisciplines.find(o => o.disciplineTitleId === disciplineTitleId).disciplineTitle,
-            id: user.pinnedDisciplines.find(o => o.disciplineTitleId === disciplineTitleId).disciplineTitleId
-        };
+        const discipline: DisciplineTitle = user.pinnedDisciplines.find(o => o.disciplineTitleId === disciplineTitleId).title;
         const projectTypes = user.pinnedDisciplines.filter(o => o.disciplineTitleId === disciplineTitleId).map(o => o.projectType);
 
         setPinnedDisciplineDetailsOpen(true);
@@ -126,7 +121,6 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
         const { match } = props;
         const tempId = match.params && match.params[paths.idParameterName];
         const id = parseInt(tempId, null);
-        setIsUserExist(Boolean(id));
         dispatch(userActions.getUser(id));
         //TODO: Разобраться с выборкой наименований дисциплин
         dispatch(disciplineTitleActions.getDisciplinesTitles({}));
@@ -144,19 +138,17 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
 
     function handleCancelClick() {
         const { match } = props;
-        const tempId = match.params && match.params[paths.idParameterName];
-        const id = parseInt(tempId, null);
-        dispatch(userActions.getUser(id));
+        dispatch(userActions.getUser(user.id));
     }
 
     const { classes } = props;
 
-    const userDetailsDisabled = userState.userLoading || disciplineTitleState.loading;
+    const userDetailsDisabled = userState.modelLoading || disciplineTitleState.loading;
     let user: User = null;
     let pinnedDisciplines: PinnedDiscipline[] = [];
     let graduateDegrees: UserGraduateDegree[] = [];
-    if (userState.userLoading === false) {
-        user = userState.user;
+    if (userState.modelLoading === false) {
+        user = userState.model;
         pinnedDisciplines = user.pinnedDisciplines;
         graduateDegrees = user.graduateDegrees;
     }
@@ -172,12 +164,14 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
     }
 
     let branchesOfSciences: BranchOfScience[] = [];
-    if(!selectedBranchOfScience) {
+    if(selectedBranchOfScience === null) {
         branchesOfSciences = BranchesOfSciences.filter(o => !graduateDegrees.map(o => o.branchOfScience).includes(o));
     } else {
         const userDisciplinesWithoutSelected = graduateDegrees.filter(o => o.branchOfScience !== selectedBranchOfScience).map(o => o.branchOfScience);
         branchesOfSciences = BranchesOfSciences.filter(o => !userDisciplinesWithoutSelected.includes(o));
     }
+
+    const isUserExist = user && Boolean(user.id);
 
     return (
         <form autoComplete="off" noValidate>
@@ -206,7 +200,7 @@ export const UserComponent = withStyles(styles)(function (props: Props) {
                         </Tooltip>
                     </Grid>
                     <Card className={clsx(classes.margin1Y, classes.w100)}>
-                        {userState.userLoading && <LinearProgress variant="query" />}
+                        {userState.modelLoading && <LinearProgress variant="query" />}
                         <CardContent>
                             <UserDetails
                                 user={user}

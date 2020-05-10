@@ -4,50 +4,42 @@ import { mergeStyles } from "../../../utilities";
 import { commonStyles } from "../../../muiTheme";
 import { Dialog, DialogTitle, DialogContent, Grid, TextField, InputAdornment, DialogActions, Button, FormControl, FormHelperText } from "@material-ui/core";
 import { StudentGroup, StudyDirection, StudentGroupValidation } from "../../../models";
-import { useState, useEffect } from "react";
 import { Autocomplete } from "@material-ui/lab";
 
 const styles = mergeStyles(commonStyles);
 
 const now = new Date();
+const currentMonth = now.getMonth();
+const currentYear = now.getFullYear();
 const minYear = now.getFullYear() - 5;
 
 interface Props extends WithStyles<typeof styles> {
     studyDirections: StudyDirection[];
-    selectedGroup: StudentGroup;
+    group: StudentGroup;
     open: boolean;
     onCancel: () => void;
     onAccept: (group: StudentGroup) => void;
 }
 
-const initialGroup: StudentGroup = {
-    currentCourse: 1,
-    name: '',
-    startYear: minYear,
-    studentsCount: 0,
-    studyDirectionId: 0,
-
-    studyDirection: null
-};
-
-const initialValidation: StudentGroupValidation = {
-    isValid: false,
-};
-
 export const StudentGroupDetails = withStyles(styles)(function (props: Props) {
-    const [group, setGroup] = useState(initialGroup);
-    const [formErrors, setFormErrors] = useState(initialValidation);
+    const [name, setName] = React.useState<string>('');
+    const [startYear, setStartYear] = React.useState<number>(minYear);
+    const [studentsCount, setStudentsCount] = React.useState<number>(0);
+    const [studyDirection, setStudyDirection] = React.useState<StudyDirection>(null);
+    const [formErrors, setFormErrors] = React.useState<StudentGroupValidation>(StudentGroupValidation.initial);
 
-    useEffect(() => {
-        if (props.selectedGroup)
-            setGroup(props.selectedGroup);
-    }, [props.selectedGroup]);
+    React.useEffect(() => {
+        setName(props.group ? props.group.name : '');
+        setStudyDirection(props.group ? props.group.studyDirection : null);
+        setStartYear(props.group ? props.group.startYear : minYear);
+        setStudentsCount(props.group ? props.group.studentsCount : 0);
+    }, [props.group]);
 
-    useEffect(() => {
-        const nameError = group.name ? '' : 'Наименование группы обязательно.';
-        const startYearError = group.startYear > minYear ? '' : 'Введен некорректный год начала обучения.';
-        const studentsCountError = group.studentsCount > 0 ? '' : 'Количество стундентов должно быть больше 0.';
-        const studyDirectionError = group.studyDirection ? '' : 'Направление подготовки обязательно';
+    React.useEffect(() => {
+        const nameError = name ? '' : 'Наименование группы обязательно.';
+        const startYearError = startYear >= minYear ? '' : 'Введен некорректный год начала обучения.';
+        const studentsCountError = studentsCount > 0 ? '' : 'Количество стундентов должно быть больше 0.';
+        const studyDirectionError = studyDirection ? '' : 'Направление подготовки обязательно';
         const isValid = !nameError && !startYearError && !studentsCountError && !studyDirectionError;
 
         setFormErrors({
@@ -57,7 +49,7 @@ export const StudentGroupDetails = withStyles(styles)(function (props: Props) {
             studyDirectionError,
             isValid
         });
-    }, [group]);
+    }, [name, startYear, studentsCount, studyDirection]);
 
     const {
         classes,
@@ -67,27 +59,45 @@ export const StudentGroupDetails = withStyles(styles)(function (props: Props) {
         onAccept
     } = props;
 
-    const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setGroup({ ...group, name: event.target && event.target.value });
+    function handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setName(event.target && event.target.value);
     }
 
-    const handleStudyDirectionChange = (event: React.ChangeEvent, value: StudyDirection) => {
-        setGroup({ ...group, studyDirectionId: value && value.id, studyDirection: value });
+    function handleStudyDirectionChange(event: React.ChangeEvent, value: StudyDirection) {
+        setStudyDirection(value);
     }
 
-    const handleStartYearChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    function handleStartYearChange(event: React.ChangeEvent<HTMLInputElement>) {
         const startYear = parseInt(event.target && event.target.value);
-        setGroup({ ...group, startYear });
+        setStartYear(startYear);
     }
 
-    const handleStudentsCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    function handleStudentsCountChange(event: React.ChangeEvent<HTMLInputElement>) {
         const studentsCount = parseInt(event.target && event.target.value);
-        setGroup({ ...group, studentsCount });
+        setStudentsCount(studentsCount);
     }
 
-    const handleAccept = () => {
-        onAccept(group);
-        setGroup(initialGroup);
+    function handleAccept() {
+        onAccept({
+            currentCourse: currentMonth > 8 ? currentYear - startYear : currentYear - 1 - startYear,
+            name: name,
+            startYear: startYear,
+            studentsCount: studentsCount,
+            studyDirectionId: studyDirection.id,
+            studyDirection: studyDirection
+        });
+        setName('');
+        setStudyDirection(null);
+        setStartYear(minYear);
+        setStudentsCount(0);
+    }
+
+    function handleCancel() {
+        onCancel();
+        setName('');
+        setStudyDirection(null);
+        setStartYear(minYear);
+        setStudentsCount(0);
     }
 
     return (
@@ -100,7 +110,7 @@ export const StudentGroupDetails = withStyles(styles)(function (props: Props) {
                         noOptionsText={"Направление подготовки не найдено"}
                         getOptionLabel={(option: StudyDirection) => `${option.code} ${option.shortName}`}
                         options={studyDirections}
-                        value={group.studyDirection}
+                        value={studyDirection}
                         onChange={handleStudyDirectionChange}
                         renderOption={(option: StudyDirection) => `${option.code} ${option.shortName}`}
                         renderInput={params => (
@@ -111,7 +121,7 @@ export const StudentGroupDetails = withStyles(styles)(function (props: Props) {
                                 variant="outlined"
                                 label="Направление подготовки"
                                 placeholder="Выберите направление подготовки"
-                                value={group.studyDirection ? `${group.studyDirection.code} ${group.studyDirection.shortName}` : ''}
+                                value={studyDirection ? `${studyDirection.code} ${studyDirection.shortName}` : ''}
                                 error={Boolean(formErrors.studyDirectionError)}
                                 helperText={formErrors.studyDirectionError}
                             />
@@ -131,7 +141,7 @@ export const StudentGroupDetails = withStyles(styles)(function (props: Props) {
                                 required
                                 inputProps={{ min: minYear }}
                                 InputProps={{ endAdornment: <InputAdornment position="end">г.</InputAdornment> }}
-                                value={group.startYear}
+                                value={startYear}
                                 onChange={handleStartYearChange}
                                 error={Boolean(formErrors.startYearError)}
                                 helperText={formErrors.startYearError}
@@ -139,8 +149,8 @@ export const StudentGroupDetails = withStyles(styles)(function (props: Props) {
                         </Grid>
                         <Grid item xs className={classes.margin1Left}>
                             <TextField
-                                id="name"
-                                name="name"
+                                id="studentsCount"
+                                name="studentsCount"
                                 margin="normal"
                                 type="number"
                                 variant="outlined"
@@ -150,7 +160,7 @@ export const StudentGroupDetails = withStyles(styles)(function (props: Props) {
                                 required
                                 inputProps={{ min: 0 }}
                                 InputProps={{ endAdornment: <InputAdornment position="end">чел.</InputAdornment> }}
-                                value={group.studentsCount}
+                                value={studentsCount}
                                 onChange={handleStudentsCountChange}
                                 error={Boolean(formErrors.studentsCountError)}
                                 helperText={formErrors.studentsCountError}
@@ -158,7 +168,7 @@ export const StudentGroupDetails = withStyles(styles)(function (props: Props) {
                         </Grid>
                     </Grid>
                     <TextField
-                        id="name"
+                        id="studentGroupName"
                         name="name"
                         label="Наименование"
                         placeholder={`Введите наименование группы`}
@@ -166,7 +176,7 @@ export const StudentGroupDetails = withStyles(styles)(function (props: Props) {
                         variant="outlined"
                         fullWidth
                         required
-                        value={group.name}
+                        value={name}
                         onChange={handleNameChange}
                         error={Boolean(formErrors.nameError)}
                         helperText={formErrors.nameError}
@@ -174,7 +184,7 @@ export const StudentGroupDetails = withStyles(styles)(function (props: Props) {
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onCancel} color="primary">
+                <Button onClick={handleCancel}>
                     Отмена
                     </Button>
                 <Button disabled={!formErrors.isValid} onClick={handleAccept} color="primary" autoFocus>

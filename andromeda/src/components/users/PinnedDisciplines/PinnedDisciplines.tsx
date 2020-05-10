@@ -27,16 +27,15 @@ export const PinnedDisciplines = withStyles(styles)(function (props: Props) {
     const disciplinesDisctionary = [];
 
     for (const discipline of pinnedDisciplines) {
-        if (disciplinesDisctionary.find(o => o.disciplineTitle === discipline.disciplineTitle))
+        if (disciplinesDisctionary.find(o => o.disciplineTitleId === discipline.title.id))
             continue;
 
         const projectsTypes = pinnedDisciplines.filter(o => o.disciplineTitleId === discipline.disciplineTitleId).map(o => o.projectType);
         const projectsTypesDescription: string = projectsTypes.reduce((previous: string, current: ProjectType) => (previous ? (previous + '; ') : '') + ProjectType.getProjectTypeDescription(current), undefined);
 
         disciplinesDisctionary.push({
-            disciplineTitle: discipline.disciplineTitle,
-            disciplineTitleId: discipline.disciplineTitleId,
-            id: discipline.id,
+            disciplineTitleId: discipline.title.id,
+            title: discipline.title,
             projectsTypes: projectsTypes,
             projectsTypesDescription: projectsTypesDescription
         });
@@ -45,7 +44,7 @@ export const PinnedDisciplines = withStyles(styles)(function (props: Props) {
     const listItems = disciplinesDisctionary.map((discipline, index) => (
         <ListItem key={index}>
             <ListItemText
-                primary={discipline.disciplineTitle}
+                primary={discipline.title.name}
                 secondary={discipline.projectsTypesDescription}
             />
             <ListItemSecondaryAction>

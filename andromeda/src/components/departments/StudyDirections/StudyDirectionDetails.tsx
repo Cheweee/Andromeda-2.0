@@ -136,7 +136,7 @@ export const StudyDirectionDetails = withStyles(styles)(function (props: Props) 
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onCancel} color="primary">
+                <Button onClick={onCancel}>
                     Отмена
                     </Button>
                 <Button disabled={!formErrors.isValid} onClick={handleAccept} color="primary" autoFocus>

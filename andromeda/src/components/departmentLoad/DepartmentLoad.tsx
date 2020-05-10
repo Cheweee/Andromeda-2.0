@@ -254,8 +254,8 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     }
 
     let departmentUsers: User[] = [];
-    if (userState.usersLoading === false) {
-        departmentUsers = userState.users;
+    if (userState.modelsLoading === false) {
+        departmentUsers = userState.models;
     }
 
     let department: TrainingDepartment = null;
@@ -266,15 +266,15 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     }
 
     let roles: Role[] = [];
-    if (roleState.loading === false) {
-        roles = roleState.roles;
+    if (roleState.modelsLoading === false) {
+        roles = roleState.models;
     }
 
     const groupDisciplineLoad: GroupDisciplineLoad[] = departmentLoad && departmentLoad.groupDisciplineLoad || [];
     const total: number = departmentLoad && departmentLoad.total || 0;
     const studyYear: string = departmentLoad && departmentLoad.studyYear || '';
 
-    const disabled = trainingDepartmentState.trainingDepartmentLoading && userState.usersLoading && departmentLoadState.modelLoading;
+    const disabled = trainingDepartmentState.trainingDepartmentLoading && userState.modelsLoading && departmentLoadState.modelLoading;
 
     const allocatedStudyLoad = groupDisciplineLoad.map(o => o.studyLoad).reduce((prev, curr) => prev.concat(curr), [])
         .filter(o => o.usersLoad && o.usersLoad.length > 0).map(o => o.value).reduce((prev, curr) => prev + curr, 0);

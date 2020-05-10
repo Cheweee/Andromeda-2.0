@@ -10,16 +10,10 @@ export const expansionPanelStyles = (theme: Theme) => ({
         '&:before': {
             display: 'none',
         },
-        '&$expanded': {
-            margin: 'auto',
-        },
     },
     panelExpanded: {},
     summaryRoot: {
         minHeight: 56,
-        '&$expanded': {
-            minHeight: 56,
-        },
     },
     summaryContent: {},
     summaryExpanded: {},

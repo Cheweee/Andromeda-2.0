@@ -153,7 +153,7 @@
             "preLaunchTask": "build_utility",
             "program": "${workspaceFolder}/Andromeda.Utilities/bin/Debug/netcoreapp3.1/Andromeda.Utilities.dll",
             "args": [
-                "migrate-down"
+                "migrate-down", "--migrate-version", "202005090005"
             ],
             "cwd": "${workspaceFolder}/Andromeda.Utilities",
             "console": "internalConsole",

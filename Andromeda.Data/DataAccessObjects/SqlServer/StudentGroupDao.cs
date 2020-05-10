@@ -49,8 +49,7 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                 _logger.LogInformation("Trying to execute sql delete student groups query");
                 await ExecuteAsync(@"
                     delete from StudentGroup
-                    where Id in @Ids
-                    go
+                    where Id in @Ids;
 
                     delete from [GroupDisciplineLoad]
                     where [StudentGroupId] in @Ids

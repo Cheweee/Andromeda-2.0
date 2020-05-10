@@ -387,9 +387,6 @@ namespace Andromeda.Services
                     if (!studentGroups.Any(o => o.Name == group.Name))
                         studentGroups.Add(group);
 
-                    var faculty = faculties.Find(o => o.Name == facultyCell.StringCellValue
-                    || o.FullName == facultyCell.StringCellValue);
-
                     int semesterNumber = Convert.ToInt32(semesterCell.NumericCellValue);
                     int studyWeeksCount = Convert.ToInt32(studyWeeksCell.NumericCellValue);
                     double amount = amountCell.NumericCellValue;
@@ -398,8 +395,7 @@ namespace Andromeda.Services
                     {
                         DisciplineTitle = title,
                         DisciplineTitleId = title.Id,
-                        Faculty = faculty,
-                        FacultyId = faculty.Id,
+                        FacultyName = facultyCell.StringCellValue,
                         SemesterNumber = semesterNumber,
                         StudentGroup = group,
                         StudentGroupId = group.Id,

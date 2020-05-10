@@ -36,14 +36,13 @@ namespace Andromeda.Models.Entities
         public int DepartmentLoadId { get; set; }
         public int DisciplineTitleId { get; set; }
         public int StudentGroupId { get; set; }
-        public int FacultyId { get; set; }
         public int SemesterNumber { get; set; }
         public int StudyWeeksCount { get; set; }
         public double Amount { get; set; }
+        public string FacultyName { get; set; }
 
         public DisciplineTitle DisciplineTitle { get; set; }
         public StudentGroup StudentGroup { get; set; }
-        public Department Faculty { get; set; }
 
         public List<StudyLoad> StudyLoad { get; set; }
     }

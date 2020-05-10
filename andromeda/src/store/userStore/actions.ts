@@ -286,13 +286,13 @@ function getUser(id?: number): AppThunkAction<Promise<GetSuccess | GetFailure>> 
         let users: User[] = [];
 
         try {
-            if (state.userState.usersLoading === true) {
+            if (state.userState.modelsLoading === true) {
                 users = await userService.get({ id });
                 if (!users) {
                     dispatch(snackbarActions.showSnackbar('Не удалось найти пользователя', SnackbarVariant.warning));
                 }
             } else {
-                users = state.userState.users;
+                users = state.userState.models;
             }
 
             let user = users.find(o => o.id === id);

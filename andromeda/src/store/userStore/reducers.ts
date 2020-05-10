@@ -1,12 +1,12 @@
-import { UserState, UsersState, AuthenticationState, DeleteUsersState, ValidateUserState, SelectedUserState } from "./state";
+import { UserState, ModelsState, AuthenticationState, DeleteState, ValidateUserState, ModelState } from "./state";
 import { UserActions, ActionType } from "./actions";
 import { UserValidation } from "../../models";
 
 const initialState: UserState = {
     authenticating: false,
-    usersLoading: true,
+    modelsLoading: true,
     deleting: false,
-    userLoading: true,
+    modelLoading: true,
 
     formErrors: UserValidation.initial
 }
@@ -32,133 +32,135 @@ export function userReducer(prevState: UserState = initialState, action: UserAct
         }
 
         case ActionType.getUserRequest: {
-            const state: SelectedUserState = { userLoading: true };
+            const state: ModelState = { modelLoading: true };
             return { ...prevState, ...state };
         }
         case ActionType.getUserSuccess: {
-            const state: SelectedUserState = { userLoading: false, user: action.user };
+            const state: ModelState = { modelLoading: false, model: action.user };
             return { ...prevState, ...state };
         }
         case ActionType.getUserFailure: {
-            const state: SelectedUserState = { userLoading: false, user: undefined };
+            const state: ModelState = { modelLoading: false, model: undefined };
             return { ...prevState, ...state };
         }
 
         case ActionType.getUsersRequest: {
-            const state: UsersState = { usersLoading: true };
+            const state: ModelsState = { modelsLoading: true };
             return { ...prevState, ...state };
         }
         case ActionType.getUsersSuccess: {
-            const state: UsersState = { usersLoading: false, users: action.users };
+            const state: ModelsState = { modelsLoading: false, models: action.users };
             return { ...prevState, ...state };
         }
         case ActionType.getUsersFailure: {
-            const state: UsersState = { usersLoading: false, users: undefined };
+            const state: ModelsState = { modelsLoading: false, models: undefined };
             return { ...prevState, ...state };
         }
 
         case ActionType.saveRequest: return prevState;
         case ActionType.createSuccess: {
-            if (prevState.usersLoading === false) {
-                const state: UsersState = { usersLoading: false, users: prevState.users.concat(action.user) };
-                return { ...prevState, ...state };
-            }
+            if (prevState.modelsLoading === true || prevState.modelLoading === true) return prevState;
+            
+            const updatedModel = { ...prevState.model, ...action.user };
+            const updatedModels = prevState.models.concat(action.user);
 
-            return prevState;
+            const modelsState: ModelsState = { modelsLoading: false, models: updatedModels };
+            const modelState: ModelState = { modelLoading: false, model: updatedModel };
+            return { ...prevState, ...modelsState, ...modelState };
         }
         case ActionType.updateSuccess: {
-            if (prevState.usersLoading === false) {
-                const updated = prevState.users.map(o => o.id == action.user.id ? action.user : o);
-                const state: UsersState = { usersLoading: false, users: updated };
-                return { ...prevState, ...state };
-            }
+            if (prevState.modelsLoading === true || prevState.modelLoading === true) return prevState;
 
-            return prevState;
+            const updatedModel = { ...prevState.model, ...action.user };
+            const updatedModels = prevState.models.map(o => o.id == action.user.id ? action.user : o);
+
+            const modelsState: ModelsState = { modelsLoading: false, models: updatedModels };
+            const modelState: ModelState = { modelLoading: false, model: updatedModel };
+            return { ...prevState, ...modelsState, ...modelState };
         }
         case ActionType.saveFailure: return prevState;
 
         case ActionType.updateUserDetails: {
-            if (prevState.userLoading === true) {
+            if (prevState.modelLoading === true) {
                 return prevState;
             }
 
-            const user = { ...prevState.user, ...action.user };
+            const user = { ...prevState.model, ...action.user };
             const formErrors = { ...prevState.formErrors, ...action.formErrors };
 
-            const state: SelectedUserState = { userLoading: false, user: user }; 
+            const state: ModelState = { modelLoading: false, model: user }; 
             const validationState: ValidateUserState = { formErrors: formErrors };
             return { ...prevState, ...state, ...validationState }
         }
         case ActionType.updateUserPinnedDisciplines: {
-            if (prevState.userLoading === true) return prevState;
+            if (prevState.modelLoading === true) return prevState;
 
-            const pinnedDisciplines = prevState.user.pinnedDisciplines.filter(o => o.disciplineTitleId !== action.disciplineTitle.id);
+            const pinnedDisciplines = prevState.model.pinnedDisciplines.filter(o => o.disciplineTitleId !== action.disciplineTitle.id);
 
             for (const projectType of action.projectTypes) {
                 pinnedDisciplines.push({
-                    disciplineTitleId: action.disciplineTitle.id,
-                    userId: prevState.user.id,
+                    userId: prevState.model.id,
                     projectType: projectType,
-                    disciplineTitle: action.disciplineTitle.name,
+                    disciplineTitleId: action.disciplineTitle.id,
                     title: action.disciplineTitle
                 });
             }
 
-            const user = { ...prevState.user, pinnedDisciplines }
+            const user = { ...prevState.model, pinnedDisciplines }
 
-            const state: SelectedUserState = { userLoading: false, user: user };
+            const state: ModelState = { modelLoading: false, model: user };
             return { ...prevState, ...state };
         }
         case ActionType.deleteUserPinnedDiscipline: {
-            if (prevState.userLoading === true) return prevState; 
+            if (prevState.modelLoading === true) return prevState; 
 
-            const pinnedDisciplines = prevState.user.pinnedDisciplines.filter(o => o.disciplineTitleId !== action.id);
-            const user = { ...prevState.user, pinnedDisciplines }
+            const pinnedDisciplines = prevState.model.pinnedDisciplines.filter(o => o.disciplineTitleId !== action.id);
+            const user = { ...prevState.model, pinnedDisciplines }
 
-            const state: SelectedUserState = { userLoading: false, user: user };
+            const state: ModelState = { modelLoading: false, model: user };
             return { ...prevState, ...state };
         }
         case ActionType.updateGraduateDegrees: {
-            if (prevState.userLoading === true) return prevState;
+            if (prevState.modelLoading === true) return prevState;
 
-            const graduateDegrees = prevState.user.graduateDegrees.filter(o => o.branchOfScience !== action.branchOfScience);
+            const graduateDegrees = prevState.model.graduateDegrees.filter(o => o.branchOfScience !== action.branchOfScience);
 
             graduateDegrees.push({
                 branchOfScience: action.branchOfScience,
                 graduateDegree: action.graduateDegree,
-                userId: prevState.user.id
+                userId: prevState.model.id
             });
 
-            const user = { ...prevState.user, graduateDegrees }
+            const user = { ...prevState.model, graduateDegrees }
 
-            const state: SelectedUserState = { userLoading: false, user: user };
+            const state: ModelState = { modelLoading: false, model: user };
             return { ...prevState, ...state };
         }
         case ActionType.deleteGraduateDegree: {
-            if (prevState.userLoading === true) return prevState;
+            if (prevState.modelLoading === true) return prevState;
 
-            const graduateDegrees = prevState.user.graduateDegrees.filter(o => o.branchOfScience !== action.branchOfScience);
-            const user = { ...prevState.user, graduateDegrees }
+            const graduateDegrees = prevState.model.graduateDegrees.filter(o => o.branchOfScience !== action.branchOfScience);
+            const user = { ...prevState.model, graduateDegrees }
 
-            const state: SelectedUserState = { userLoading: false, user: user };
+            const state: ModelState = { modelLoading: false, model: user };
             return { ...prevState, ...state };
         }
 
         case ActionType.deleteRequest: {
-            const deleteState: DeleteUsersState = { deleting: true, ids: action.ids };
+            const deleteState: DeleteState = { deleting: true, ids: action.ids };
             return { ...prevState, ...deleteState };
         }
         case ActionType.deleteSuccess: {
-            if (prevState.usersLoading === false) {
-                const state: UsersState = { usersLoading: false, users: prevState.users.filter((value) => !prevState.ids.includes(value.id)) };
-                const deleteState: DeleteUsersState = { deleting: false, deleted: true };
+            if (prevState.modelsLoading === false) {
+                const state: ModelsState = { modelsLoading: false, models: prevState.models.filter((value) => !prevState.ids.includes(value.id)) };
+                const deleteState: DeleteState = { deleting: false, deleted: true };
                 return { ...prevState, ...deleteState, ...state };
             }
 
             return prevState;
         }
         case ActionType.deleteFailure: {
-            const deleteState: DeleteUsersState = { deleting: false, deleted: false };
+            const deleteState: DeleteState = { deleting: false, deleted: false };
             return { ...prevState, ...deleteState };
         }
 
@@ -173,7 +175,7 @@ export function userReducer(prevState: UserState = initialState, action: UserAct
         }
 
         case ActionType.clearEditionState: {
-            const state: SelectedUserState = { userLoading: true, user: undefined };
+            const state: ModelState = { modelLoading: true, model: undefined };
             return { ...prevState, ...state };
         }
         default: return prevState;

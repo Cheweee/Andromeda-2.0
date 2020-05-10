@@ -1,21 +1,21 @@
 import { User, AuthenticatedUser, UserAuthenticateOptions, UserValidation } from "../../models"
 
-export type UsersLoading = {
-    usersLoading: true;
+export type ModelsLoading = {
+    modelsLoading: true;
 }
 
-export type UsersLoaded = {
-    usersLoading: false;
-    users: User[];
+export type ModelsLoaded = {
+    modelsLoading: false;
+    models: User[];
 }
 
-export type UserLoading = {
-    userLoading: true;
+export type ModelLoading = {
+    modelLoading: true;
 }
 
-export type UserLoaded = {
-    userLoading: boolean;
-    user?: User;
+export type ModelLoaded = {
+    modelLoading: boolean;
+    model?: User;
 }
 
 export type Authenticating = {
@@ -29,12 +29,12 @@ export type Authenticated = {
     currentUser?: AuthenticatedUser;
 }
 
-export type UsersDeleting = {
+export type ModelsDeleting = {
     deleting: true;
     ids: number[];
 }
 
-export type UsersDeleted = {
+export type ModelsDeleted = {
     deleting: false;
     deleted?: boolean;
     ids?: number[];
@@ -45,7 +45,7 @@ export type ValidateUserState = {
 }
 
 export type AuthenticationState = Authenticating | Authenticated;
-export type SelectedUserState = UserLoading | UserLoaded;
-export type UsersState = UsersLoading | UsersLoaded;
-export type DeleteUsersState = UsersDeleting | UsersDeleted;
-export type UserState = AuthenticationState & SelectedUserState & UsersState & DeleteUsersState & ValidateUserState;
+export type ModelState = ModelLoading | ModelLoaded;
+export type ModelsState = ModelsLoading | ModelsLoaded;
+export type DeleteState = ModelsDeleting | ModelsDeleted;
+export type UserState = AuthenticationState & ModelState & ModelsState & DeleteState & ValidateUserState;

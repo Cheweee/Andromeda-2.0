@@ -1,39 +1,39 @@
 import { Role, RoleValidation } from "../../models"
 
-export type RolesLoading = {
-    loading: true;
+export type ModelsLoading = {
+    modelsLoading: true;
 }
 
-export type RolesLoaded = {
-    loading: false;
-    roles: Role[];
+export type ModelsLoaded = {
+    modelsLoading: false;
+    models: Role[];
 }
 
-export type RoleGetting = {
-    roleLoading: true;
+export type ModelLoading = {
+    modelLoading: true;
 }
 
-export type RoleGetted = {
-    roleLoading: boolean;
-    role?: Role;
+export type ModelLoaded = {
+    modelLoading: boolean;
+    model?: Role;
 }
 
-export type RolesDeleting = {
+export type ModelsDeleting = {
     deleting: true;
     ids: number[];
 }
 
-export type RolesDeleted = {
+export type ModelsDeleted = {
     deleting: false;
     deleted?: boolean;
     ids?: number[];
 }
 
-export type RoleValidating = {
+export type Validation = {
     formErrors?: RoleValidation;
 }
 
-export type RoleGetState = RoleGetting | RoleGetted;
-export type RolesListState = RolesLoading | RolesLoaded;
-export type RolesDeleteState = RolesDeleting | RolesDeleted;
-export type RoleState = RoleGetState & RolesListState & RolesDeleteState & RoleValidating;
+export type ModelState = ModelLoading | ModelLoaded;
+export type ModelsState = ModelsLoading | ModelsLoaded;
+export type DeleteState = ModelsDeleting | ModelsDeleted;
+export type RoleState = ModelState & ModelsState & DeleteState & Validation;

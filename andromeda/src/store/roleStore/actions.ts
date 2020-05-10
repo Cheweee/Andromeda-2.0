@@ -199,13 +199,13 @@ function getRole(id?: number): AppThunkAction<Promise<GetSuccess | GetFailure>> 
         let roles: Role[] = [];
 
         try {
-            if (state.roleState.loading === true) {
+            if (state.roleState.modelsLoading === true) {
                 roles = await roleService.getRoles({ id });
                 if (!roles) {
                     dispatch(snackbarActions.showSnackbar('Не удалось найти роли', SnackbarVariant.warning));
                 }
             } else {
-                roles = state.roleState.roles;
+                roles = state.roleState.models;
             }
 
             let role = roles.find(o => o.id === id);

@@ -8,10 +8,17 @@ using Microsoft.Extensions.Logging;
 namespace Andromeda.Utilities.Actions
 {
     [Verb("migrate-down", HelpText = "Migrate the DB schema to the latest version")]
-    public class MigrateDownOptions { }
+    public class MigrateDownOptions
+    {
+        [Option("migrate-version", HelpText = "Allow to migrate down to special version")]
+        public long Version { get; set; }
+    }
     public class MigrateDown
     {
-        public static int Run(ILogger logger, DatabaseConnectionSettings settings)
+        public static int Run(
+            ILogger logger, 
+            DatabaseConnectionSettings settings,
+            MigrateDownOptions options)
         {
             try
             {
@@ -24,7 +31,7 @@ namespace Andromeda.Utilities.Actions
                     var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
 
                     // Execute the migrations
-                    runner.MigrateDown(0);
+                    runner.MigrateDown(options.Version);
                 }
 
                 logger.LogInformation($"{settings.DatabaseName} database successfully migrated");

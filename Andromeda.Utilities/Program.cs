@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using CommandLine;
 using Andromeda.Data;
 using Andromeda.Data.Interfaces;
+using System.Collections.Generic;
 
 namespace Andromeda.Utilities
 {
@@ -39,7 +40,7 @@ namespace Andromeda.Utilities
                 (ResetOptions options) => RunReset(services.GetService<ILogger<Reset>>(), appsettings, options, departmentService),
                 (SeedOptions options) => RunSeed(services.GetService<ILogger<Seed>>(), departmentService),
                 (SetSettingsOptions options) => RunSettingsUpdate(services.GetService<ILogger<SettingsUpdate>>(), appsettings, options),
-                errors => 1
+                errors => ShowErrors(services.GetService<ILogger<Program>>(), errors)
             );
         }
 
@@ -81,7 +82,8 @@ namespace Andromeda.Utilities
                 return new DisciplineTitleService(daoFactory.DisciplineTitleDao);
             });
 
-            services.AddScoped(provider => {
+            services.AddScoped(provider =>
+            {
                 var daoFactory = provider.GetService<IDaoFactory>();
                 var disciplineTitleService = provider.GetService<DisciplineTitleService>();
                 var roleInDepartmentService = provider.GetService<RoleInDepartmentService>();
@@ -96,10 +98,19 @@ namespace Andromeda.Utilities
 
         static int RunCreate(ILogger logger, DatabaseConnectionSettings settings, CreateOptions options) => Create.Run(logger, settings);
         static int RunDrop(ILogger logger, DatabaseConnectionSettings settings, DropOptions options) => Drop.Run(logger, settings);
-        static int RunMigrateDown(ILogger logger, DatabaseConnectionSettings settings, MigrateDownOptions options) => MigrateDown.Run(logger, settings);
+        static int RunMigrateDown(ILogger logger, DatabaseConnectionSettings settings, MigrateDownOptions options) => MigrateDown.Run(logger, settings, options);
         static int RunMigrateUp(ILogger logger, DatabaseConnectionSettings settings, MigrateUpOptions options) => MigrateUp.Run(logger, settings);
         static int RunReset(ILogger logger, DatabaseConnectionSettings appsettings, ResetOptions options, DepartmentService departmentService) => Reset.Run(logger, appsettings, options, departmentService);
         static int RunSeed(ILogger logger, DepartmentService departmentService) => Seed.Run(logger, departmentService);
         static int RunSettingsUpdate(ILogger logger, DatabaseConnectionSettings appsettings, SetSettingsOptions options) => SettingsUpdate.Run(logger, appsettings, options);
+        static int ShowErrors(ILogger logger, IEnumerable<Error> errors)
+        {
+            foreach (var error in errors)
+            {
+                logger.LogError(error.Tag.ToString());
+            }
+
+            return 1;
+        }
     }
 }

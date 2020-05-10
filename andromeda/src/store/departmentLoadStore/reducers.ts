@@ -39,15 +39,24 @@ export function departmentLoadReducer(prevState: DepartmentLoadState = initialSt
 
         case ActionType.saveRequest: return prevState;
         case ActionType.createSuccess: {
-            if (prevState.modelsLoading === true) return prevState;
-            const state: ModelsState = { modelsLoading: false, models: prevState.models.concat(action.model) };
-            return { ...prevState, ...state };
+            if (prevState.modelsLoading === true || prevState.modelLoading === true) return prevState;
+            
+            const updatedModel = { ...prevState.model, ...action.model };
+            const updatedModels = prevState.models.concat(action.model);
+
+            const modelsState: ModelsState = { modelsLoading: false, models: updatedModels };
+            const modelState: ModelState = { modelLoading: false, model: updatedModel };
+            return { ...prevState, ...modelsState, ...modelState };
         }
         case ActionType.updateSuccess: {
-            if (prevState.modelsLoading === true) return prevState;
-            const updated = prevState.models.map(o => o.id == action.model.id ? action.model : o);
-            const state: ModelsState = { modelsLoading: false, models: updated };
-            return { ...prevState, ...state };
+            if (prevState.modelsLoading === true || prevState.modelLoading === true) return prevState;
+
+            const updatedModel = { ...prevState.model, ...action.model };
+            const updatedModels = prevState.models.map(o => o.id == action.model.id ? action.model : o);
+
+            const modelsState: ModelsState = { modelsLoading: false, models: updatedModels };
+            const modelState: ModelState = { modelLoading: false, model: updatedModel };
+            return { ...prevState, ...modelsState, ...modelState };
         }
         case ActionType.saveFailure: return prevState;
 

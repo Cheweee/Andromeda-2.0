@@ -74,24 +74,37 @@ namespace Andromeda.Data.DataAccessObjects
 
                 sql.AppendLine(@"
                     select distinct
-                          u.[Id]
-                        , u.[Username]
-                        , u.[Firstname]
-                        , u.[Secondname]
-                        , u.[Lastname]
-                        , u.[Email]                    
+                           u.[Id]
+                         , u.[Username]
+                         , u.[Firstname]
+                         , u.[Secondname]
+                         , u.[Lastname]
+                         , u.[Email]
                     from [User] u
                 ");
 
-                if(options.OnlyWithPinnedDisciplines.HasValue && options.OnlyWithPinnedDisciplines.Value)
+                if (options.OnlyWithPinnedDisciplines.HasValue && options.OnlyWithPinnedDisciplines.Value)
                     sql.AppendLine("join [PinnedDiscipline] pd on pd.UserId = u.Id");
 
-                if (options.DepartmentId.HasValue)
+                if (options.CanTeach.HasValue || options.DepartmentId.HasValue)// && options.CanTeach.Value)
                 {
-                    sql.AppendLine(@"
-                        join [UserRoleInDepartment] urid on urid.UserId = u.Id
-                        join [RoleInDepartment] rid on rid.Id = urid.RoleInDepartmentId and rid.DepartmentId = @DepartmentId
-                    ");
+                    sql.AppendLine("join [UserRoleInDepartment] urid on urid.UserId = u.Id");
+                    if (options.DepartmentId.HasValue)
+                    {
+                        sql.AppendLine("join [RoleInDepartment] rid on rid.Id = urid.RoleInDepartmentId and rid.DepartmentId = @DepartmentId");
+                    }
+                    else
+                    {
+                        sql.AppendLine("join [RoleInDepartment] rid on rid.Id = urid.RoleInDepartmentId");
+                    }
+                    if (options.CanTeach.HasValue)
+                        sql.AppendLine("join [Role] r on r.Id = rid.RoleId and r.CanTeach = 1");
+
+                    // sql.AppendLine(@"
+                    //     join [UserRoleInDepartment] urid on urid.UserId = u.Id
+                    //     join [RoleInDepartment] rid on rid.Id = urid.RoleInDepartmentId
+                    //     join [Role] r on r.Id = rid.RoleId and r.CanTeach = 1
+                    // ");
                 }
 
                 int conditionIndex = 0;
@@ -123,7 +136,7 @@ namespace Andromeda.Data.DataAccessObjects
                 }
 
                 sql.AppendLine("order by u.Lastname, u.Firstname, u.Secondname");
-                
+
                 _logger.LogInformation($"Sql query successfully created:\n{sql.ToString()}");
 
                 _logger.LogInformation("Try to execute sql get users query");

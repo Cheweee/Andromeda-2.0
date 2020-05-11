@@ -57,6 +57,7 @@ export interface UserGetOptions extends GetOptions {
     password?: string;
     departmentId?: number;
     roleId?: number;
+    canTeach?: boolean;
 }
 
 export interface UserAuthenticateOptions {

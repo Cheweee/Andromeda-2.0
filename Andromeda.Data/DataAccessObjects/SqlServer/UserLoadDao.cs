@@ -45,8 +45,8 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
             {
                 _logger.LogInformation("Trying to execute sql delete user load query");
                 await ExecuteAsync(@"
-                    delete from UserLoad
-                    where Id = any(@ids)
+                    delete from [UserLoad]
+                    where [Id] in @ids
                 ", new { ids });
                 _logger.LogInformation("Sql delete user load query successfully executed");
             }

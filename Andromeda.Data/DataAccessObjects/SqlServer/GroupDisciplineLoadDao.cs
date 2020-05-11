@@ -23,7 +23,7 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                             DepartmentLoadId,
                             DisciplineTitleId,
                             StudentGroupId,
-                            FacultyId,
+                            FacultyName,
                             SemesterNumber,
                             StudyWeeksCount,
                             Amount
@@ -31,7 +31,7 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                             @DepartmentLoadId,
                             @DisciplineTitleId,
                             @StudentGroupId,
-                            @FacultyId,
+                            @FacultyName,
                             @SemesterNumber,
                             @StudyWeeksCount,
                             @Amount
@@ -79,7 +79,7 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                         gl.DepartmentLoadId,
                         gl.DisciplineTitleId,
                         gl.StudentGroupId,
-                        gl.FacultyId,
+                        gl.FacultyName,
                         gl.SemesterNumber,
                         gl.StudyWeeksCount,
                         gl.Amount
@@ -119,7 +119,7 @@ namespace Andromeda.Data.DataAccessObjects.SqlServer
                         DepartmentLoadId = @DepartmentLoadId,
                         DisciplineTitleId = @DisciplineTitleId,
                         StudentGroupId = @StudentGroupId,
-                        FacultyId = @FacultyId,
+                        FacultyName = @FacultyName,
                         SemesterNumber = @SemesterNumber,
                         StudyWeeksCount = @StudyWeeksCount,
                         Amount = @Amount

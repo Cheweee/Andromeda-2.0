@@ -5,7 +5,7 @@ import { RouteComponentProps } from "react-router-dom";
 
 import { WithStyles, withStyles } from "@material-ui/core/styles";
 import { Grid, Card, CardContent, Typography, Tooltip, IconButton, Paper, Breadcrumbs, Link, Button, LinearProgress } from "@material-ui/core";
-import { Search, PieChartRounded, Add, Check, Close } from "@material-ui/icons";
+import { Search, PieChartRounded, Add, Check, Close, Delete } from "@material-ui/icons";
 
 import clsx from "clsx";
 
@@ -70,7 +70,7 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
     const [userDisciplineLoadDetailsOpen, setUserDisciplineLoadDetailsOpen] = React.useState<boolean>(false);
     const [openedGroupDisciplineLoadIndex, setOpenedGroupDisciplineLoadIndex] = React.useState<number>(-1);
 
-    const [ generateDetailsOpen, setGenerateDetailsOpen ] = React.useState<boolean>(false);
+    const [generateDetailsOpen, setGenerateDetailsOpen] = React.useState<boolean>(false);
 
     function handleGenerateDetailsOpen() {
         setGenerateDetailsOpen(true);
@@ -95,7 +95,6 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
         setunallocatedLoadSearch(newValue);
     }
     //#endregion
-
 
     //#region Group discipline load details
     const [selectedGroupDisciplineLoadIndex, setSelectedGroupDisciplineLoadIndex] = React.useState<number>(-1);
@@ -181,6 +180,10 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
         setUserDisciplineLoadDataDetailsOpen(false);
     }
 
+    function handleUserDisciplineLoadDelete(userId: number) {
+        dispatch(departmentLoadActions.deleteUserDisciplineLoad(userId));
+    }
+
     function handleCancelClick() {
         initialize(true);
     }
@@ -205,7 +208,7 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
 
         if (force || departmentLoadState.modelLoading === true)
             dispatch(departmentLoadActions.getModel(id));
-        dispatch(userActions.getUsers({ departmentId: departmentId }));
+        dispatch(userActions.getUsers({ departmentId: departmentId, canTeach: true }));
         dispatch(trainingDepartmentActions.getTrainingDepartment(departmentId));
         dispatch(roleActions.getRoles({}));
     }
@@ -310,7 +313,7 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
             <Grid container direction="row" className={classes.margin2Top}>
                 <Grid className={clsx(classes.margin1Right)} item xs>
                     <Grid container direction="row" alignItems="center">
-                        <Typography>Нераспределенная нагрузка</Typography>
+                        <Typography>Планируемая нагрузка</Typography>
                         <Grid item xs />
                         <Search className={classes.searchIcon} />
                         <Input
@@ -350,11 +353,6 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                     />
                 </Grid>
             </Grid>
-            {!Boolean(usersDisciplinesLoad.length) && (
-                <Grid container direction="row" justify="center">
-                    <Typography color="textSecondary">{'Нагрузка на преподавателей еще не была распределена.'}</Typography>
-                </Grid>
-            )}
             {usersDisciplinesLoad.length > 1 && (
                 <Grid className={classes.margin2Top}>
                     <Typography>{"Нагрузка преподавателей"}</Typography>
@@ -386,6 +384,13 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
                                         <Typography>{User.getFullInitials(o.user)}</Typography>
                                         <Grid item xs />
                                         <Button onClick={() => handleUserDisciplineLoadEdit(index)}><Typography color="textSecondary">Детали</Typography></Button>
+                                        <Tooltip title="Удалить нагрузку пользователя">
+                                            <span>
+                                                <IconButton onClick={() => handleUserDisciplineLoadDelete(o.user.id)}>
+                                                    <Delete color="disabled" />
+                                                </IconButton>
+                                            </span>
+                                        </Tooltip>
                                     </Grid>
                                     <UserDisciplineLoadCard
                                         index={index}
@@ -401,8 +406,16 @@ export const DepartmentLoadComponent = withStyles(styles)(function (props: Props
             <footer className={classes.footer}>
                 <Paper className={classes.padding2Left}>
                     <Grid container direction="row" alignItems="center">
-                        <Typography>Всего нагрузки: {total.toFixed(2)}ч. Распределено: {allocatedStudyLoad.toFixed(2)}ч.</Typography>
-                        <Grid item xs />
+                        {!Boolean(usersDisciplinesLoad.length) && (
+                            <Grid item xs container direction="row" justify="center">
+                                <Typography color="textSecondary">{'Нагрузка на преподавателей еще не была распределена.'}</Typography>
+                            </Grid>
+                        )}
+                        {Boolean(usersDisciplinesLoad.length) && (
+                            <Grid item xs container>
+                                <Typography>Всего нагрузки: {total.toFixed(2)}ч. Распределено: {allocatedStudyLoad.toFixed(2)}ч.</Typography>
+                            </Grid>
+                        )}
                         <Tooltip title="Автоматическое распределение нагрузки">
                             <span>
                                 <IconButton color="primary" onClick={handleGenerateDetailsOpen}>

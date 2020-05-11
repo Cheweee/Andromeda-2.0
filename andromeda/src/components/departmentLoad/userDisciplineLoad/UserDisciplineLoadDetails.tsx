@@ -24,8 +24,8 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 export const UserDisciplineLoadDetails = withStyles(styles)(function (props: Props) {
-    const [user, setUser] = React.useState<User>(User.initial);
-    const [groupDisciplineLoad, setGroupDisciplineLoad] = React.useState<GroupDisciplineLoad>(GroupDisciplineLoad.initial);
+    const [user, setUser] = React.useState<User>(null);
+    const [groupDisciplineLoad, setGroupDisciplineLoad] = React.useState<GroupDisciplineLoad>(null);
     const [alreadyDistributedLoad, setAlreadyDistributedLoad] = React.useState<UserLoad[]>([])
     const [studyLoad, setStudyLoad] = React.useState<StudyLoad[]>([]);
     const [studentsCount, setStudentsCount] = React.useState<number>(0);
@@ -162,6 +162,7 @@ export const UserDisciplineLoadDetails = withStyles(styles)(function (props: Pro
                     className={classes.w100}
                     noOptionsText={"Преподаватель не найден"}
                     getOptionLabel={(option: User) => User.getName(option)}
+                    getOptionSelected={(option: User, value: User) => value && option.id === value.id}
                     options={users}
                     value={user}
                     onChange={handleSelectedUserChange}
@@ -184,6 +185,7 @@ export const UserDisciplineLoadDetails = withStyles(styles)(function (props: Pro
                     className={classes.w100}
                     noOptionsText={"Учебная нагрузка не найдена"}
                     getOptionLabel={(option: GroupDisciplineLoad) => GroupDisciplineLoad.getDescription(option)}
+                    getOptionSelected={(option: GroupDisciplineLoad, value: GroupDisciplineLoad) => value && option.id === value.id}
                     options={groupsDisciplinesLoad}
                     value={groupDisciplineLoad}
                     onChange={handleGroupDisciplineLoadChange}

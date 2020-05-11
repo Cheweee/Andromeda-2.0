@@ -14,13 +14,11 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 export const DepartmentLoadGenerateDetails = withStyles(styles)(function (props: Props) {
-    const [options, setOptions] = React.useState<DepartmentLoadGenerateOptions>(DepartmentLoadGenerateOptions.initial);
+    const [options, setOptions] = React.useState<DepartmentLoadGenerateOptions>({...DepartmentLoadGenerateOptions.initial});
 
     const {
         classes,
-
         open,
-
         onAccept,
         onCancel
     } = props;
@@ -79,7 +77,14 @@ export const DepartmentLoadGenerateDetails = withStyles(styles)(function (props:
         setOptions(newOptions);
     }
 
-    function handleAccept() { onAccept(options); }
+    function handleAccept() { 
+        onAccept(options);
+        setOptions({...DepartmentLoadGenerateOptions.initial});
+    }
+    function handleCancel() {
+        onCancel();
+        setOptions({...DepartmentLoadGenerateOptions.initial});
+    }
 
     return (
         <Dialog fullWidth maxWidth="sm" scroll="paper" open={open} onClose={onCancel}>
@@ -155,7 +160,7 @@ export const DepartmentLoadGenerateDetails = withStyles(styles)(function (props:
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onCancel}>
+                <Button onClick={handleCancel}>
                     Отмена
                     </Button>
                 <Button onClick={handleAccept} color="primary" autoFocus>

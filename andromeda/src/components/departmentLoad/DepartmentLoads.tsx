@@ -34,14 +34,10 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
         departmentLoadState: state.departmentLoadState
     }));
 
-    const [search, setSearch] = React.useState<string>();
     const [id, setId] = React.useState<number>(null);
     const [open, setOpen] = React.useState<boolean>(false);
 
-    const debouncedSearch = useDebounce(search, 500);
-
     React.useEffect(() => { initialize(); }, []);
-    React.useEffect(() => { getDepartmentLoads(debouncedSearch); }, [debouncedSearch]);
 
     //#region Department loads state
 
@@ -85,10 +81,6 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
             const ids = [id];
             dispatch(departmentLoadActions.deleteModels(ids));
         }
-    }
-
-    function handleSearchChange(value: string) {
-        setSearch(value);
     }
     //#endregion
 
@@ -137,11 +129,6 @@ export const DepartmentLoads = withStyles(styles)(withRouter(function (props: Pr
                     <Typography color="textPrimary">Нагрузка кафедры</Typography>
                 </Breadcrumbs>
                 <Grid item xs />
-                <Search className={classes.searchIcon} />
-                <Input
-                    value={search}
-                    onValueChange={handleSearchChange}
-                />
                 <Tooltip title={"Создать учебную нагрузку"}>
                     <span>
                         <IconButton disabled={departmentLoadState.modelsLoading} onClick={handleAdd}>

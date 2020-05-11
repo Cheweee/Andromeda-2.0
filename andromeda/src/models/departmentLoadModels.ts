@@ -57,8 +57,14 @@ export interface DepartmentLoadGenerateOptions {
 }
 
 export namespace DepartmentLoadGenerateOptions {
-    export const initial:DepartmentLoadGenerateOptions = {
-        departmentLoad: null
+    export const initial: DepartmentLoadGenerateOptions = {
+        departmentLoad: null,
+        useFinalTestsResults: false,
+        useGraduateDegrees: false,
+        useIndependetTestsResults: false,
+        useMethodicalDevelopments: false,
+        usePinnedDisciplines: false,
+        useTeachingExperience: false
     };
 }
 

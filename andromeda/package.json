@@ -21,7 +21,7 @@
     "@types/ts-nameof": "^4.2.1",
     "file-loader": "^6.0.0",
     "html-webpack-plugin": "^4.3.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "react-router-dom": "^5.1.2",
     "source-map-loader": "^0.2.4",
     "ts-loader": "^7.0.3",
